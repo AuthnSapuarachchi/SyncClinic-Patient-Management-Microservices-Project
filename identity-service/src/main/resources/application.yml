@@ -5,10 +5,9 @@ spring:
   application:
     name: identity-service
   datasource:
-    # Standard PostgreSQL port is 5432
-    url: jdbc:postgresql://localhost:5432/syncclinic_auth
-    username: postgres # 'postgres' is usually the default admin username, not 'root'
-    password: password # Change this to your actual pgAdmin/postgres password
+    url: jdbc:postgresql://localhost:5433/syncclinic_auth
+    username: postgres
+    password: rootpassword123
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
