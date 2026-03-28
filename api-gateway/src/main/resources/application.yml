@@ -12,6 +12,8 @@ spring:
           uri: http://localhost:8081
           predicates:
             - Path=/api/patient/**
+          filters:
+            - AuthenticationFilter
 
         # Route for the Doctor Management Service
         - id: doctor-service
