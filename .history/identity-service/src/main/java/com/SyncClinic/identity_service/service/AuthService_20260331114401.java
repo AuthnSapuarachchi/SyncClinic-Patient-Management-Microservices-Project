@@ -11,8 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-
 @Service
 public class AuthService {
 
@@ -28,19 +26,14 @@ public class AuthService {
     @Autowired
     private JwtService jwtService;
 
-    public Map<String, String> saveUser(UserCredentials credential) {
+    public String saveUser(UserCredentials credential) {
         // Hash the plain-text password before saving it
         credential.setPassword(passwordEncoder.encode(credential.getPassword()));
 
         // Save the user to the database
-        UserCredentials savedUser = repository.save(credential);
+        repository.save(credential);
 
-        String token = jwtService.generateToken(savedUser.getEmail());
-
-        return Map.of(
-                "message", "User successfully registered to SyncClinic!",
-                "token", token
-        );
+        return "User successfully registered to SyncClinic!";
     }
 
     public String generateToken(AuthRequest authRequest) {
