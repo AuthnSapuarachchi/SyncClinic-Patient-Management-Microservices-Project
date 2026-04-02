@@ -1,0 +1,33 @@
+package com.SyncClinic.patient_service.controller;
+
+import com.SyncClinic.patient_service.entity.Patient;
+import com.SyncClinic.patient_service.service.PatientService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/patients")
+public class PatientController {
+
+    @Autowired
+    private PatientService service;
+
+    @PostMapping("/add")
+    public Patient addPatient(@RequestBody Patient patient) {
+        return service.savePatient(patient);
+    }
+
+    @GetMapping("/all")
+    public List<Patient> getAllPatients() {
+        return service.getAllPatients();
+    }
+
+    @GetMapping("/{id}")
+    public Patient getPatientById(@PathVariable Long id) {
+        return service.getPatientById(id);
+    }
+
+}
