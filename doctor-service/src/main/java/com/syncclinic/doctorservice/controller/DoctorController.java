@@ -33,4 +33,25 @@ public class DoctorController {
     public List<Doctor> getAllDoctors() {
         return doctorService.getAllDoctors();
     }
+
+    // Get a doctor by ID
+    @GetMapping("/{id}")
+    public Doctor getDoctorById(@PathVariable Long id) {
+        return doctorService.getDoctorById(id);
+    }
+
+    // Update an existing doctor
+    @PutMapping("/{id}")
+    public Doctor updateDoctor(@PathVariable Long id, @RequestBody Doctor updatedDoctor) {
+        return doctorService.updateDoctor(id, updatedDoctor);
+    }
+
+    // Delete a doctor by ID
+    @DeleteMapping("/{id}")
+    public String deleteDoctor(@PathVariable Long id) {
+
+        doctorService.deleteDoctor(id);
+
+        return "Doctor deleted successfully";
+    }
 }
