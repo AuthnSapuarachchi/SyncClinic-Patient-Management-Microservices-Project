@@ -4,6 +4,7 @@ import com.SyncClinic.identity_service.dto.AuthRequest;
 import com.SyncClinic.identity_service.entity.UserCredentials;
 import com.SyncClinic.identity_service.repository.UserCredentialsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,9 @@ public class AuthService {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
     public Map<String, String> saveUser(UserCredentials credential) {
         // Hash the plain-text password before saving it
         credential.setPassword(passwordEncoder.encode(credential.getPassword()));
@@ -35,8 +39,15 @@ public class AuthService {
         // Save the user to the database
         UserCredentials savedUser = repository.save(credential);
 
+        // 3. SHOUT INTO KAFKA!
+        // We send a JSON string containing the email to the Broker
+        String eventMessage = String.format("{\"email\": \"%s\"}", savedUser.getEmail());
+        kafkaTemplate.send("user-registration-events", eventMessage);
+
+        // 4. Generate the JWT token
         String token = jwtService.generateToken(savedUser.getEmail());
 
+        // 5. Return the token and success message to the user
         return Map.of(
                 "message", "User successfully registered to SyncClinic!",
                 "token", token
