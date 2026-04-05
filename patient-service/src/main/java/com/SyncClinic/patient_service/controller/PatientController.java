@@ -15,9 +15,14 @@ public class PatientController {
     @Autowired
     private PatientService service;
 
-    @PostMapping("/add")
-    public Patient addPatient(@RequestBody Patient patient) {
-        return service.savePatient(patient);
+//    @PostMapping("/add")
+//    public Patient addPatient(@RequestBody Patient patient) {
+//        return service.savePatient(patient);
+//    }
+
+    @PutMapping("/update/{email}")
+    public Patient updateProfile(@PathVariable String email, @RequestBody Patient patientData) {
+        return service.updatePatientProfile(email, patientData);
     }
 
     @GetMapping("/all")
