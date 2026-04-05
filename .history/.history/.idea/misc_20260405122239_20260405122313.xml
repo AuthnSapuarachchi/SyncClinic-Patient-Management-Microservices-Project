@@ -6,8 +6,11 @@
       <list>
         <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
         <option value="$PROJECT_DIR$/identity-service/pom.xml" />
+<<<<<<< HEAD
         <option value="$PROJECT_DIR$/patient-service/pom.xml" />
+=======
         <option value="$PROJECT_DIR$/service-registry/pom.xml" />
+>>>>>>> authnBranch
       </list>
     </option>
   </component>
