@@ -1,6 +1,5 @@
 package com.SyncClinic.patient_service.service;
 
-<<<<<<< HEAD
 import com.SyncClinic.patient_service.entity.Patient;
 import com.SyncClinic.patient_service.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +13,11 @@ public class PatientService {
     @Autowired
     private PatientRepository repository;
 
-//    public Patient savePatient(Patient patient) {
-//        return repository.save(patient);
-//    }
-
-
-    // 2. ADD the new Update method
+    // 1. The Update Method (Triggered by REST API)
     public Patient updatePatientProfile(String email, Patient updatedData) {
-        // Step A: Find the blank profile Kafka created
         Patient existingPatient = repository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Patient profile not found for email: " + email));
 
-        // Step B: Overwrite the pending/null data with the new data
         existingPatient.setFirstName(updatedData.getFirstName());
         existingPatient.setLastName(updatedData.getLastName());
         existingPatient.setPhone(updatedData.getPhone());
@@ -33,19 +25,17 @@ public class PatientService {
         existingPatient.setBloodGroup(updatedData.getBloodGroup());
         existingPatient.setMedicalHistory(updatedData.getMedicalHistory());
 
-        // Step C: Save the updated profile back to the database
         return repository.save(existingPatient);
     }
 
+    // 2. The Get All Method
     public List<Patient> getAllPatients() {
         return repository.findAll();
     }
 
+    // 3. The Get By ID Method
     public Patient getPatientById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patient not found with id: " + id));
     }
-=======
-public class PatientService {
->>>>>>> 5a20b6e (api gatway setup and set the security and service registry setup and register servicess in one phone book)
 }

@@ -1,6 +1,5 @@
 package com.SyncClinic.patient_service.entity;
 
-<<<<<<< HEAD
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class Patient {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +25,5 @@ public class Patient {
     private String dateOfBirth;
     private String bloodGroup;
     private String medicalHistory;
-=======
-public class Patient {
->>>>>>> 5a20b6e (api gatway setup and set the security and service registry setup and register servicess in one phone book)
+
 }
