@@ -38,6 +38,13 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
+<<<<<<< HEAD
+=======
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+>>>>>>> 5a20b6e (api gatway setup and set the security and service registry setup and register servicess in one phone book)
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>

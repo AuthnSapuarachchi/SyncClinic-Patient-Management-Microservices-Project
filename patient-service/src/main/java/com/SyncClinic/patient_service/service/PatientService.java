@@ -1,5 +1,6 @@
 package com.SyncClinic.patient_service.service;
 
+<<<<<<< HEAD
 import com.SyncClinic.patient_service.entity.Patient;
 import com.SyncClinic.patient_service.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,4 +45,7 @@ public class PatientService {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patient not found with id: " + id));
     }
+=======
+public class PatientService {
+>>>>>>> 5a20b6e (api gatway setup and set the security and service registry setup and register servicess in one phone book)
 }

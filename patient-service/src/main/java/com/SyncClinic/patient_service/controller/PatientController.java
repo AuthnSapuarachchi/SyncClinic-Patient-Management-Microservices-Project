@@ -1,5 +1,6 @@
 package com.SyncClinic.patient_service.controller;
 
+<<<<<<< HEAD
 import com.SyncClinic.patient_service.entity.Patient;
 import com.SyncClinic.patient_service.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,4 +36,7 @@ public class PatientController {
         return service.getPatientById(id);
     }
 
+=======
+public class PatientController {
+>>>>>>> 5a20b6e (api gatway setup and set the security and service registry setup and register servicess in one phone book)
 }

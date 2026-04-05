@@ -1,5 +1,6 @@
 package com.SyncClinic.patient_service.service;
 
+<<<<<<< HEAD
 import com.SyncClinic.patient_service.entity.Patient;
 import com.SyncClinic.patient_service.repository.PatientRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -47,4 +48,7 @@ public class PatientKafkaConsumer {
             System.err.println("❌ Error processing Kafka message: " + e.getMessage());
         }
     }
+=======
+public class PatientKafkaConsumer {
+>>>>>>> 5a20b6e (api gatway setup and set the security and service registry setup and register servicess in one phone book)
 }
