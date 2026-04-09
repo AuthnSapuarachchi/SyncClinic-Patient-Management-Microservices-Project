@@ -1,6 +1,5 @@
 package com.SyncClinic.patient_service.service;
 
-import com.SyncClinic.patient_service.dto.PatientUpdateRequest;
 import com.SyncClinic.patient_service.entity.Patient;
 import com.SyncClinic.patient_service.exception.ResourceNotFoundException;
 import com.SyncClinic.patient_service.repository.PatientRepository;
@@ -16,14 +15,14 @@ public class PatientService {
     private PatientRepository repository;
 
     // 1. The Update Method (Triggered by REST API)
-    public Patient updatePatientProfile(String email, PatientUpdateRequest updatedData) {
+    public Patient updatePatientProfile(String email, Patient updatedData) {
         Patient existingPatient = repository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient profile not found for email: " + email));
 
         existingPatient.setFirstName(updatedData.getFirstName());
         existingPatient.setLastName(updatedData.getLastName());
         existingPatient.setPhone(updatedData.getPhone());
-        existingPatient.setDateOfBirth(updatedData.getDateOfBirth() != null ? updatedData.getDateOfBirth().toString() : null);
+        existingPatient.setDateOfBirth(updatedData.getDateOfBirth());
         existingPatient.setBloodGroup(updatedData.getBloodGroup());
         existingPatient.setMedicalHistory(updatedData.getMedicalHistory());
 
