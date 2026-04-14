@@ -7,7 +7,7 @@
     <groupId>com.healthcare</groupId>
     <artifactId>telemedicine-service</artifactId>
     <version>1.0.0</version>
-    <packagingJar/>
+    <packaging>jar</packaging>
     <name>Telemedicine Service</name>
     <description>Telemedicine service for healthcare platform with Jitsi Meet integration</description>
 
