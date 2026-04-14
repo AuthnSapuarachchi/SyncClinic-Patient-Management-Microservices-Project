@@ -4,9 +4,8 @@ import api from '../api/axiosConfig';
 export default function PatientDashboard() {
     // We get the email of the currently logged-in user
     const userEmail = localStorage.getItem('user_email');
-    const draftKey = userEmail ? `patient_profile_draft_${userEmail}` : null;
 
-    const getEmptyFormData = () => ({
+    const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         phone: '',
@@ -14,30 +13,8 @@ export default function PatientDashboard() {
         bloodGroup: '',
         medicalHistory: ''
     });
-
-    const getInitialFormData = () => {
-        if (!draftKey) {
-            return getEmptyFormData();
-        }
-
-        try {
-            const savedDraft = localStorage.getItem(draftKey);
-            return savedDraft ? JSON.parse(savedDraft) : getEmptyFormData();
-        } catch {
-            return getEmptyFormData();
-        }
-    };
-
-    const [formData, setFormData] = useState(getInitialFormData);
     
     const [status, setStatus] = useState({ loading: false, message: '', isError: false });
-
-    useEffect(() => {
-        // Keep unsaved form changes during refresh for this specific user.
-        if (draftKey) {
-            localStorage.setItem(draftKey, JSON.stringify(formData));
-        }
-    }, [draftKey, formData]);
 
     useEffect(() => {
         const fetchProfileData = async () => {
@@ -63,13 +40,9 @@ export default function PatientDashboard() {
 
         // Call the function when the component loads
         if (userEmail) {
-            const hasSavedDraft = draftKey && localStorage.getItem(draftKey);
-            if (hasSavedDraft) {
-                return;
-            }
             fetchProfileData();
         }
-    }, [draftKey, userEmail]);
+    }, [userEmail]);
 
     // Handle input changes dynamically
     const handleChange = (e) => {
@@ -101,9 +74,6 @@ export default function PatientDashboard() {
     };
 
     const handleLogout = () => {
-        if (draftKey) {
-            localStorage.removeItem(draftKey);
-        }
         localStorage.removeItem('jwt_token');
         localStorage.removeItem('user_email');
         window.location.reload(); // Quick way to reset the app state
@@ -128,12 +98,12 @@ export default function PatientDashboard() {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm text-gray-400 mb-1">First Name</label>
-                            <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required
+                            <input type="text" name="firstName" onChange={handleChange} required
                                 className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:border-blue-500 outline-none" />
                         </div>
                         <div>
                             <label className="block text-sm text-gray-400 mb-1">Last Name</label>
-                            <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required
+                            <input type="text" name="lastName" onChange={handleChange} required
                                 className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:border-blue-500 outline-none" />
                         </div>
                     </div>
@@ -141,12 +111,12 @@ export default function PatientDashboard() {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm text-gray-400 mb-1">Phone (10 digits)</label>
-                            <input type="text" name="phone" value={formData.phone} onChange={handleChange} required
+                            <input type="text" name="phone" onChange={handleChange} required
                                 className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:border-blue-500 outline-none" />
                         </div>
                         <div>
                             <label className="block text-sm text-gray-400 mb-1">Blood Group</label>
-                            <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} required
+                            <select name="bloodGroup" onChange={handleChange} required
                                 className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:border-blue-500 outline-none">
                                 <option value="">Select...</option>
                                 <option value="A+">A+</option>
@@ -160,13 +130,13 @@ export default function PatientDashboard() {
 
                     <div>
                         <label className="block text-sm text-gray-400 mb-1">Date of Birth</label>
-                        <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required
+                        <input type="date" name="dateOfBirth" onChange={handleChange} required
                             className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:border-blue-500 outline-none" />
                     </div>
 
                     <div>
                         <label className="block text-sm text-gray-400 mb-1">Medical History (Optional)</label>
-                        <textarea name="medicalHistory" value={formData.medicalHistory} onChange={handleChange} rows="3"
+                        <textarea name="medicalHistory" onChange={handleChange} rows="3"
                             className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:border-blue-500 outline-none"></textarea>
                     </div>
 
