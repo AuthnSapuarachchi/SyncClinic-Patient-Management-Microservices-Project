@@ -5,12 +5,9 @@ import com.SyncClinic.patient_service.entity.Patient;
 import com.SyncClinic.patient_service.service.PatientService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/patients")
@@ -38,13 +35,6 @@ public class PatientController {
     @GetMapping("/profile/{email}")
     public Patient getPatientProfile(@PathVariable String email) {
         return service.getPatientByEmail(email);
-    }
-
-    @PostMapping("/{email}/report")
-    public ResponseEntity<Map<String, String>> uploadMedicalReport(
-            @PathVariable String email,
-            @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.ok(service.uploadMedicalReport(email, file));
     }
 
 }
