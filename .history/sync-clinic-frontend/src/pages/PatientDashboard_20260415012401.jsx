@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../api/axiosConfig';
 
 export default function PatientDashboard() {
@@ -33,8 +33,7 @@ export default function PatientDashboard() {
     const [status, setStatus] = useState({ loading: false, message: '', isError: false });
 
     const [selectedFile, setSelectedFile] = useState(null);
-    const [uploadStatus, setUploadStatus] = useState({ loading: false, message: '', isError: false });
-    const fileInputRef = useRef(null);
+const [uploadStatus, setUploadStatus] = useState({ loading: false, message: '' });
 
     useEffect(() => {
         // Keep unsaved form changes during refresh for this specific user.
@@ -105,38 +104,36 @@ export default function PatientDashboard() {
     };
 
     const handleFileUpload = async (e) => {
-        e.preventDefault();
+    e.preventDefault();
+    if (!selectedFile) {
+        setUploadStatus({ loading: false, message: '❌ Please select a file first.' });
+        return;
+    }
 
-        if (!selectedFile) {
-            setUploadStatus({ loading: false, message: 'Please select a file first.', isError: true });
-            return;
-        }
+    setUploadStatus({ loading: true, message: '' });
 
-        setUploadStatus({ loading: true, message: '', isError: false });
+    // This is the required format for sending files
+    const fileData = new FormData();
+    fileData.append('file', selectedFile);
 
-        const fileData = new FormData();
-        fileData.append('file', selectedFile);
-
-        try {
-            const response = await api.post(`/api/patients/${userEmail}/report`, fileData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            setUploadStatus({ loading: false, message: response.data.message || 'Report uploaded successfully!', isError: false });
-            setSelectedFile(null);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
+    try {
+        // Axios interceptor will still attach your JWT!
+        const response = await api.post(`/api/patients/${userEmail}/report`, fileData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
             }
-        } catch (error) {
-            setUploadStatus({
-                loading: false,
-                message: 'Upload failed: ' + (error.response?.data?.message || error.message),
-                isError: true
-            });
-        }
-    };
+        });
+
+        setUploadStatus({ loading: false, message: '✅ ' + response.data.message });
+        setSelectedFile(null); // Clear the file input
+
+    } catch (error) {
+        setUploadStatus({ 
+            loading: false, 
+            message: '❌ Upload failed: ' + (error.response?.data?.message || error.message) 
+        });
+    }
+};
 
     const handleLogout = () => {
         if (draftKey) {
@@ -283,6 +280,40 @@ export default function PatientDashboard() {
                                 />
                             </label>
 
+                            {/* --- Medical Report Upload Section --- */}
+<div className="mt-12 pt-8 border-t border-gray-700">
+    <h3 className="text-xl font-bold text-blue-400 mb-4">Upload Medical Report</h3>
+    <p className="text-sm text-gray-400 mb-4">Upload recent lab results or doctor notes (PDF or Image).</p>
+    
+    <form onSubmit={handleFileUpload} className="flex flex-col space-y-4">
+        <input 
+            type="file" 
+            onChange={(e) => setSelectedFile(e.target.files[0])}
+            className="w-full text-sm text-gray-400
+                file:mr-4 file:py-2 file:px-4
+                file:rounded file:border-0
+                file:text-sm file:font-semibold
+                file:bg-gray-700 file:text-blue-400
+                hover:file:bg-gray-600 cursor-pointer"
+            accept=".pdf, .png, .jpg, .jpeg"
+        />
+        
+        <button 
+            type="submit" 
+            disabled={uploadStatus.loading || !selectedFile}
+            className="w-1/3 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition disabled:opacity-50"
+        >
+            {uploadStatus.loading ? 'Uploading...' : 'Upload File'}
+        </button>
+    </form>
+
+    {uploadStatus.message && (
+        <div className="mt-4 text-sm text-gray-300">
+            {uploadStatus.message}
+        </div>
+    )}
+</div>
+
                             <button
                                 type="submit"
                                 disabled={status.loading}
@@ -297,35 +328,6 @@ export default function PatientDashboard() {
                                 {status.message}
                             </div>
                         )}
-
-                        <div className="mt-8 border-t border-slate-700 pt-6">
-                            <h3 className="text-lg font-bold text-cyan-300">Upload Medical Report</h3>
-                            <p className="mt-1 text-sm text-slate-300">Upload recent lab results or doctor notes (PDF or image).</p>
-
-                            <form onSubmit={handleFileUpload} className="mt-4 space-y-4">
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                                    className="w-full cursor-pointer rounded-xl border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-cyan-300 hover:file:bg-slate-600"
-                                    accept=".pdf,.png,.jpg,.jpeg"
-                                />
-
-                                <button
-                                    type="submit"
-                                    disabled={uploadStatus.loading || !selectedFile}
-                                    className="w-full rounded-xl bg-slate-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-                                >
-                                    {uploadStatus.loading ? 'Uploading...' : 'Upload File'}
-                                </button>
-                            </form>
-
-                            {uploadStatus.message && (
-                                <div className={`mt-4 rounded-xl border px-4 py-3 text-sm ${uploadStatus.isError ? 'border-rose-400/40 bg-rose-500/10 text-rose-200' : 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'}`}>
-                                    {uploadStatus.message}
-                                </div>
-                            )}
-                        </div>
                     </section>
                 </div>
 

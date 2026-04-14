@@ -10,50 +10,9 @@ export default function AuthScreen() {
     const [message, setMessage] = useState('');
     const [isError, setIsError] = useState(false);
 
-    const normalizeRole = (role) => {
-        if (typeof role !== 'string' || !role.trim()) {
-            return null;
-        }
-
-        return role.startsWith('ROLE_') ? role : `ROLE_${role.toUpperCase()}`;
-    };
-
-    const extractRoleFromResponse = (responseData) => {
-        if (!responseData || typeof responseData !== 'object') {
-            return null;
-        }
-
-        if (responseData.role) {
-            return normalizeRole(responseData.role);
-        }
-
-        if (Array.isArray(responseData.authorities) && responseData.authorities.length > 0) {
-            const firstAuthority = responseData.authorities[0];
-            if (typeof firstAuthority === 'string') {
-                return normalizeRole(firstAuthority);
-            }
-            if (typeof firstAuthority === 'object' && firstAuthority?.authority) {
-                return normalizeRole(firstAuthority.authority);
-            }
-        }
-
-        if (Array.isArray(responseData.roles) && responseData.roles.length > 0) {
-            return normalizeRole(responseData.roles[0]);
-        }
-
-        return null;
-    };
-
-    const getTokenFromResponse = (responseData) => {
-        return responseData?.token || responseData?.jwt || responseData?.accessToken || null;
-    };
-
-    const saveSessionAndRedirect = (token, role) => {
+    const saveSessionAndRedirect = (token) => {
         localStorage.setItem('jwt_token', token);
         localStorage.setItem('user_email', email);
-        if (role) {
-            localStorage.setItem('user_role', role);
-        }
         window.location.href = '/patientDashboard';
     };
 
@@ -71,26 +30,18 @@ export default function AuthScreen() {
                     role: 'ROLE_PATIENT'
                 });
 
-                const jwtToken = getTokenFromResponse(response.data);
-                const role = extractRoleFromResponse(response.data) || 'ROLE_PATIENT';
-                if (!jwtToken) {
-                    throw new Error('Token not found in register response');
-                }
+                const jwtToken = response.data.token;
                 setMessage('Registration successful. Redirecting...');
-                saveSessionAndRedirect(jwtToken, role);
+                saveSessionAndRedirect(jwtToken);
             } else {
                 const response = await api.post('/auth/login', {
                     email: email,
                     password: password
                 });
 
-                const jwtToken = getTokenFromResponse(response.data);
-                const role = extractRoleFromResponse(response.data);
-                if (!jwtToken) {
-                    throw new Error('Token not found in login response');
-                }
+                const jwtToken = response.data.token;
                 setMessage('Login successful. Redirecting...');
-                saveSessionAndRedirect(jwtToken, role);
+                saveSessionAndRedirect(jwtToken);
             }
 
         } catch (error) {

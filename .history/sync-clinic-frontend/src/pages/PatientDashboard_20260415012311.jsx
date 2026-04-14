@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../api/axiosConfig';
 
 export default function PatientDashboard() {
@@ -33,8 +33,7 @@ export default function PatientDashboard() {
     const [status, setStatus] = useState({ loading: false, message: '', isError: false });
 
     const [selectedFile, setSelectedFile] = useState(null);
-    const [uploadStatus, setUploadStatus] = useState({ loading: false, message: '', isError: false });
-    const fileInputRef = useRef(null);
+const [uploadStatus, setUploadStatus] = useState({ loading: false, message: '' });
 
     useEffect(() => {
         // Keep unsaved form changes during refresh for this specific user.
@@ -100,40 +99,6 @@ export default function PatientDashboard() {
                 loading: false, 
                 message: `❌ Error: ${errorMsg}`, 
                 isError: true 
-            });
-        }
-    };
-
-    const handleFileUpload = async (e) => {
-        e.preventDefault();
-
-        if (!selectedFile) {
-            setUploadStatus({ loading: false, message: 'Please select a file first.', isError: true });
-            return;
-        }
-
-        setUploadStatus({ loading: true, message: '', isError: false });
-
-        const fileData = new FormData();
-        fileData.append('file', selectedFile);
-
-        try {
-            const response = await api.post(`/api/patients/${userEmail}/report`, fileData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            setUploadStatus({ loading: false, message: response.data.message || 'Report uploaded successfully!', isError: false });
-            setSelectedFile(null);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-        } catch (error) {
-            setUploadStatus({
-                loading: false,
-                message: 'Upload failed: ' + (error.response?.data?.message || error.message),
-                isError: true
             });
         }
     };
@@ -297,35 +262,6 @@ export default function PatientDashboard() {
                                 {status.message}
                             </div>
                         )}
-
-                        <div className="mt-8 border-t border-slate-700 pt-6">
-                            <h3 className="text-lg font-bold text-cyan-300">Upload Medical Report</h3>
-                            <p className="mt-1 text-sm text-slate-300">Upload recent lab results or doctor notes (PDF or image).</p>
-
-                            <form onSubmit={handleFileUpload} className="mt-4 space-y-4">
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                                    className="w-full cursor-pointer rounded-xl border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-cyan-300 hover:file:bg-slate-600"
-                                    accept=".pdf,.png,.jpg,.jpeg"
-                                />
-
-                                <button
-                                    type="submit"
-                                    disabled={uploadStatus.loading || !selectedFile}
-                                    className="w-full rounded-xl bg-slate-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-                                >
-                                    {uploadStatus.loading ? 'Uploading...' : 'Upload File'}
-                                </button>
-                            </form>
-
-                            {uploadStatus.message && (
-                                <div className={`mt-4 rounded-xl border px-4 py-3 text-sm ${uploadStatus.isError ? 'border-rose-400/40 bg-rose-500/10 text-rose-200' : 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'}`}>
-                                    {uploadStatus.message}
-                                </div>
-                            )}
-                        </div>
                     </section>
                 </div>
 

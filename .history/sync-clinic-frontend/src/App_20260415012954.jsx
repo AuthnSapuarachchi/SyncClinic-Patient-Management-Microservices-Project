@@ -1,6 +1,5 @@
 import './App.css'
 import { jwtDecode } from 'jwt-decode'
-import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthScreen from './pages/AuthScreen'
 import PatientDashboard from './pages/PatientDashboard'
 // import DoctorDashboard from './pages/DoctorDashboard'
@@ -72,9 +71,9 @@ function App() {
         if (savedRole) {
           userRole = normalizeRole(savedRole)
         } else {
-          // Default to patient in this app when token is valid but role claim is absent.
-          userRole = 'ROLE_PATIENT'
-          localStorage.setItem('user_role', userRole)
+          console.warn('Role not found in token payload. Clearing session.', decodedToken)
+          clearSession()
+          token = null
         }
       }
     } catch (error) {
@@ -85,24 +84,22 @@ function App() {
   }
 
   if (!token) {
-    return (
-      <Routes>
-        <Route path="/" element={<AuthScreen />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    )
+    return <AuthScreen />
   }
 
-  return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/patientDashboard" replace />} />
-      <Route
-        path="/patientDashboard"
-        element={userRole === 'ROLE_PATIENT' ? <PatientDashboard /> : <Navigate to="/" replace />}
-      />
-      <Route path="*" element={<Navigate to="/patientDashboard" replace />} />
-    </Routes>
-  )
+  if (userRole === 'ROLE_PATIENT') {
+    return <PatientDashboard />
+  }
+
+  // if (userRole === 'ROLE_DOCTOR') {
+  //   return <DoctorDashboard />
+  // }
+
+  // if (userRole === 'ROLE_ADMIN') {
+  //   return <AdminDashboard />
+  // }
+
+  return <AuthScreen />
 }
 
 export default App
