@@ -32,14 +32,18 @@ public class NotificationLogResponse {
 				.userId(log.getUserId())
 				.recipientEmail(log.getRecipientEmail())
 				.recipientPhone(log.getRecipientPhone())
-				.type(log.getType().name())
-				.eventType(log.getEventType().name())
+				.type(enumName(log.getType()))
+				.eventType(enumName(log.getEventType()))
 				.subject(log.getSubject())
 				.message(log.getMessage())
-				.status(log.getStatus().name())
+				.status(enumName(log.getStatus()))
 				.sentAt(log.getSentAt())
 				.errorMessage(log.getErrorMessage())
 				.build();
+	}
+
+	private static String enumName(Enum<?> value) {
+		return value != null ? value.name() : null;
 	}
 
 }
