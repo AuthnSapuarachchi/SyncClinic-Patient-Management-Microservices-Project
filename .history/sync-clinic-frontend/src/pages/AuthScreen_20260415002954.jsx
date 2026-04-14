@@ -54,12 +54,12 @@ export default function AuthScreen() {
     };
 
     return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-br from-slate-950 via-slate-900 to-cyan-950 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 px-4 py-8 sm:px-6 lg:px-8">
             <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-cyan-300/20 blur-3xl" />
             <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-blue-300/20 blur-3xl" />
 
             <section className="relative z-10 mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl shadow-2xl lg:grid-cols-2">
-                <aside className="bg-linear-to-br from-blue-900 to-sky-900 p-8 text-blue-50 sm:p-10" aria-label="SyncClinic highlights">
+                <aside className="bg-gradient-to-br from-blue-900 to-sky-900 p-8 text-blue-50 sm:p-10" aria-label="SyncClinic highlights">
                     <p className="inline-block rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider">
                         Patient Care Platform
                     </p>
@@ -155,7 +155,7 @@ export default function AuthScreen() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full rounded-xl bg-linear-to-r from-teal-700 to-cyan-700 px-4 py-3 font-bold text-white transition hover:from-teal-800 hover:to-cyan-800 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="w-full rounded-xl bg-gradient-to-r from-teal-700 to-cyan-700 px-4 py-3 font-bold text-white transition hover:from-teal-800 hover:to-cyan-800 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {loading ? 'Connecting...' : mode === 'register' ? 'Register as Patient' : 'Login to Dashboard'}
                         </button>

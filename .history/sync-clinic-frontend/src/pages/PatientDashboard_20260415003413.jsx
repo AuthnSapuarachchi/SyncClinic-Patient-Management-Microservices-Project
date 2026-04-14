@@ -124,7 +124,7 @@ export default function PatientDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-cyan-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-5xl">
                 <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -248,7 +248,7 @@ export default function PatientDashboard() {
                             <button
                                 type="submit"
                                 disabled={status.loading}
-                                className="w-full rounded-xl bg-linear-to-r from-cyan-600 to-teal-600 px-4 py-3 text-sm font-bold text-white transition hover:from-cyan-700 hover:to-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="w-full rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 px-4 py-3 text-sm font-bold text-white transition hover:from-cyan-700 hover:to-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {status.loading ? 'Saving...' : 'Save Profile'}
                             </button>
