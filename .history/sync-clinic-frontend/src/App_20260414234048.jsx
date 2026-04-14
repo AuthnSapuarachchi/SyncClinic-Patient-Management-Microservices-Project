@@ -1,6 +1,6 @@
 import './App.css'
 import AuthScreen from './pages/AuthScreen'
-import PatientDashboard from './pages/PatientDashboard'
+
 
 function App() {
 
