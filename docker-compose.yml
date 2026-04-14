@@ -133,6 +133,8 @@ networks:
   healthcare-network:
     driver: bridge
 
+
+
 volumes:
   postgres-data:
   rabbitmq-data:

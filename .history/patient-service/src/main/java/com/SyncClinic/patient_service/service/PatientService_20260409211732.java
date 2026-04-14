@@ -23,7 +23,7 @@ public class PatientService {
         existingPatient.setFirstName(updatedData.getFirstName());
         existingPatient.setLastName(updatedData.getLastName());
         existingPatient.setPhone(updatedData.getPhone());
-        existingPatient.setDateOfBirth(updatedData.getDateOfBirth() != null ? updatedData.getDateOfBirth().toString() : null);
+        existingPatient.setDateOfBirth(updatedData.getDateOfBirth().toString());
         existingPatient.setBloodGroup(updatedData.getBloodGroup());
         existingPatient.setMedicalHistory(updatedData.getMedicalHistory());
 
