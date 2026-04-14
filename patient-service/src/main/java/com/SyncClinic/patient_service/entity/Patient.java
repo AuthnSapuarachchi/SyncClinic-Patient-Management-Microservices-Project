@@ -20,7 +20,7 @@ public class Patient {
 
     private String firstName;
     private String lastName;
-    private String email; // This will link them to their Auth credentials later!
+    private String email;
     private String phone;
     private String dateOfBirth;
     private String bloodGroup;
