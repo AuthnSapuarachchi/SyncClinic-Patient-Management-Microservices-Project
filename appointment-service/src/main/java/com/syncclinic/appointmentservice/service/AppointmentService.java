@@ -117,4 +117,20 @@ public class AppointmentService {
 
         return appointment;
     }
+
+    // Get appointments for a doctor filtered by status
+    public List<Appointment> getAppointmentsByDoctorAndStatus(
+            Long doctorId,
+            AppointmentStatus status
+    ) {
+        return appointmentRepository.findByDoctorIdAndStatus(doctorId, status);
+    }
+
+    // Get appointments for a patient filtered by status
+    public List<Appointment> getAppointmentsByPatientAndStatus(
+            Long patientId,
+            AppointmentStatus status
+    ) {
+        return appointmentRepository.findByPatientIdAndStatus(patientId, status);
+    }
 }

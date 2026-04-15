@@ -66,4 +66,22 @@ public class AppointmentController {
     public Appointment cancelAppointment(@PathVariable Long appointmentId) {
         return appointmentService.cancelAppointment(appointmentId);
     }
+
+    // Get doctor appointments filtered by status
+    @GetMapping("/doctor/{doctorId}/status")
+    public List<Appointment> getAppointmentsByDoctorAndStatus(
+            @PathVariable Long doctorId,
+            @RequestParam AppointmentStatus status
+    ) {
+        return appointmentService.getAppointmentsByDoctorAndStatus(doctorId, status);
+    }
+
+    // Get patient appointments filtered by status
+    @GetMapping("/patient/{patientId}/status")
+    public List<Appointment> getAppointmentsByPatientAndStatus(
+            @PathVariable Long patientId,
+            @RequestParam AppointmentStatus status
+    ) {
+        return appointmentService.getAppointmentsByPatientAndStatus(patientId, status);
+    }
 }
