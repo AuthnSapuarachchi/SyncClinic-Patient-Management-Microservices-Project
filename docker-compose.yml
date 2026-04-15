@@ -17,6 +17,27 @@ services:
     networks:
       - healthcare-network
 
+    # PostgreSQL Database (for payment service)
+  postgres-payment-db:
+    image: postgres:15-alpine
+    container_name: syncclinic-postgres-payment
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rootpassword123
+      POSTGRES_DB: syncclinic_payment
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-payment-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - healthcare-network
+
   # RabbitMQ Message Broker
   rabbitmq:
     image: rabbitmq:3.12-management-alpine
@@ -129,6 +150,32 @@ services:
     networks:
       - healthcare-network
 
+  
+  # Payment Service
+  payment-service:
+  build:
+    context: ./payment-service
+    dockerfile: Dockerfile
+  container_name: syncclinic-payment
+  ports:
+    - "8084:8084"
+  env_file:
+    - .env
+  environment:
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payment-db:5432/syncclinic_payment
+    SPRING_DATASOURCE_USERNAME: postgres
+    SPRING_DATASOURCE_PASSWORD: rootpassword123
+    SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+  depends_on:
+    postgres-payment-db:
+      condition: service_healthy
+    kafka:
+      condition: service_healthy
+  restart: unless-stopped
+  networks:
+    - healthcare-network
+
 networks:
   healthcare-network:
     driver: bridge
@@ -137,5 +184,6 @@ networks:
 
 volumes:
   postgres-data:
+  postgres-payment-data:
   rabbitmq-data:
   mongodb-data:
