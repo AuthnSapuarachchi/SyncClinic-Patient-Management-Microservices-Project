@@ -2,9 +2,11 @@ package com.syncclinic.appointmentservice.controller;
 
 import com.syncclinic.appointmentservice.model.Appointment;
 import com.syncclinic.appointmentservice.model.AppointmentStatus;
+import com.syncclinic.appointmentservice.model.AppointmentStatusHistory;
 import com.syncclinic.appointmentservice.service.AppointmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import com.syncclinic.appointmentservice.model.AppointmentStatusHistory;
 
 import java.util.List;
 
@@ -51,5 +53,11 @@ public class AppointmentController {
             @RequestParam AppointmentStatus status
     ) {
         return appointmentService.updateAppointmentStatus(appointmentId, status);
+    }
+
+    // Get all appointment status history records
+    @GetMapping("/history")
+    public List<AppointmentStatusHistory> getAllStatusHistory() {
+        return appointmentService.getAllStatusHistory();
     }
 }

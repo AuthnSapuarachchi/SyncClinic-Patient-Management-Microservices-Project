@@ -5,6 +5,11 @@ import com.syncclinic.appointmentservice.model.AppointmentStatus;
 import com.syncclinic.appointmentservice.repository.AppointmentRepository;
 import org.springframework.stereotype.Service;
 
+// import statements for appointment status history
+import com.syncclinic.appointmentservice.model.AppointmentStatusHistory;
+import com.syncclinic.appointmentservice.repository.AppointmentStatusHistoryRepository;
+import java.time.LocalDateTime;
+
 import java.util.List;
 
 // Service layer for appointment operations
@@ -13,8 +18,16 @@ public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
 
-    public AppointmentService(AppointmentRepository appointmentRepository) {
-        this.appointmentRepository = appointmentRepository;
+    // Repository for appointment status history
+    private final AppointmentStatusHistoryRepository statusHistoryRepository;
+
+    // Constructor injection for repositories
+    public AppointmentService(
+        AppointmentRepository appointmentRepository,
+        AppointmentStatusHistoryRepository statusHistoryRepository
+    ) {
+    this.appointmentRepository = appointmentRepository;
+    this.statusHistoryRepository = statusHistoryRepository;
     }
 
     // Create a new appointment
@@ -49,8 +62,29 @@ public class AppointmentService {
                         "Appointment not found with ID: " + appointmentId
                 ));
 
+        // Store previous status before updating
+        AppointmentStatus oldStatus = appointment.getStatus();
+
         appointment.setStatus(status);
 
-        return appointmentRepository.save(appointment);
+        // Save updated appointment
+        appointment = appointmentRepository.save(appointment);
+
+        // Save appointment status change history
+        AppointmentStatusHistory history = AppointmentStatusHistory.builder()
+                .appointment(appointment)
+                .oldStatus(oldStatus)
+                .newStatus(status)
+                .changedAt(LocalDateTime.now())
+                .build();
+
+        statusHistoryRepository.save(history);
+
+        return appointment;
+    }
+
+    // Get all status history records for all appointments
+    public List<AppointmentStatusHistory> getAllStatusHistory() {
+        return statusHistoryRepository.findAll();
     }
 }
