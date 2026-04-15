@@ -1,10 +1,10 @@
-package com.example.demo;
+package com.SyncClinic.payment_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DemoApplicationTests {
+class PaymentServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
