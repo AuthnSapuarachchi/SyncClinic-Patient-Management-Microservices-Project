@@ -10,6 +10,9 @@ import com.syncclinic.appointmentservice.model.AppointmentStatusHistory;
 import com.syncclinic.appointmentservice.repository.AppointmentStatusHistoryRepository;
 import java.time.LocalDateTime;
 
+//DTO imports
+import com.syncclinic.appointmentservice.dto.DoctorDto;
+
 import java.util.List;
 
 // Service layer for appointment operations
@@ -21,18 +24,30 @@ public class AppointmentService {
     // Repository for appointment status history
     private final AppointmentStatusHistoryRepository statusHistoryRepository;
 
+    // Client service to communicate with Doctor Service
+    private final DoctorClientService doctorClientService;
+
     // Constructor injection for repositories
-    public AppointmentService(
-        AppointmentRepository appointmentRepository,
-        AppointmentStatusHistoryRepository statusHistoryRepository
+   public AppointmentService(
+            AppointmentRepository appointmentRepository,
+            AppointmentStatusHistoryRepository statusHistoryRepository,
+            DoctorClientService doctorClientService
     ) {
-    this.appointmentRepository = appointmentRepository;
-    this.statusHistoryRepository = statusHistoryRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.statusHistoryRepository = statusHistoryRepository;
+        this.doctorClientService = doctorClientService;
     }
 
     // Create a new appointment
     public Appointment createAppointment(Appointment appointment) {
 
+        // Check whether doctor exists in Doctor Service
+        DoctorDto doctor = doctorClientService.getDoctorById(appointment.getDoctorId());
+
+        if (doctor == null) {
+            throw new RuntimeException("Doctor not found with ID: " + appointment.getDoctorId());
+        }
+        
         // Default appointment status when booking
         appointment.setStatus(AppointmentStatus.PENDING);
 
