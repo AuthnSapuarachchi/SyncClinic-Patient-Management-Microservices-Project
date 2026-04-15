@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import com.syncclinic.appointmentservice.dto.DoctorAvailabilityDto;
 
 // Service to communicate with Doctor Service
 @Service
@@ -29,6 +30,23 @@ public class DoctorClientService {
 
         } catch (HttpServerErrorException.InternalServerError ex) {
             return null;
+        }
+    }
+
+    // Get doctor availability from Doctor Service
+    public DoctorAvailabilityDto[] getDoctorAvailability(Long doctorId) {
+
+        try {
+            String availabilityUrl =
+                    "http://localhost:8082/api/doctors/" + doctorId + "/availability";
+
+            return restTemplate.getForObject(
+                    availabilityUrl,
+                    DoctorAvailabilityDto[].class
+            );
+
+        } catch (Exception ex) {
+            return new DoctorAvailabilityDto[0];
         }
     }
 }

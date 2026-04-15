@@ -1,5 +1,9 @@
 package com.syncclinic.appointmentservice.service;
 
+import com.syncclinic.appointmentservice.dto.DoctorAvailabilityDto;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+
 import com.syncclinic.appointmentservice.model.Appointment;
 import com.syncclinic.appointmentservice.model.AppointmentStatus;
 import com.syncclinic.appointmentservice.repository.AppointmentRepository;
@@ -47,7 +51,63 @@ public class AppointmentService {
         if (doctor == null) {
             throw new RuntimeException("Doctor not found with ID: " + appointment.getDoctorId());
         }
-        
+
+        // Check whether doctor is verified
+        if (!"VERIFIED".equalsIgnoreCase(doctor.getStatus())) {
+            throw new RuntimeException(
+                    "Doctor is not verified for appointments. Current status: " + doctor.getStatus()
+            );
+        }
+
+        // Get doctor availability records
+    DoctorAvailabilityDto[] availabilityList =
+            doctorClientService.getDoctorAvailability(appointment.getDoctorId());
+
+    // Get appointment day name such as MONDAY
+    String appointmentDay =
+            appointment.getAppointmentDate().getDayOfWeek().name();
+
+    // Check whether doctor is available on the selected day and time
+    boolean isAvailable = false;
+
+    for (DoctorAvailabilityDto availability : availabilityList) {
+
+        if (availability.getDayOfWeek().equalsIgnoreCase(appointmentDay)) {
+
+            LocalTime startTime = LocalTime.parse(availability.getStartTime());
+            LocalTime endTime = LocalTime.parse(availability.getEndTime());
+            LocalTime appointmentTime = appointment.getAppointmentTime();
+
+            if (!appointmentTime.isBefore(startTime)
+                    && !appointmentTime.isAfter(endTime)) {
+
+                isAvailable = true;
+                break;
+            }
+        }
+    }
+
+    // Reject appointment if doctor is unavailable
+    if (!isAvailable) {
+        throw new RuntimeException(
+                "Doctor is not available on " + appointmentDay +
+                " at " + appointment.getAppointmentTime()
+        );
+    }
+
+    boolean alreadyBooked =
+        appointmentRepository.existsByDoctorIdAndAppointmentDateAndAppointmentTime(
+                appointment.getDoctorId(),
+                appointment.getAppointmentDate(),
+                appointment.getAppointmentTime()
+        );
+
+    if (alreadyBooked) {
+        throw new RuntimeException(
+            "Doctor already has an appointment at this date and time"
+    );
+}
+
         // Default appointment status when booking
         appointment.setStatus(AppointmentStatus.PENDING);
 
