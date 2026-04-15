@@ -87,4 +87,34 @@ public class AppointmentService {
     public List<AppointmentStatusHistory> getAllStatusHistory() {
         return statusHistoryRepository.findAll();
     }
+
+    // Cancel an appointment
+    public Appointment cancelAppointment(Long appointmentId) {
+
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Appointment not found with ID: " + appointmentId
+                ));
+
+        // Store previous status
+        AppointmentStatus oldStatus = appointment.getStatus();
+
+        // Update status to cancelled
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+
+        // Save appointment
+        appointment = appointmentRepository.save(appointment);
+
+        // Save history record
+        AppointmentStatusHistory history = AppointmentStatusHistory.builder()
+                .appointment(appointment)
+                .oldStatus(oldStatus)
+                .newStatus(AppointmentStatus.CANCELLED)
+                .changedAt(LocalDateTime.now())
+                .build();
+
+        statusHistoryRepository.save(history);
+
+        return appointment;
+    }
 }

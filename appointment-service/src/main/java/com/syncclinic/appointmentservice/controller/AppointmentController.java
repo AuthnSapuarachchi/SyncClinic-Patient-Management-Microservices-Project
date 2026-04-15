@@ -60,4 +60,10 @@ public class AppointmentController {
     public List<AppointmentStatusHistory> getAllStatusHistory() {
         return appointmentService.getAllStatusHistory();
     }
+
+    // Cancel an appointment
+    @PutMapping("/{appointmentId}/cancel")
+    public Appointment cancelAppointment(@PathVariable Long appointmentId) {
+        return appointmentService.cancelAppointment(appointmentId);
+    }
 }
