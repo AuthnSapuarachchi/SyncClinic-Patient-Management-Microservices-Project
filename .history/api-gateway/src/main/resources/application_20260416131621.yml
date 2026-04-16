@@ -7,9 +7,9 @@ spring:
   cloud:
     gateway:
       routes:
-        # Route for the Identity Service
+          # Route for the Identity Service
         - id: identity-service
-          uri: http://localhost:8081 # Pointing to your identity service
+          uri: http://localhost:8081  # Pointing to your identity service
           predicates:
             - Path=/auth/**
           filters:
@@ -19,7 +19,7 @@ spring:
         - id: patient-service
           uri: http://localhost:8082
           predicates:
-            - Path=/api/patients,/api/patients/**
+            - Path=/api/patients/**
           filters:
             - AuthenticationFilter
 
@@ -27,16 +27,16 @@ spring:
         - id: doctor-service
           uri: http://localhost:8083
           predicates:
-            - Path=/api/doctors,/api/doctors/**
+            - Path=/api/doctors/**
 
         # Route for prescription APIs (served by doctor-service)
         - id: prescription-service
           uri: http://localhost:8083
           predicates:
-            - Path=/api/prescriptions,/api/prescriptions/**
+            - Path=/api/prescriptions/**
 
         # Route for the Appointment Service
         - id: appointment-service
           uri: http://localhost:8084
           predicates:
-            - Path=/api/appointments,/api/appointments/**
+            - Path=/api/appointments/**
