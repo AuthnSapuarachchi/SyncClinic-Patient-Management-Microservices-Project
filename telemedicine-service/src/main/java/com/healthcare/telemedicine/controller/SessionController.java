@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/sessions")
-@CrossOrigin(origins = "*", maxAge = 3600)
 @Slf4j
 public class SessionController {
 
