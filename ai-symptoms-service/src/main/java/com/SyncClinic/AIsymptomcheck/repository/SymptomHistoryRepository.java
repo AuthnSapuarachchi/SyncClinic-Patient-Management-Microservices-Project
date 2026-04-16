@@ -1,6 +1,6 @@
-package com.medisphere.AIsymptomcheck.repository;
+package com.SyncClinic.AIsymptomcheck.repository;
 
-import com.medisphere.AIsymptomcheck.domain.SymptomHistory;
+import com.SyncClinic.AIsymptomcheck.domain.SymptomHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;

@@ -1,13 +1,13 @@
-package com.medisphere.AIsymptomcheck.service;
+package com.SyncClinic.AIsymptomcheck.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.medisphere.AIsymptomcheck.domain.SymptomHistory;
-import com.medisphere.AIsymptomcheck.dto.SymptomCheckRequest;
-import com.medisphere.AIsymptomcheck.dto.SymptomCheckResponse;
-import com.medisphere.AIsymptomcheck.dto.SymptomHistoryResponse;
-import com.medisphere.AIsymptomcheck.exception.HistoryNotFoundException;
-import com.medisphere.AIsymptomcheck.repository.SymptomHistoryRepository;
+import com.SyncClinic.AIsymptomcheck.domain.SymptomHistory;
+import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckRequest;
+import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckResponse;
+import com.SyncClinic.AIsymptomcheck.dto.SymptomHistoryResponse;
+import com.SyncClinic.AIsymptomcheck.exception.HistoryNotFoundException;
+import com.SyncClinic.AIsymptomcheck.repository.SymptomHistoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

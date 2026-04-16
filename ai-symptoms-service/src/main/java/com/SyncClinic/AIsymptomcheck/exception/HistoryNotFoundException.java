@@ -1,4 +1,4 @@
-package com.medisphere.AIsymptomcheck.exception;
+package com.SyncClinic.AIsymptomcheck.exception;
 
 public class HistoryNotFoundException extends RuntimeException {
 

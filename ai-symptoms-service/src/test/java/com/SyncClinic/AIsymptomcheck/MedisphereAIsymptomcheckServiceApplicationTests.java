@@ -1,4 +1,4 @@
-package com.medisphere.AIsymptomcheck;
+package com.SyncClinic.AIsymptomcheck;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

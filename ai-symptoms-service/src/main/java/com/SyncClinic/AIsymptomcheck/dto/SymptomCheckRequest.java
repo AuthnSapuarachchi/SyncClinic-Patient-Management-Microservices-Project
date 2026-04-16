@@ -1,4 +1,4 @@
-package com.medisphere.AIsymptomcheck.dto;
+package com.SyncClinic.AIsymptomcheck.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
