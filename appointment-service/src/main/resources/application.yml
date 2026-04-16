@@ -1,0 +1,25 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: appointmentservice
+
+  config:
+    import: "optional:file:.env[.properties]"
+
+  datasource:
+    # Points to your 5433 PostgreSQL instance
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/appointment_service_db}
+    # Added defaults to prevent the "${DB_USERNAME}" authentication error
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:rootpassword123}
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
