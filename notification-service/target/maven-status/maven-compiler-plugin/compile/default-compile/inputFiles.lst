@@ -8,10 +8,12 @@ C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservic
 C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\controller\NotificationController.java
 C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\dto\response\NotificationLogResponse.java
 C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\service\EmailService.java
+C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\handler\AppointmentNoShowHandler.java
 C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\dto\events\PaymentFailedEvent.java
 C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\config\TwilioConfig.java
 C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\dto\events\ConsultationCompletedEvent.java
 C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\dto\events\AppointmentCancelledEvent.java
+C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\dto\events\AppointmentNoShowEvent.java
 C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\handler\PaymentNotificationHandler.java
 C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\consumer\NotificationConsumer.java
 C:\Users\CYBORG 15\OneDrive\Desktop\AF\SyncClinic-Patient-Management-Microservices-Project\notification-service\src\main\java\com\healthcare\notification\handler\ConsultationNotificationHandler.java

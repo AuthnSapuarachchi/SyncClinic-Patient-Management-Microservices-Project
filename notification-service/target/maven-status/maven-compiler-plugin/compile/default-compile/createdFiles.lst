@@ -2,9 +2,11 @@ com\healthcare\notification\dto\events\PaymentFailedEvent$PaymentFailedEventBuil
 com\healthcare\notification\config\TwilioConfig.class
 com\healthcare\notification\config\RabbitMQConfig.class
 com\healthcare\notification\handler\AppointmentCancellationHandler.class
+com\healthcare\notification\dto\events\AppointmentNoShowEvent.class
 com\healthcare\notification\model\NotificationLog$NotificationStatus.class
 com\healthcare\notification\repository\NotificationLogRepository.class
 com\healthcare\notification\dto\events\PaymentSuccessEvent.class
+com\healthcare\notification\handler\AppointmentNoShowHandler.class
 com\healthcare\notification\model\NotificationLog$NotificationType.class
 com\healthcare\notification\dto\response\NotificationLogResponse.class
 com\healthcare\notification\dto\events\AppointmentBookedEvent.class
@@ -26,6 +28,7 @@ com\healthcare\notification\dto\response\ApiResponse$ApiResponseBuilder.class
 com\healthcare\notification\dto\response\ApiResponse.class
 com\healthcare\notification\model\NotificationLog$EventType.class
 com\healthcare\notification\dto\events\AppointmentCancelledEvent$AppointmentCancelledEventBuilder.class
+com\healthcare\notification\dto\events\AppointmentNoShowEvent$AppointmentNoShowEventBuilder.class
 com\healthcare\notification\model\NotificationLog$NotificationLogBuilder.class
 com\healthcare\notification\exception\ApiErrorResponse.class
 com\healthcare\notification\dto\events\PaymentSuccessEvent$PaymentSuccessEventBuilder.class
