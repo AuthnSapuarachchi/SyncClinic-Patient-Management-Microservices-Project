@@ -10,7 +10,7 @@ spring:
 
   datasource:
     # Points to your 5433 PostgreSQL instance
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/appointment_service_db}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres-db:5433/appointment_service_db}
     # Added defaults to prevent the "${DB_USERNAME}" authentication error
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:rootpassword123}

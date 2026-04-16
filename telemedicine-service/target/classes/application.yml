@@ -9,11 +9,11 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/telemedicine_db}
+      uri: ${MONGODB_URI:mongodb://admin:admin123@mongodb:27017/telemedicine_db?authSource=admin}
       auto-index-creation: true
 
   rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
+    host: ${RABBITMQ_HOST:rabbitmq}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}

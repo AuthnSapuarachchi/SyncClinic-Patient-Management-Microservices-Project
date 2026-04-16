@@ -3,14 +3,14 @@ server:
 
 spring:
   application:
-    name: doctorservice
+    name: doctor-service
 
   config:
     import: "optional:file:.env[.properties]"
 
   datasource:
     # Note: Using port 5433 as per your original configuration
-    url: ${DB_URL:jdbc:postgresql://localhost:5433/doctor_service_db}
+    url: ${DB_URL:jdbc:postgresql://postgres-db:5432/doctor_service_db}
     # Added 'postgres' and 'password' as defaults to prevent authentication crashes
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:rootpassword123}

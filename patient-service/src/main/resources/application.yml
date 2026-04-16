@@ -6,13 +6,13 @@ spring:
     name: patient-service
   datasource:
     # Notice it points to the NEW database!
-    url: jdbc:postgresql://localhost:5433/syncclinic_patients
+    url: jdbc:postgresql://postgres-db:5432/syncclinic_patients
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:rootpassword123}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create # Automatically creates the tables
+      ddl-auto: update # Automatically creates the tables
     show-sql: true
     properties:
       hibernate:
@@ -20,7 +20,7 @@ spring:
 
   kafka:
     consumer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: kafka:9092
       group-id: patient-group  # This is the "bookmark" Kafka uses to track this specific service
       auto-offset-reset: earliest # If the service boots up for the first time, read from the beginning of the queue!
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -31,7 +31,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://service-registry:8761/eureka/
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${server.port}
