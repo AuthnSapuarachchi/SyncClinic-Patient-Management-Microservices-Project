@@ -96,6 +96,9 @@ services:
     networks:
       - healthcare-network
 
+  # ==========================================
+  # SERVICE REGISTRY (Eureka) - Assuming this is the 2nd missing service!
+  # ==========================================
   service-registry:
     build:
       context: ./service-registry
@@ -106,7 +109,9 @@ services:
     restart: unless-stopped
     networks:
       - healthcare-network
-
+# ==========================================
+  # IDENTITY SERVICE
+  # ==========================================
   identity-service:
     build:
       context: ./identity-service
@@ -137,7 +142,7 @@ services:
       #   condition: service_started
     restart: unless-stopped
     networks:
-      - healthcare-network    
+      - healthcare-network      
 
   patient-service:
     build: 

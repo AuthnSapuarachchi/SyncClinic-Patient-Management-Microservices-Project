@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: appointmentservice
+    name: appointment-service
 
   config:
     import: "optional:file:.env[.properties]"

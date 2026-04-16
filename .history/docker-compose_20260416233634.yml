@@ -106,38 +106,7 @@ services:
     restart: unless-stopped
     networks:
       - healthcare-network
-
-  identity-service:
-    build:
-      context: ./identity-service
-      dockerfile: Dockerfile
-    container_name: syncclinic-identity
-    ports:
-      - "8081:8081"
-    environment:
-      # Pointing to the unified database container
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/syncclinic_auth
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: rootpassword123
-      # Pointing to the Kafka container
-      SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS: kafka:9092
-      # Injecting the JWT Secret
-      JWT_SECRET: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
-      # Pointing to the Service Registry container instead of localhost
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
-      EUREKA_CLIENT_REGISTERWITHEUREKA: "true"
-      EUREKA_CLIENT_FETCHREGISTRY: "true"
-    depends_on:
-      postgres-db:
-        condition: service_healthy
-      kafka:
-        condition: service_started
-      # Uncomment the next two lines ONLY IF you add the service-registry block above!
-      # service-registry:
-      #   condition: service_started
-    restart: unless-stopped
-    networks:
-      - healthcare-network    
+      
 
   patient-service:
     build: 
