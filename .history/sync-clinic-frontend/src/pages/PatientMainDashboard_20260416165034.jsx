@@ -85,7 +85,7 @@ export default function PatientMainDashboard() {
             try {
                 const doctorsResponse = await api.get('/api/doctors');
                 const doctorsData = normalizeListResponse(doctorsResponse.data);
-                setDoctors(doctorsData.filter((doctor) => doctor.status !== 'REJECTED'));
+                setDoctors(doctorsData.filter((doctor) => doctor.status === 'VERIFIED'));
 
                 try {
                     const patientResponse = await api.get(`/api/patients/profile/${encodeURIComponent(userEmail)}`);
