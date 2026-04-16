@@ -1,4 +1,4 @@
-package com.medisphere.AIsymptomcheck.domain;
+package com.SyncClinic.AIsymptomcheck.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;

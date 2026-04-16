@@ -1,9 +1,9 @@
-package com.medisphere.AIsymptomcheck.service;
+package com.SyncClinic.AIsymptomcheck.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.medisphere.AIsymptomcheck.dto.SymptomCheckRequest;
-import com.medisphere.AIsymptomcheck.dto.SymptomCheckResponse;
+import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckRequest;
+import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
