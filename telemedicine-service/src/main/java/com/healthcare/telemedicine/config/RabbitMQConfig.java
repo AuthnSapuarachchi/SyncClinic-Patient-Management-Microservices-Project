@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-	// Exchange
+	// Exchange definition
 	public static final String HEALTHCARE_EXCHANGE = "healthcare.exchange";
 
 	// Queues

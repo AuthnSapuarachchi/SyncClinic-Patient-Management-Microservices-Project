@@ -2,12 +2,17 @@ import './App.css'
 import { jwtDecode } from 'jwt-decode'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthScreen from './pages/AuthScreen'
+import LandingPage from './pages/LandingPage'
 import PatientDashboard from './pages/PatientDashboard'
+<<<<<<< HEAD
 import PaymentInitiation from './pages/PaymentInitiation'
 import PaymentCheckout from './pages/PaymentCheckout'
 import PaymentSuccess from './pages/PaymentSuccess'
 import PaymentFailed from './pages/PaymentFailed'
 import PaymentHistory from './pages/PaymentHistory'
+=======
+import PatientMainDashboard from './pages/PatientMainDashboard'
+>>>>>>> main
 // import DoctorDashboard from './pages/DoctorDashboard'
 // import AdminDashboard from './pages/AdminDashboard'
 
@@ -59,6 +64,7 @@ const clearSession = () => {
 function App() {
   let token = localStorage.getItem('jwt_token')
   const savedRole = localStorage.getItem('user_role')
+  const hasSeenLanding = localStorage.getItem('has_seen_landing') === 'true'
   let userRole = null
 
   if (token) {
@@ -92,7 +98,9 @@ function App() {
   if (!token) {
     return (
       <Routes>
-        <Route path="/" element={<AuthScreen />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/landing" element={<Navigate to="/" replace />} />
+        <Route path="/auth" element={hasSeenLanding ? <AuthScreen /> : <Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
@@ -103,6 +111,10 @@ function App() {
       <Route path="/" element={<Navigate to="/patientDashboard" replace />} />
       <Route
         path="/patientDashboard"
+        element={userRole === 'ROLE_PATIENT' ? <PatientMainDashboard /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/patient/profile"
         element={userRole === 'ROLE_PATIENT' ? <PatientDashboard /> : <Navigate to="/" replace />}
       />
       

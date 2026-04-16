@@ -1,0 +1,25 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: doctorservice
+
+  config:
+    import: "optional:file:.env[.properties]"
+
+  datasource:
+    # Note: Using port 5433 as per your original configuration
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/doctor_service_db}
+    # Added 'postgres' and 'password' as defaults to prevent authentication crashes
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:rootpassword123}
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect

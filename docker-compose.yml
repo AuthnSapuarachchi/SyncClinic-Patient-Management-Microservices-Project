@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> main
 services:
   # PostgreSQL Database
   postgres-db:
@@ -14,6 +17,11 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d syncclinic_auth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - healthcare-network
 
@@ -77,6 +85,35 @@ services:
     networks:
       - healthcare-network
 
+<<<<<<< HEAD
+=======
+  # AI Symptoms Service
+  ai-symptoms-service:
+    build:
+      context: ./ai-symptoms-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-ai-symptoms
+    ports:
+      - "8089:8088"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/syncclinic_auth
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=rootpassword123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - EUREKA_CLIENT_ENABLED=false
+      - JWT_SECRET=your_very_secure_and_long_secret_key_for_medisphere_telemedicine_service_2026
+      - GROQ_API_URL=https://api.groq.com/openai/v1/chat/completions
+      - GROQ_API_KEY=${GROQ_API_KEY:-test-key}
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - healthcare-network
+
+  # Kafka Message Broker (existing)
+>>>>>>> main
   kafka:
     image: confluentinc/confluent-local:7.6.0
     container_name: syncclinic_broker
@@ -93,6 +130,7 @@ services:
     networks:
       - healthcare-network
 
+<<<<<<< HEAD
   telemedicine-service:
     build:
       context: ./telemedicine-service
@@ -144,6 +182,61 @@ services:
     restart: unless-stopped
     networks:
       - healthcare-network
+=======
+#  # Telemedicine Service
+#  telemedicine-service:
+#    build:
+#      context: ./telemedicine-service
+#      dockerfile: Dockerfile
+#    container_name: syncclinic-telemedicine
+#    ports:
+#      - "8083:8083"
+#    environment:
+#      MONGODB_URI: ${MONGODB_URI}
+#      RABBITMQ_HOST: rabbitmq
+#      RABBITMQ_PORT: 5672
+#      RABBITMQ_USERNAME: guest
+#      RABBITMQ_PASSWORD: guest
+#      JITSI_BASE_URL: https://meet.jit.si
+#    depends_on:
+#      rabbitmq:
+#        condition: service_healthy
+#      mongodb:
+#        condition: service_healthy
+#    restart: unless-stopped
+#    networks:
+#      - healthcare-network
+#
+#  # Notification Service
+#  notification-service:
+#    build:
+#      context: ./notification-service
+#      dockerfile: Dockerfile
+#    container_name: syncclinic-notification
+#    ports:
+#      - "8085:8085"
+#    environment:
+#      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/notification_db}
+#      RABBITMQ_HOST: rabbitmq
+#      RABBITMQ_PORT: 5672
+#      RABBITMQ_USERNAME: guest
+#      RABBITMQ_PASSWORD: guest
+#      MAIL_HOST: smtp.gmail.com
+#      MAIL_PORT: 587
+#      MAIL_USERNAME: ${MAIL_USERNAME:-your-email@gmail.com}
+#      MAIL_PASSWORD: ${MAIL_PASSWORD:-your-app-password}
+#      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-your-account-sid}
+#      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-your-auth-token}
+#      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-+1234567890}
+#    depends_on:
+#      rabbitmq:
+#        condition: service_healthy
+#      mongodb:
+#        condition: service_healthy
+#    restart: unless-stopped
+#    networks:
+#      - healthcare-network
+>>>>>>> main
 
   #FIXED: Payment Service
   payment-service:
