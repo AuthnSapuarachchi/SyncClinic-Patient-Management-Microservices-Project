@@ -26,16 +26,7 @@ public class PatientService {
     // 1. The Update Method (Triggered by REST API)
     public Patient updatePatientProfile(String email, PatientUpdateRequest updatedData) {
         Patient existingPatient = repository.findByEmail(email)
-            .orElseGet(() -> repository.save(new Patient(
-                null,
-                null,
-                null,
-                email,
-                null,
-                null,
-                null,
-                null
-            )));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient profile not found for email: " + email));
 
         existingPatient.setFirstName(updatedData.getFirstName());
         existingPatient.setLastName(updatedData.getLastName());
@@ -59,18 +50,9 @@ public class PatientService {
     }
 
     public Patient getPatientByEmail(String email) {
-        // Auto-provision a patient row for newly registered users to avoid 404 during dashboard load.
+        // Throw domain exception so global exception handler can format a consistent 404 response.
         return repository.findByEmail(email)
-            .orElseGet(() -> repository.save(new Patient(
-                null,
-                null,
-                null,
-                email,
-                null,
-                null,
-                null,
-                null
-            )));
+            .orElseThrow(() -> new ResourceNotFoundException("Patient profile not found for email: " + email));
     }
 
     public Map<String, String> uploadMedicalReport(String email, MultipartFile file) {
