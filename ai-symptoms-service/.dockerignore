@@ -1,0 +1,14 @@
+target
+*.jar
+*.war
+*.zip
+*.tar
+*.log
+.mvn/wrapper/maven-wrapper.jar
+.settings
+.idea
+.vscode
+*.iml
+.git
+.gitignore
+.DS_Store
