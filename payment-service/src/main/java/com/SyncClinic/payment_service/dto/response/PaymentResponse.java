@@ -14,6 +14,7 @@ public class PaymentResponse {
     private String currency;
     private Payment.PaymentStatus status;
     private String clientSecret;   // Stripe client secret — frontend uses this to show the payment form
+    private String publishableKey; // Stripe publishable key for client-side Stripe.js initialization
     private LocalDateTime createdAt;
     private String failureReason;
  
@@ -27,6 +28,7 @@ public class PaymentResponse {
                            String currency,
                            Payment.PaymentStatus status,
                            String clientSecret,
+                           String publishableKey,
                            LocalDateTime createdAt,
                            String failureReason) {
         this.paymentId = paymentId;
@@ -36,6 +38,7 @@ public class PaymentResponse {
         this.currency = currency;
         this.status = status;
         this.clientSecret = clientSecret;
+        this.publishableKey = publishableKey;
         this.createdAt = createdAt;
         this.failureReason = failureReason;
     }
@@ -94,6 +97,14 @@ public class PaymentResponse {
  
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
+    }
+ 
+    public String getPublishableKey() {
+        return publishableKey;
+    }
+ 
+    public void setPublishableKey(String publishableKey) {
+        this.publishableKey = publishableKey;
     }
  
     public LocalDateTime getCreatedAt() {

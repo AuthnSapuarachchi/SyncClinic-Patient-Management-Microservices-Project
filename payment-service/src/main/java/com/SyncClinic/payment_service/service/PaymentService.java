@@ -38,6 +38,9 @@ public class PaymentService {
     @Value("${stripe.webhook.secret}")
     private String webhookSecret;
  
+    @Value("${stripe.publishable.key}")
+    private String stripePublishableKey;
+ 
     public PaymentService(PaymentRepository paymentRepository,
                           PaymentEventPublisher eventPublisher,
                           JwtUtil jwtUtil) {
@@ -224,6 +227,7 @@ public class PaymentService {
                 p.getCurrency(),
                 p.getStatus(),
                 p.getStripeClientSecret(),
+                stripePublishableKey,
                 p.getCreatedAt(),
                 p.getFailureReason());
     }
