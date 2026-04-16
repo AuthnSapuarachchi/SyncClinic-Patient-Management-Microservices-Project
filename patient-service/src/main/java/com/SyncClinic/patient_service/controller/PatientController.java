@@ -35,7 +35,7 @@ public class PatientController {
         return service.getPatientById(id);
     }
 
-    @GetMapping("/profile/{email}")
+    @GetMapping("/profile/{email:.+}")
     public Patient getPatientProfile(@PathVariable String email) {
         return service.getPatientByEmail(email);
     }

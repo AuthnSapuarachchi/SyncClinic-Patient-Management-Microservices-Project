@@ -23,19 +23,14 @@ public class PatientService {
     @Autowired
     private PatientRepository repository;
 
+    private Patient getOrCreatePatientByEmail(String email) {
+        return repository.findByEmail(email)
+                .orElseGet(() -> repository.save(Patient.builder().email(email).build()));
+    }
+
     // 1. The Update Method (Triggered by REST API)
     public Patient updatePatientProfile(String email, PatientUpdateRequest updatedData) {
-        Patient existingPatient = repository.findByEmail(email)
-            .orElseGet(() -> repository.save(new Patient(
-                null,
-                null,
-                null,
-                email,
-                null,
-                null,
-                null,
-                null
-            )));
+        Patient existingPatient = getOrCreatePatientByEmail(email);
 
         existingPatient.setFirstName(updatedData.getFirstName());
         existingPatient.setLastName(updatedData.getLastName());
@@ -59,23 +54,11 @@ public class PatientService {
     }
 
     public Patient getPatientByEmail(String email) {
-        // Auto-provision a patient row for newly registered users to avoid 404 during dashboard load.
-        return repository.findByEmail(email)
-            .orElseGet(() -> repository.save(new Patient(
-                null,
-                null,
-                null,
-                email,
-                null,
-                null,
-                null,
-                null
-            )));
+        return getOrCreatePatientByEmail(email);
     }
 
     public Map<String, String> uploadMedicalReport(String email, MultipartFile file) {
-        repository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Patient profile not found for email: " + email));
+        getOrCreatePatientByEmail(email);
 
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Please select a file to upload.");
