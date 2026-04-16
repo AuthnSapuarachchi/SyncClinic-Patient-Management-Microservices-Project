@@ -3,8 +3,6 @@ package com.SyncClinic.payment_service.repository;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,5 +20,4 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
 
     Optional<Payment> findByStripePaymentIntentId(String stripePaymentIntentId);
 
-    Page<Payment> findAll(Pageable pageable);
 }

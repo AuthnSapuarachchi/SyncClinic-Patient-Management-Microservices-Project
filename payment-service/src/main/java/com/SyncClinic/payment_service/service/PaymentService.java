@@ -221,6 +221,10 @@ public class PaymentService {
 
     // --- Patient endpoints ---
 
+    public List<PaymentResponse> getMyPayments() {
+        return getMyPayments(null);
+    }
+
     public List<PaymentResponse> getMyPayments(String patientId) {
         if (patientId == null || patientId.isBlank()) {
             return paymentRepository.findAll()
