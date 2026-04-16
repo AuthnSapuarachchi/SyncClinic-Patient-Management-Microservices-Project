@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
+import AIChatBot from './AIChatBot';
 
 export default function PatientMainDashboard() {
     const navigate = useNavigate();
     const userEmail = localStorage.getItem('user_email') || 'patient@syncclinic.com';
 
     const [patientId, setPatientId] = useState(null);
+    const [patientAge, setPatientAge] = useState('');
+    const [patientGender, setPatientGender] = useState('');
     const [doctors, setDoctors] = useState([]);
     const [appointments, setAppointments] = useState([]);
     const [prescriptions, setPrescriptions] = useState([]);
@@ -80,6 +83,25 @@ export default function PatientMainDashboard() {
             setError('');
 
             try {
+                const patientResponse = await api.get(`/api/patients/profile/${userEmail}`);
+                const resolvedPatientId = patientResponse.data?.id;
+                const resolvedPatientAge = patientResponse.data?.age || patientResponse.data?.dateOfBirth || '';
+                const resolvedPatientGender = patientResponse.data?.gender || '';
+
+                if (!resolvedPatientId) {
+                    throw new Error('Patient ID not found for logged-in user');
+                }
+
+                setPatientId(resolvedPatientId);
+                setPatientAge(resolvedPatientAge);
+                setPatientGender(resolvedPatientGender);
+
+                const [doctorsResponse, appointmentsResponse, prescriptionsResponse] = await Promise.all([
+                    api.get('/api/doctors'),
+                    api.get(`/api/appointments/patient/${resolvedPatientId}`),
+                    api.get(`/api/prescriptions/patient/${resolvedPatientId}`)
+                ]);
+
                 const doctorsResponse = await api.get('/api/doctors');
                 const doctorsData = normalizeListResponse(doctorsResponse.data);
                 setDoctors(doctorsData.filter((doctor) => doctor.status === 'VERIFIED'));
@@ -267,7 +289,7 @@ export default function PatientMainDashboard() {
                                             </div>
                                             <div className="text-left sm:text-right">
                                                 <p className="text-sm text-slate-300">Available: {doctor.status}</p>
-                                                <p className="text-sm font-semibold text-emerald-300">LKR {0..toLocaleString()}</p>
+                                                <p className="text-sm font-semibold text-emerald-300">LKR 0</p>
                                             </div>
                                         </div>
                                         <div className="mt-3 flex flex-wrap gap-2">
@@ -300,7 +322,11 @@ export default function PatientMainDashboard() {
                                         <p className="font-semibold text-slate-100">{doctorNameById[appointment.doctorId] || `Doctor #${appointment.doctorId}`}</p>
                                         <p className="text-slate-300">Doctor ID: {appointment.doctorId}</p>
                                         <p className="text-slate-300">{appointment.appointmentDate} at {appointment.appointmentTime}</p>
-                                        <p className={`mt-1 inline-block rounded-md px-2 py-0.5 text-xs font-semibold {(appointment.status || '') === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
+                                        <p className={`mt-1 inline-block rounded-md px-2 py-0.5 text-xs font-semibold ${
+                                            (appointment.status || '') === 'APPROVED'
+                                                ? 'bg-emerald-500/20 text-emerald-300'
+                                                : 'bg-amber-500/20 text-amber-300'
+                                        }`}>
                                             {appointment.status} • {appointment.reason || 'Consultation'}
                                         </p>
                                     </div>
@@ -359,6 +385,7 @@ export default function PatientMainDashboard() {
                         </div>
                     </section>
                 </div>
+                <AIChatBot patientAge={patientAge} patientGender={patientGender} />
             </div>
         </div>
     );
