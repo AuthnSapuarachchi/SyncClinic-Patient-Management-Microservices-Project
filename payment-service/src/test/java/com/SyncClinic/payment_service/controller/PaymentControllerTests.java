@@ -15,15 +15,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.SyncClinic.payment_service.config.JwtUtil;
 import com.SyncClinic.payment_service.dto.request.CreatePaymentRequest;
 import com.SyncClinic.payment_service.dto.response.PaymentResponse;
 import com.SyncClinic.payment_service.entity.Payment;
@@ -43,13 +40,9 @@ class PaymentControllerTests {
     @MockBean
     private PaymentService paymentService;
 
-    @SuppressWarnings("unused")
-    @MockBean
-    private JwtUtil jwtUtil;
-
     @AfterEach
     void clearSecurityContext() {
-        SecurityContextHolder.clearContext();
+        // No security context required for payment-service endpoints after JWT removal
     }
 
     @Test
@@ -70,15 +63,7 @@ class PaymentControllerTests {
                 null
         );
 
-        TestingAuthenticationToken auth = new TestingAuthenticationToken(
-                "patient-user",
-                null,
-                "ROLE_PATIENT"
-        );
-        auth.setDetails("mock-jwt-token");
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        when(paymentService.createPaymentIntent(any(CreatePaymentRequest.class), eq("mock-jwt-token")))
+        when(paymentService.createPaymentIntent(any(CreatePaymentRequest.class)))
                 .thenReturn(response);
 
         mockMvc.perform(post("/api/payments/intent")
@@ -117,14 +102,6 @@ class PaymentControllerTests {
                 null
         );
 
-        TestingAuthenticationToken auth = new TestingAuthenticationToken(
-                "patient-user",
-                null,
-                "ROLE_PATIENT"
-        );
-        auth.setDetails("mock-jwt-token");
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
         when(paymentService.getPaymentByAppointment("appt-456")).thenReturn(response);
 
         mockMvc.perform(get("/api/payments/appt-456"))
@@ -148,15 +125,7 @@ class PaymentControllerTests {
                 null
         );
 
-        TestingAuthenticationToken auth = new TestingAuthenticationToken(
-                "patient-user",
-                null,
-                "ROLE_PATIENT"
-        );
-        auth.setDetails("mock-jwt-token");
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        when(paymentService.getMyPayments("mock-jwt-token")).thenReturn(List.of(response));
+        when(paymentService.getMyPayments()).thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/payments/my"))
                 .andExpect(status().isOk())
@@ -178,14 +147,6 @@ class PaymentControllerTests {
                 LocalDateTime.now(),
                 "Card declined"
         );
-
-        TestingAuthenticationToken auth = new TestingAuthenticationToken(
-                "admin-user",
-                null,
-                "ROLE_ADMIN"
-        );
-        auth.setDetails("admin-jwt-token");
-        SecurityContextHolder.getContext().setAuthentication(auth);
 
         when(paymentService.getAllPayments(0, 20)).thenReturn(List.of(response));
         when(paymentService.getTotalPaymentsCount()).thenReturn(1L);

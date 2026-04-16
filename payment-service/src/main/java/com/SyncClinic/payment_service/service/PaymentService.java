@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.SyncClinic.payment_service.config.JwtUtil;
 import com.SyncClinic.payment_service.dto.events.PaymentFailedEvent;
 import com.SyncClinic.payment_service.dto.events.PaymentSuccessEvent;
 import com.SyncClinic.payment_service.dto.request.CreatePaymentRequest;
@@ -34,7 +33,6 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaymentEventPublisher eventPublisher;
-    private final JwtUtil jwtUtil;
     private final AppointmentServiceClient appointmentClient;
 
     @Value("${stripe.webhook.secret}")
@@ -45,11 +43,9 @@ public class PaymentService {
 
     public PaymentService(PaymentRepository paymentRepository,
                           PaymentEventPublisher eventPublisher,
-                          JwtUtil jwtUtil,
                           AppointmentServiceClient appointmentClient) {
         this.paymentRepository = paymentRepository;
         this.eventPublisher = eventPublisher;
-        this.jwtUtil = jwtUtil;
         this.appointmentClient = appointmentClient;
     }
 
@@ -63,13 +59,16 @@ public class PaymentService {
      * 4. Return clientSecret + publishableKey to frontend
      */
     @Transactional
-    public PaymentResponse createPaymentIntent(CreatePaymentRequest request, String jwtToken) {
-
-        String patientId = jwtUtil.extractUserId(jwtToken);
-        String patientEmail = jwtUtil.extractUsername(jwtToken);
+    public PaymentResponse createPaymentIntent(CreatePaymentRequest request) {
 
         // Step 1 — Verify appointment is COMPLETED before allowing payment
         AppointmentDetails appointment = appointmentClient.getAndVerifyAppointment(request.getAppointmentId());
+        String patientId = appointment.getPatientId();
+        String patientEmail = "unknown@syncclinic.local";
+
+        if (patientId == null || patientId.isBlank()) {
+            throw new PaymentException("Unable to identify patient for payment request");
+        }
 
         // Use consultation fee from appointment record
         // Stripe requires amount in smallest unit — LKR uses cents (1 LKR = 100 cents)
@@ -220,9 +219,8 @@ public class PaymentService {
 
     // --- Patient endpoints ---
 
-    public List<PaymentResponse> getMyPayments(String jwtToken) {
-        String patientId = jwtUtil.extractUserId(jwtToken);
-        return paymentRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
+    public List<PaymentResponse> getMyPayments() {
+        return paymentRepository.findAll()
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

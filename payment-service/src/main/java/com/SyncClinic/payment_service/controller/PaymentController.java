@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,12 +38,10 @@ public class PaymentController {
      * Returns 403 if appointment is not yet COMPLETED.
      */
     @PostMapping("/intent")
-    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<PaymentResponse> createPaymentIntent(
             @Valid @RequestBody CreatePaymentRequest request) {
 
-        String token = getTokenFromContext();
-        PaymentResponse response = paymentService.createPaymentIntent(request, token);
+        PaymentResponse response = paymentService.createPaymentIntent(request);
         return ResponseEntity.ok(response);
     }
 
@@ -72,7 +67,6 @@ public class PaymentController {
      * Returns: { status, transactionId, amount }
      */
     @GetMapping("/{appointmentId}")
-    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
     public ResponseEntity<PaymentResponse> getPaymentByAppointment(
             @PathVariable String appointmentId) {
         return ResponseEntity.ok(paymentService.getPaymentByAppointment(appointmentId));
@@ -83,10 +77,8 @@ public class PaymentController {
      * Patient views their own payment history.
      */
     @GetMapping("/my")
-    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<List<PaymentResponse>> getMyPayments() {
-        String token = getTokenFromContext();
-        return ResponseEntity.ok(paymentService.getMyPayments(token));
+        return ResponseEntity.ok(paymentService.getMyPayments());
     }
 
     /**
@@ -95,7 +87,6 @@ public class PaymentController {
      * Returns: { transactions: [], total }
      */
     @GetMapping("/admin/all")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> getAllPayments(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -109,16 +100,4 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
-    // Helper: pull the raw JWT string from Spring Security context
-    private String getTokenFromContext() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            throw new IllegalStateException("No authentication found");
-        }
-        Object details = authentication.getDetails();
-        if (details instanceof String token) {
-            return token;
-        }
-        throw new IllegalStateException("JWT token not available in authentication details");
-    }
 }
