@@ -1,7 +1,5 @@
 package com.SyncClinic.payment_service.service;
 
-import com.SyncClinic.payment_service.dto.response.AppointmentDetails;
-import com.SyncClinic.payment_service.exception.PaymentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import com.SyncClinic.payment_service.dto.response.AppointmentDetails;
+import com.SyncClinic.payment_service.exception.PaymentException;
 
 /**
  * HTTP client that talks to the appointment-service
@@ -70,6 +71,7 @@ public class AppointmentServiceClient {
             log.warn("Appointment-service unreachable — skipping status check for development");
             AppointmentDetails fallback = new AppointmentDetails();
             fallback.setId(appointmentId);
+            fallback.setPatientId("test-patient-id");
             fallback.setStatus("COMPLETED");
             fallback.setConsultationFee(new java.math.BigDecimal("1500.00"));
             fallback.setDoctorName("Dr. Unknown");
