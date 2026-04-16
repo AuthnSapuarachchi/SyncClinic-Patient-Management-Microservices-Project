@@ -1,4 +1,4 @@
-package com.healthcare.telemedicine.dto.response;
+package com.healthcare.telemedicine.dto;
 
 import com.healthcare.telemedicine.model.VideoSession;
 import lombok.AllArgsConstructor;
