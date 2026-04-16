@@ -39,6 +39,13 @@ Base path: `/telemedicine-service/api/sessions`
 - Message broker: RabbitMQ
 - Video platform: Jitsi Meet (`https://meet.jit.si`)
 
+## Local Run Configuration
+- Default MongoDB URI is now `mongodb://localhost:27017/telemedicine_db` when `MONGODB_URI` is not set.
+- To override in IntelliJ Run Configuration, set environment variable:
+	- `MONGODB_URI=<your-uri>`
+- Example authenticated URI:
+	- `mongodb://admin:admin123@localhost:27017/telemedicine_db?authSource=admin`
+
 ## Typical Flow
 1. Appointment Service publishes AppointmentConfirmed event.
 2. TelemedicineConsumer receives the event.

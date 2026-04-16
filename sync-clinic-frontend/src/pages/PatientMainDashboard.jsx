@@ -55,6 +55,8 @@ export default function PatientMainDashboard() {
         return [];
     };
 
+    const isNotFoundError = (requestError) => requestError?.response?.status === 404;
+
     const fetchAppointments = async (activePatientId) => {
         if (!activePatientId) {
             setAppointments([]);
@@ -100,10 +102,41 @@ export default function PatientMainDashboard() {
                     api.get(`/api/prescriptions/patient/${resolvedPatientId}`)
                 ]);
 
+                const doctorsResponse = await api.get('/api/doctors');
                 const doctorsData = normalizeListResponse(doctorsResponse.data);
                 setDoctors(doctorsData.filter((doctor) => doctor.status === 'VERIFIED'));
-                setAppointments(normalizeListResponse(appointmentsResponse.data));
-                setPrescriptions(normalizeListResponse(prescriptionsResponse.data));
+
+                try {
+                    const patientResponse = await api.get(`/api/patients/profile/${encodeURIComponent(userEmail)}`);
+                    const resolvedPatientId = patientResponse.data?.id;
+
+                    if (!resolvedPatientId) {
+                        setPatientId(null);
+                        setAppointments([]);
+                        setPrescriptions([]);
+                        setError('Patient profile was found but is incomplete. Please update your profile.');
+                        return;
+                    }
+
+                    setPatientId(resolvedPatientId);
+
+                    const [appointmentsResponse, prescriptionsResponse] = await Promise.all([
+                        api.get(`/api/appointments/patient/${resolvedPatientId}`),
+                        api.get(`/api/prescriptions/patient/${resolvedPatientId}`)
+                    ]);
+
+                    setAppointments(normalizeListResponse(appointmentsResponse.data));
+                    setPrescriptions(normalizeListResponse(prescriptionsResponse.data));
+                } catch (patientFetchError) {
+                    if (isNotFoundError(patientFetchError)) {
+                        setPatientId(null);
+                        setAppointments([]);
+                        setPrescriptions([]);
+                        setError('Patient profile not found yet. Open Manage Profile and save your details first.');
+                    } else {
+                        throw patientFetchError;
+                    }
+                }
             } catch (fetchError) {
                 console.error('Failed to fetch patient dashboard data', fetchError);
                 setError('Failed to load dashboard data. Please try again.');
@@ -186,7 +219,7 @@ export default function PatientMainDashboard() {
                     <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <div className="rounded-xl border border-cyan-400/20 bg-cyan-500/10 p-4">
                             <p className="text-xs uppercase tracking-wide text-cyan-200">Upcoming Appointments</p>
-                            <p className="mt-1 text-2xl font-bold">{appointments.length}</p>
+                            <p className="mt-1 text-2xl font-bold">{Math.min(appointments.length, 6)}</p>
                         </div>
                         <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-4">
                             <p className="text-xs uppercase tracking-wide text-emerald-200">Available Doctors</p>
@@ -284,7 +317,7 @@ export default function PatientMainDashboard() {
                         <section className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
                             <h2 className="text-lg font-bold text-cyan-300">Appointments</h2>
                             <div className="mt-4 space-y-3 text-sm">
-                                {appointments.map((appointment) => (
+                                {appointments.slice(0, 6).map((appointment) => (
                                     <div key={appointment.id} className="rounded-xl border border-slate-700 bg-slate-900/70 p-3">
                                         <p className="font-semibold text-slate-100">{doctorNameById[appointment.doctorId] || `Doctor #${appointment.doctorId}`}</p>
                                         <p className="text-slate-300">Doctor ID: {appointment.doctorId}</p>
