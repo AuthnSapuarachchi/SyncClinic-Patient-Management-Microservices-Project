@@ -26,16 +26,7 @@ public class PatientService {
     // 1. The Update Method (Triggered by REST API)
     public Patient updatePatientProfile(String email, PatientUpdateRequest updatedData) {
         Patient existingPatient = repository.findByEmail(email)
-            .orElseGet(() -> repository.save(new Patient(
-                null,
-                null,
-                null,
-                email,
-                null,
-                null,
-                null,
-                null
-            )));
+            .orElseGet(() -> repository.save(Patient.builder().email(email).build()));
 
         existingPatient.setFirstName(updatedData.getFirstName());
         existingPatient.setLastName(updatedData.getLastName());
@@ -61,16 +52,7 @@ public class PatientService {
     public Patient getPatientByEmail(String email) {
         // Auto-provision a patient row for newly registered users to avoid 404 during dashboard load.
         return repository.findByEmail(email)
-            .orElseGet(() -> repository.save(new Patient(
-                null,
-                null,
-                null,
-                email,
-                null,
-                null,
-                null,
-                null
-            )));
+            .orElseGet(() -> repository.save(Patient.builder().email(email).build()));
     }
 
     public Map<String, String> uploadMedicalReport(String email, MultipartFile file) {
