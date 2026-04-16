@@ -193,6 +193,41 @@ public class AppointmentService {
         return appointment;
     }
 
+    // Reschedule an appointment
+    public Appointment rescheduleAppointment(
+            Long appointmentId,
+            Appointment newAppointmentDetails
+    ) {
+
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Appointment not found with ID: " + appointmentId
+                ));
+
+        // Update date and time
+        appointment.setAppointmentDate(newAppointmentDetails.getAppointmentDate());
+        appointment.setAppointmentTime(newAppointmentDetails.getAppointmentTime());
+
+        // Reset appointment status back to pending after rescheduling
+        AppointmentStatus oldStatus = appointment.getStatus();
+        appointment.setStatus(AppointmentStatus.PENDING);
+
+        // Save updated appointment
+        appointment = appointmentRepository.save(appointment);
+
+        // Save history record
+        AppointmentStatusHistory history = AppointmentStatusHistory.builder()
+                .appointment(appointment)
+                .oldStatus(oldStatus)
+                .newStatus(AppointmentStatus.PENDING)
+                .changedAt(LocalDateTime.now())
+                .build();
+
+        statusHistoryRepository.save(history);
+
+        return appointment;
+    }
+
     // Get appointments for a doctor filtered by status
     public List<Appointment> getAppointmentsByDoctorAndStatus(
             Long doctorId,

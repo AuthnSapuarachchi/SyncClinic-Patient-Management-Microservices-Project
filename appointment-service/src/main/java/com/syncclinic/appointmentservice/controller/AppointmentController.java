@@ -76,6 +76,18 @@ public class AppointmentController {
         return appointmentService.getAppointmentsByDoctorAndStatus(doctorId, status);
     }
 
+    // Reschedule an appointment
+    @PutMapping("/{appointmentId}/reschedule")
+    public Appointment rescheduleAppointment(
+            @PathVariable Long appointmentId,
+            @RequestBody Appointment newAppointmentDetails
+    ) {
+        return appointmentService.rescheduleAppointment(
+                appointmentId,
+                newAppointmentDetails
+        );
+    }
+
     // Get patient appointments filtered by status
     @GetMapping("/patient/{patientId}/status")
     public List<Appointment> getAppointmentsByPatientAndStatus(
