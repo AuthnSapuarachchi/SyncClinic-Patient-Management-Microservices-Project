@@ -1,0 +1,43 @@
+server:
+  port: ${SERVER_PORT:8088}
+
+spring:
+  application:
+    name: medisphere-AIsymptomcheck-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/ai_symptoms_db}
+    driverClassName: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:rootpassword123}
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:health,info}
+
+eureka:
+  client:
+    enabled: ${EUREKA_CLIENT_ENABLED:false}
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8761/eureka/}
+
+groq:
+  api-url: ${GROQ_API_URL:https://api.groq.com/openai/v1/chat/completions}
+  api-key: ${GROQ_API_KEY:}
+
+jwt:
+  secret: ${JWT_SECRET:your_very_secure_and_long_secret_key_for_medisphere_telemedicine_service_2026}
+
+logging:
+  level:
+    com:
+      medisphere: DEBUG
