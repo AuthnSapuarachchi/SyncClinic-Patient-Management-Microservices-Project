@@ -40,15 +40,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String username = jwtUtil.extractUsername(token);
             String role = jwtUtil.extractRole(token);
  
+            if (role != null && role.startsWith("ROLE_")) {
+                role = role.substring("ROLE_".length());
+            }
+
             // Store user info in security context so controllers can access it
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     username,
                     null,
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                    role != null && !role.isBlank()
+                            ? List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                            : List.of()
             );
- 
-            // Store full token in details so service layer can extract userId
-            auth.setDetails(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
  

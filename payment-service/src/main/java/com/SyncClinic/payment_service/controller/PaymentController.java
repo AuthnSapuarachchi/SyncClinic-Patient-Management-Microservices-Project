@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
  
@@ -68,6 +69,7 @@ public class PaymentController {
      * Accessible by PATIENT, DOCTOR, or ADMIN.
      */
     @GetMapping("/appointment/{appointmentId}")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
     public ResponseEntity<List<PaymentResponse>> getPaymentsByAppointment(
             @PathVariable String appointmentId) {
         return ResponseEntity.ok(paymentService.getPaymentsByAppointment(appointmentId));
@@ -85,9 +87,16 @@ public class PaymentController {
  
     // Helper to pull the raw JWT from the Spring Security context
     private String getTokenFromContext() {
-        Object details = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getDetails();
-        return (String) details;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new IllegalStateException("No authentication found in security context");
+        }
+
+        Object details = authentication.getDetails();
+        if (details instanceof String token) {
+            return token;
+        }
+
+        throw new IllegalStateException("JWT token is not available in authentication details");
     }
 }
