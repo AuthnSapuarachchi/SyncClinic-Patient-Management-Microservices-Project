@@ -5,6 +5,8 @@ import com.syncclinic.appointmentservice.model.AppointmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 // Repository interface for Appointment entity
@@ -19,4 +21,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // Get appointments by status
     List<Appointment> findByStatus(AppointmentStatus status);
+
+    // Search appointments by doctor and status
+    List<Appointment> findByDoctorIdAndStatus(Long doctorId, AppointmentStatus status);
+
+    // Search appointments by patient and status
+    List<Appointment> findByPatientIdAndStatus(Long patientId, AppointmentStatus status);
+
+    boolean existsByDoctorIdAndAppointmentDateAndAppointmentTime(
+        Long doctorId,
+        LocalDate appointmentDate,
+        LocalTime appointmentTime
+    );
 }
