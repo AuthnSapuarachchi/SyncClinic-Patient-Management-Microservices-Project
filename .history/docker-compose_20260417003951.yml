@@ -147,7 +147,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/patient_service_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5433/patient_service_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: rootpassword123
     depends_on:
@@ -164,7 +164,7 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/doctor_service_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5433/doctor_service_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: rootpassword123
     depends_on:
@@ -199,7 +199,7 @@ services:
       - "8086:8086"
     environment:
       # Pointed to the unified postgres-db container!
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/syncclinic_payment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5433/syncclinic_payment
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: rootpassword123
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
@@ -274,7 +274,7 @@ services:
     ports:
       - "8088:8088"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/ai_symptoms_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5433/ai_symptoms_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: rootpassword123
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
