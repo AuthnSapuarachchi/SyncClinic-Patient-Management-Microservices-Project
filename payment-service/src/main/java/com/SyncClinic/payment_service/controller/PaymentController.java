@@ -5,8 +5,6 @@ import com.SyncClinic.payment_service.dto.response.PaymentResponse;
 import com.SyncClinic.payment_service.service.PaymentService;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -17,11 +15,13 @@ import java.util.List;
  
 @RestController
 @RequestMapping("/api/payments")
-@RequiredArgsConstructor
-@Slf4j
 public class PaymentController {
  
     private final PaymentService paymentService;
+
+    public PaymentController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
  
     /**
      * POST /api/payments/initiate

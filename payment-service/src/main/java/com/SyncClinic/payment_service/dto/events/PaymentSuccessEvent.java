@@ -1,7 +1,5 @@
 package com.SyncClinic.payment_service.dto.events;
 
-import lombok.Builder;
-import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
  
@@ -10,8 +8,6 @@ import java.time.LocalDateTime;
  * The notification-service listens to this and sends
  * confirmation SMS/email to patient and doctor.
  */
-@Data
-@Builder
 public class PaymentSuccessEvent {
  
     private String paymentId;
@@ -23,5 +19,100 @@ public class PaymentSuccessEvent {
     private BigDecimal amount;
     private String currency;
     private LocalDateTime paidAt;
+ 
+    public PaymentSuccessEvent() {
+    }
+ 
+    public PaymentSuccessEvent(String paymentId,
+                               String appointmentId,
+                               String patientId,
+                               String patientEmail,
+                               String doctorId,
+                               String doctorName,
+                               BigDecimal amount,
+                               String currency,
+                               LocalDateTime paidAt) {
+        this.paymentId = paymentId;
+        this.appointmentId = appointmentId;
+        this.patientId = patientId;
+        this.patientEmail = patientEmail;
+        this.doctorId = doctorId;
+        this.doctorName = doctorName;
+        this.amount = amount;
+        this.currency = currency;
+        this.paidAt = paidAt;
+    }
+ 
+    public String getPaymentId() {
+        return paymentId;
+    }
+ 
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
+    }
+ 
+    public String getAppointmentId() {
+        return appointmentId;
+    }
+ 
+    public void setAppointmentId(String appointmentId) {
+        this.appointmentId = appointmentId;
+    }
+ 
+    public String getPatientId() {
+        return patientId;
+    }
+ 
+    public void setPatientId(String patientId) {
+        this.patientId = patientId;
+    }
+ 
+    public String getPatientEmail() {
+        return patientEmail;
+    }
+ 
+    public void setPatientEmail(String patientEmail) {
+        this.patientEmail = patientEmail;
+    }
+ 
+    public String getDoctorId() {
+        return doctorId;
+    }
+ 
+    public void setDoctorId(String doctorId) {
+        this.doctorId = doctorId;
+    }
+ 
+    public String getDoctorName() {
+        return doctorName;
+    }
+ 
+    public void setDoctorName(String doctorName) {
+        this.doctorName = doctorName;
+    }
+ 
+    public BigDecimal getAmount() {
+        return amount;
+    }
+ 
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+ 
+    public String getCurrency() {
+        return currency;
+    }
+ 
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+ 
+    public LocalDateTime getPaidAt() {
+        return paidAt;
+    }
+ 
+    public void setPaidAt(LocalDateTime paidAt) {
+        this.paidAt = paidAt;
+    }
 }
  

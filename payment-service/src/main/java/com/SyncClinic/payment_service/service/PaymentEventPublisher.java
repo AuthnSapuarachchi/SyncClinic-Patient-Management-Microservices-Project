@@ -1,18 +1,18 @@
 package com.SyncClinic.payment_service.service;
 
-import com.SyncClinic.payment_service.dto.events.PaymentFailedEvent;
-import com.SyncClinic.payment_service.dto.events.PaymentSuccessEvent;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+
+import com.SyncClinic.payment_service.dto.events.PaymentFailedEvent;
+import com.SyncClinic.payment_service.dto.events.PaymentSuccessEvent;
  
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class PaymentEventPublisher {
+ 
+    private static final Logger log = LoggerFactory.getLogger(PaymentEventPublisher.class);
  
     private final KafkaTemplate<String, Object> kafkaTemplate;
  
@@ -21,6 +21,10 @@ public class PaymentEventPublisher {
  
     @Value("${kafka.topic.payment-failed}")
     private String paymentFailedTopic;
+ 
+    public PaymentEventPublisher(KafkaTemplate<String, Object> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
  
     public void publishPaymentSuccess(PaymentSuccessEvent event) {
         log.info("Publishing PaymentSuccessEvent for appointmentId: {}", event.getAppointmentId());

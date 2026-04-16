@@ -1,12 +1,14 @@
 package com.SyncClinic.payment_service.service;
 
-import com.stripe.exception.SignatureVerificationException;
-import com.stripe.exception.StripeException;
-import com.stripe.model.PaymentIntent;
-import com.stripe.model.Event;
-import com.stripe.model.EventDataObjectDeserializer;
-import com.stripe.net.Webhook;
-import com.stripe.param.PaymentIntentCreateParams;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.SyncClinic.payment_service.config.JwtUtil;
 import com.SyncClinic.payment_service.dto.events.PaymentFailedEvent;
@@ -16,22 +18,18 @@ import com.SyncClinic.payment_service.dto.response.PaymentResponse;
 import com.SyncClinic.payment_service.entity.Payment;
 import com.SyncClinic.payment_service.exception.PaymentException;
 import com.SyncClinic.payment_service.repository.PaymentRepository;
-
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
- 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.PaymentIntent;
+import com.stripe.net.Webhook;
+import com.stripe.param.PaymentIntentCreateParams;
  
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class PaymentService {
+ 
+    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
  
     private final PaymentRepository paymentRepository;
     private final PaymentEventPublisher eventPublisher;
@@ -39,6 +37,14 @@ public class PaymentService {
  
     @Value("${stripe.webhook.secret}")
     private String webhookSecret;
+ 
+    public PaymentService(PaymentRepository paymentRepository,
+                          PaymentEventPublisher eventPublisher,
+                          JwtUtil jwtUtil) {
+        this.paymentRepository = paymentRepository;
+        this.eventPublisher = eventPublisher;
+        this.jwtUtil = jwtUtil;
+    }
  
     /**
      * Step 1: Patient clicks "Pay Now" → we create a PaymentIntent in Stripe
@@ -70,18 +76,17 @@ public class PaymentService {
             PaymentIntent paymentIntent = PaymentIntent.create(params);
  
             // Save to our DB with PENDING status
-            Payment payment = Payment.builder()
-                    .patientId(patientId)
-                    .patientEmail(patientEmail)
-                    .appointmentId(request.getAppointmentId())
-                    .doctorId(request.getDoctorId())
-                    .doctorName(request.getDoctorName())
-                    .amount(request.getAmount())
-                    .currency(request.getCurrency())
-                    .status(Payment.PaymentStatus.PENDING)
-                    .stripePaymentIntentId(paymentIntent.getId())
-                    .stripeClientSecret(paymentIntent.getClientSecret())
-                    .build();
+            Payment payment = new Payment();
+            payment.setPatientId(patientId);
+            payment.setPatientEmail(patientEmail);
+            payment.setAppointmentId(request.getAppointmentId());
+            payment.setDoctorId(request.getDoctorId());
+            payment.setDoctorName(request.getDoctorName());
+            payment.setAmount(request.getAmount());
+            payment.setCurrency(request.getCurrency());
+            payment.setStatus(Payment.PaymentStatus.PENDING);
+            payment.setStripePaymentIntentId(paymentIntent.getId());
+            payment.setStripeClientSecret(paymentIntent.getClientSecret());
  
             Payment saved = paymentRepository.save(payment);
             log.info("Created PaymentIntent {} for patient {}", paymentIntent.getId(), patientId);
@@ -139,17 +144,16 @@ public class PaymentService {
             paymentRepository.save(payment);
  
             // Fire Kafka event → notification-service will send confirmation email/SMS
-            eventPublisher.publishPaymentSuccess(PaymentSuccessEvent.builder()
-                    .paymentId(payment.getId())
-                    .appointmentId(payment.getAppointmentId())
-                    .patientId(payment.getPatientId())
-                    .patientEmail(payment.getPatientEmail())
-                    .doctorId(payment.getDoctorId())
-                    .doctorName(payment.getDoctorName())
-                    .amount(payment.getAmount())
-                    .currency(payment.getCurrency())
-                    .paidAt(LocalDateTime.now())
-                    .build());
+            eventPublisher.publishPaymentSuccess(new PaymentSuccessEvent(
+                    payment.getId(),
+                    payment.getAppointmentId(),
+                    payment.getPatientId(),
+                    payment.getPatientEmail(),
+                    payment.getDoctorId(),
+                    payment.getDoctorName(),
+                    payment.getAmount(),
+                    payment.getCurrency(),
+                    LocalDateTime.now()));
  
             log.info("Payment {} succeeded for appointment {}", payment.getId(), payment.getAppointmentId());
         });
@@ -167,14 +171,13 @@ public class PaymentService {
             paymentRepository.save(payment);
  
             // Fire Kafka event → notification-service will inform patient
-            eventPublisher.publishPaymentFailed(PaymentFailedEvent.builder()
-                    .paymentId(payment.getId())
-                    .appointmentId(payment.getAppointmentId())
-                    .patientId(payment.getPatientId())
-                    .patientEmail(payment.getPatientEmail())
-                    .failureReason(reason)
-                    .failedAt(LocalDateTime.now())
-                    .build());
+            eventPublisher.publishPaymentFailed(new PaymentFailedEvent(
+                    payment.getId(),
+                    payment.getAppointmentId(),
+                    payment.getPatientId(),
+                    payment.getPatientEmail(),
+                    reason,
+                    LocalDateTime.now()));
  
             log.warn("Payment {} failed: {}", payment.getId(), reason);
         });
@@ -213,16 +216,15 @@ public class PaymentService {
     // --- Helper ---
  
     private PaymentResponse mapToResponse(Payment p) {
-        return PaymentResponse.builder()
-                .paymentId(p.getId())
-                .appointmentId(p.getAppointmentId())
-                .doctorName(p.getDoctorName())
-                .amount(p.getAmount())
-                .currency(p.getCurrency())
-                .status(p.getStatus())
-                .clientSecret(p.getStripeClientSecret())
-                .createdAt(p.getCreatedAt())
-                .failureReason(p.getFailureReason())
-                .build();
+        return new PaymentResponse(
+                p.getId(),
+                p.getAppointmentId(),
+                p.getDoctorName(),
+                p.getAmount(),
+                p.getCurrency(),
+                p.getStatus(),
+                p.getStripeClientSecret(),
+                p.getCreatedAt(),
+                p.getFailureReason());
     }
 }
