@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   # PostgreSQL Database
@@ -17,7 +17,7 @@ services:
     networks:
       - healthcare-network
 
-    # PostgreSQL Database (for payment service)
+  # PostgreSQL Database (for payment service)
   postgres-payment-db:
     image: postgres:15-alpine
     container_name: syncclinic-postgres-payment
@@ -38,7 +38,6 @@ services:
     networks:
       - healthcare-network
 
-  # RabbitMQ Message Broker
   rabbitmq:
     image: rabbitmq:3.12-management-alpine
     container_name: syncclinic-rabbitmq
@@ -59,7 +58,6 @@ services:
     networks:
       - healthcare-network
 
-  # MongoDB Database
   mongodb:
     image: mongo:7.0
     container_name: syncclinic-mongodb
@@ -79,7 +77,6 @@ services:
     networks:
       - healthcare-network
 
-  # Kafka Message Broker (existing)
   kafka:
     image: confluentinc/confluent-local:7.6.0
     container_name: syncclinic_broker
@@ -96,7 +93,6 @@ services:
     networks:
       - healthcare-network
 
-  # Telemedicine Service
   telemedicine-service:
     build:
       context: ./telemedicine-service
@@ -120,7 +116,6 @@ services:
     networks:
       - healthcare-network
 
-  # Notification Service
   notification-service:
     build:
       context: ./notification-service
@@ -150,40 +145,34 @@ services:
     networks:
       - healthcare-network
 
-  
-  # Payment Service
+  #FIXED: Payment Service
   payment-service:
-  build:
-    context: ./payment-service
-    dockerfile: Dockerfile
-  container_name: syncclinic-payment
-  ports:
-    - "8084:8084"
-  env_file:
-    - .env
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payment-db:5432/syncclinic_payment
-    SPRING_DATASOURCE_USERNAME: postgres
-    SPRING_DATASOURCE_PASSWORD: rootpassword123
-    SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
-  depends_on:
-    postgres-payment-db:
-      condition: service_healthy
-    kafka:
-      condition: service_healthy
-  restart: unless-stopped
-  networks:
-    - healthcare-network
-
-networks:
-  healthcare-network:
-    driver: bridge
-
-
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-payment
+    ports:
+      - "8084:8084"
+    
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payment-db:5432/syncclinic_payment
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: rootpassword123
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+    depends_on:
+      - postgres-payment-db
+      - kafka
+    restart: unless-stopped
+    networks:
+      - healthcare-network
 
 volumes:
   postgres-data:
   postgres-payment-data:
   rabbitmq-data:
   mongodb-data:
+
+networks:
+  healthcare-network:
+    driver: bridge
