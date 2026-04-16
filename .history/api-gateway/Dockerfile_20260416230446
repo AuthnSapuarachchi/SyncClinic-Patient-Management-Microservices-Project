@@ -10,7 +10,7 @@ COPY pom.xml .
 COPY src ./src
 
 # Let Docker run Maven to compile the code (No laptop required!)
-RUN mvn clean package -Dmaven.test.skip=true
+RUN mvn clean package -DskipTests
 
 # ==========================================
 # STAGE 2: The Runner (Production Image)
