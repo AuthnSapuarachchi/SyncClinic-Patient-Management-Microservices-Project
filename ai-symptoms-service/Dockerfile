@@ -1,5 +1,5 @@
 # Build stage
-FROM eclipse-temurin:17-alpine as build
+FROM eclipse-temurin:17-alpine AS build
 WORKDIR /workspace
 
 COPY .mvn .mvn
