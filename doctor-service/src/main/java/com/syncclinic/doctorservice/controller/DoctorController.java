@@ -1,6 +1,7 @@
 package com.syncclinic.doctorservice.controller;
 
 import com.syncclinic.doctorservice.model.Doctor;
+import com.syncclinic.doctorservice.model.DoctorStatus;
 import com.syncclinic.doctorservice.service.DoctorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -53,5 +54,14 @@ public class DoctorController {
         doctorService.deleteDoctor(id);
 
         return "Doctor deleted successfully";
+    }
+
+    // Update doctor status (e.g., PENDING, VERIFIED, APPROVED, REJECTED)   
+    @PutMapping("/{id}/status")
+    public Doctor updateDoctorStatus(
+            @PathVariable Long id,
+            @RequestParam DoctorStatus status
+    ) {
+        return doctorService.updateDoctorStatus(id, status);
     }
 }

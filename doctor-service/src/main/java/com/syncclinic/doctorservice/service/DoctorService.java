@@ -1,6 +1,7 @@
 package com.syncclinic.doctorservice.service;
 
 import com.syncclinic.doctorservice.model.Doctor;
+import com.syncclinic.doctorservice.model.DoctorStatus;
 import com.syncclinic.doctorservice.repository.DoctorRepository;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +54,17 @@ public class DoctorService {
 
         // Save updated doctor
         return doctorRepository.save(existingDoctor);
+    }
+
+    // Update doctor status (e.g., PENDING, VERIFIED, APPROVED, REJECTED)
+    public Doctor updateDoctorStatus(Long id, DoctorStatus status) {
+
+    Doctor doctor = doctorRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + id));
+
+    doctor.setStatus(status);
+
+    return doctorRepository.save(doctor);
     }
 
     // Delete a doctor by ID
