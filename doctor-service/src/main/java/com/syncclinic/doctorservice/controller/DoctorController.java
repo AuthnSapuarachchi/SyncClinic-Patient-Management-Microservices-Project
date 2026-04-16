@@ -34,14 +34,6 @@ public class DoctorController {
         return doctorService.getAllDoctors();
     }
 
-    @GetMapping("/available")
-    public List<Doctor> getAvailableDoctors(
-            @RequestParam(required = false) String situation,
-            @RequestParam(required = false) String specialty
-    ) {
-        return doctorService.getRecommendedDoctors(situation, specialty);
-    }
-
     // Get a doctor by ID
     @GetMapping("/{id}")
     public Doctor getDoctorById(@PathVariable Long id) {

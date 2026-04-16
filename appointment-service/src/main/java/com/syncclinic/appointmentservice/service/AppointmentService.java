@@ -2,9 +2,12 @@ package com.syncclinic.appointmentservice.service;
 
 import com.syncclinic.appointmentservice.model.Appointment;
 import com.syncclinic.appointmentservice.model.AppointmentStatus;
+import com.syncclinic.appointmentservice.model.AppointmentStatusHistory;
 import com.syncclinic.appointmentservice.repository.AppointmentRepository;
+import com.syncclinic.appointmentservice.repository.AppointmentStatusHistoryRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 // Service layer for appointment operations
@@ -12,9 +15,14 @@ import java.util.List;
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
+    private final AppointmentStatusHistoryRepository statusHistoryRepository;
 
-    public AppointmentService(AppointmentRepository appointmentRepository) {
+    public AppointmentService(
+            AppointmentRepository appointmentRepository,
+            AppointmentStatusHistoryRepository statusHistoryRepository
+    ) {
         this.appointmentRepository = appointmentRepository;
+        this.statusHistoryRepository = statusHistoryRepository;
     }
 
     // Create a new appointment
@@ -49,8 +57,66 @@ public class AppointmentService {
                         "Appointment not found with ID: " + appointmentId
                 ));
 
+        AppointmentStatus oldStatus = appointment.getStatus();
         appointment.setStatus(status);
+        appointment = appointmentRepository.save(appointment);
+        saveHistory(appointment, oldStatus, status);
+        return appointment;
+    }
 
-        return appointmentRepository.save(appointment);
+    // Cancel an appointment.
+    public Appointment cancelAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Appointment not found with ID: " + appointmentId
+                ));
+
+        AppointmentStatus oldStatus = appointment.getStatus();
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointment = appointmentRepository.save(appointment);
+        saveHistory(appointment, oldStatus, AppointmentStatus.CANCELLED);
+        return appointment;
+    }
+
+    // Reschedule by replacing date/time and moving status back to PENDING.
+    public Appointment rescheduleAppointment(Long appointmentId, Appointment newAppointmentDetails) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Appointment not found with ID: " + appointmentId
+                ));
+
+        appointment.setAppointmentDate(newAppointmentDetails.getAppointmentDate());
+        appointment.setAppointmentTime(newAppointmentDetails.getAppointmentTime());
+
+        AppointmentStatus oldStatus = appointment.getStatus();
+        appointment.setStatus(AppointmentStatus.PENDING);
+        appointment = appointmentRepository.save(appointment);
+        saveHistory(appointment, oldStatus, AppointmentStatus.PENDING);
+        return appointment;
+    }
+
+    // Get all status history records.
+    public List<AppointmentStatusHistory> getAllStatusHistory() {
+        return statusHistoryRepository.findAll();
+    }
+
+    // Get doctor appointments filtered by status.
+    public List<Appointment> getAppointmentsByDoctorAndStatus(Long doctorId, AppointmentStatus status) {
+        return appointmentRepository.findByDoctorIdAndStatus(doctorId, status);
+    }
+
+    // Get patient appointments filtered by status.
+    public List<Appointment> getAppointmentsByPatientAndStatus(Long patientId, AppointmentStatus status) {
+        return appointmentRepository.findByPatientIdAndStatus(patientId, status);
+    }
+
+    private void saveHistory(Appointment appointment, AppointmentStatus oldStatus, AppointmentStatus newStatus) {
+        AppointmentStatusHistory history = AppointmentStatusHistory.builder()
+                .appointment(appointment)
+                .oldStatus(oldStatus)
+                .newStatus(newStatus)
+                .changedAt(LocalDateTime.now())
+                .build();
+        statusHistoryRepository.save(history);
     }
 }
