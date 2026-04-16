@@ -1,10 +1,10 @@
-package com.medisphere.AIsymptomcheck.controller;
+package com.SyncClinic.AIsymptomcheck.controller;
 
-import com.medisphere.AIsymptomcheck.dto.SymptomCheckRequest;
-import com.medisphere.AIsymptomcheck.dto.SymptomCheckResponse;
-import com.medisphere.AIsymptomcheck.dto.SymptomHistoryResponse;
-import com.medisphere.AIsymptomcheck.service.SymptomService;
-import com.medisphere.AIsymptomcheck.service.SymptomHistoryService;
+import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckRequest;
+import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckResponse;
+import com.SyncClinic.AIsymptomcheck.dto.SymptomHistoryResponse;
+import com.SyncClinic.AIsymptomcheck.service.SymptomService;
+import com.SyncClinic.AIsymptomcheck.service.SymptomHistoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

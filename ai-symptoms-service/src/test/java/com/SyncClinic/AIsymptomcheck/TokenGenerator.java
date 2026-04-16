@@ -1,4 +1,4 @@
-package com.medisphere.AIsymptomcheck;
+package com.SyncClinic.AIsymptomcheck;
 
 // Run it as a plain Java main — NOT a Spring Boot test
 import io.jsonwebtoken.Jwts;

@@ -1,4 +1,4 @@
-package com.medisphere.AIsymptomcheck.config;
+package com.SyncClinic.AIsymptomcheck.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

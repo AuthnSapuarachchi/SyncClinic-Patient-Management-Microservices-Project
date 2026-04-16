@@ -1,4 +1,4 @@
-package com.medisphere.AIsymptomcheck.dto;
+package com.SyncClinic.AIsymptomcheck.dto;
 
 import lombok.Data;
 import java.time.LocalDateTime;
