@@ -12,8 +12,6 @@ spring:
           uri: http://syncclinic-identity:8081
           predicates:
             - Path=/auth/**
-          filters:
-            - AuthenticationFilter
 
         # Route for the Patient Management Service
         - id: patient-service
