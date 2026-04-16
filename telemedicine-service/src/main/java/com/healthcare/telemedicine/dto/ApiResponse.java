@@ -1,4 +1,4 @@
-package com.healthcare.telemedicine.dto.response;
+package com.healthcare.telemedicine.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

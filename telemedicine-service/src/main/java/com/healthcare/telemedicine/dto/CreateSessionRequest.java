@@ -1,4 +1,4 @@
-package com.healthcare.telemedicine.dto.request;
+package com.healthcare.telemedicine.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateSessionRequest {
 
-	private String appointmentId;
-	private String patientId;
-	private String patientName;
-	private String doctorId;
-	private String doctorName;
+    private String appointmentId;
+    private String patientId;
+    private String patientName;
+    private String doctorId;
+    private String doctorName;
 
 }

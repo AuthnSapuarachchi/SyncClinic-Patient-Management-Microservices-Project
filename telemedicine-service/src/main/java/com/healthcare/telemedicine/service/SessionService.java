@@ -2,7 +2,7 @@ package com.healthcare.telemedicine.service;
 
 import com.healthcare.telemedicine.dto.events.AppointmentConfirmedEvent;
 import com.healthcare.telemedicine.dto.events.ConsultationCompletedEvent;
-import com.healthcare.telemedicine.dto.response.SessionResponse;
+import com.healthcare.telemedicine.dto.SessionResponse;
 import com.healthcare.telemedicine.model.VideoSession;
 import com.healthcare.telemedicine.publisher.TelemedicinePublisher;
 import com.healthcare.telemedicine.repository.VideoSessionRepository;

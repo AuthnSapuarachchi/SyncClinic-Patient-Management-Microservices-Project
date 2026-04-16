@@ -1,8 +1,8 @@
 package com.healthcare.telemedicine.controller;
 
-import com.healthcare.telemedicine.dto.request.CreateSessionRequest;
-import com.healthcare.telemedicine.dto.response.ApiResponse;
-import com.healthcare.telemedicine.dto.response.SessionResponse;
+import com.healthcare.telemedicine.dto.CreateSessionRequest;
+import com.healthcare.telemedicine.dto.ApiResponse;
+import com.healthcare.telemedicine.dto.SessionResponse;
 import com.healthcare.telemedicine.service.SessionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
