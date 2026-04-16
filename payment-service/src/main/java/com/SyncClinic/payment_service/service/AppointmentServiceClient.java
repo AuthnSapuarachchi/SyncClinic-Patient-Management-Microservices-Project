@@ -72,6 +72,7 @@ public class AppointmentServiceClient {
             AppointmentDetails fallback = new AppointmentDetails();
             fallback.setId(appointmentId);
             fallback.setPatientId("test-patient-id");
+            fallback.setPatientEmail("test-patient@syncclinic.local");
             fallback.setStatus("COMPLETED");
             fallback.setConsultationFee(new java.math.BigDecimal("1500.00"));
             fallback.setDoctorName("Dr. Unknown");

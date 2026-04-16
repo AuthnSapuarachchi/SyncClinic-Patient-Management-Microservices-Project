@@ -10,6 +10,7 @@ public class AppointmentDetails {
 
     private String id;
     private String patientId;
+    private String patientEmail;
     private String doctorId;
     private String doctorName;
     private String status;           // PENDING | CONFIRMED | COMPLETED | CANCELLED
@@ -21,6 +22,9 @@ public class AppointmentDetails {
 
     public String getPatientId() { return patientId; }
     public void setPatientId(String patientId) { this.patientId = patientId; }
+
+    public String getPatientEmail() { return patientEmail; }
+    public void setPatientEmail(String patientEmail) { this.patientEmail = patientEmail; }
 
     public String getDoctorId() { return doctorId; }
     public void setDoctorId(String doctorId) { this.doctorId = doctorId; }

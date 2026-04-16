@@ -64,7 +64,9 @@ public class PaymentService {
         // Step 1 — Verify appointment is COMPLETED before allowing payment
         AppointmentDetails appointment = appointmentClient.getAndVerifyAppointment(request.getAppointmentId());
         String patientId = appointment.getPatientId();
-        String patientEmail = "unknown@syncclinic.local";
+        String patientEmail = appointment.getPatientEmail() != null && !appointment.getPatientEmail().isBlank()
+                ? appointment.getPatientEmail()
+                : "unknown@syncclinic.local";
 
         if (patientId == null || patientId.isBlank()) {
             throw new PaymentException("Unable to identify patient for payment request");
@@ -219,8 +221,15 @@ public class PaymentService {
 
     // --- Patient endpoints ---
 
-    public List<PaymentResponse> getMyPayments() {
-        return paymentRepository.findAll()
+    public List<PaymentResponse> getMyPayments(String patientId) {
+        if (patientId == null || patientId.isBlank()) {
+            return paymentRepository.findAll()
+                    .stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
+        }
+
+        return paymentRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

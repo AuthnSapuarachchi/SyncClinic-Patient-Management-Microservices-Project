@@ -73,12 +73,13 @@ public class PaymentController {
     }
 
     /**
-     * GET /api/payments/my
-     * Patient views their own payment history.
+     * GET /api/payments/my?patientId=...
+     * Returns payments for a given patient, or all if patientId is omitted.
      */
     @GetMapping("/my")
-    public ResponseEntity<List<PaymentResponse>> getMyPayments() {
-        return ResponseEntity.ok(paymentService.getMyPayments());
+    public ResponseEntity<List<PaymentResponse>> getMyPayments(
+            @RequestParam(required = false) String patientId) {
+        return ResponseEntity.ok(paymentService.getMyPayments(patientId));
     }
 
     /**
