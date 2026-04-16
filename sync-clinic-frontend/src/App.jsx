@@ -4,7 +4,15 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthScreen from './pages/AuthScreen'
 import LandingPage from './pages/LandingPage'
 import PatientDashboard from './pages/PatientDashboard'
+<<<<<<< HEAD
+import PaymentInitiation from './pages/PaymentInitiation'
+import PaymentCheckout from './pages/PaymentCheckout'
+import PaymentSuccess from './pages/PaymentSuccess'
+import PaymentFailed from './pages/PaymentFailed'
+import PaymentHistory from './pages/PaymentHistory'
+=======
 import PatientMainDashboard from './pages/PatientMainDashboard'
+>>>>>>> main
 // import DoctorDashboard from './pages/DoctorDashboard'
 // import AdminDashboard from './pages/AdminDashboard'
 
@@ -109,6 +117,29 @@ function App() {
         path="/patient/profile"
         element={userRole === 'ROLE_PATIENT' ? <PatientDashboard /> : <Navigate to="/" replace />}
       />
+      
+      {/* Payment Routes */}
+      <Route
+        path="/payment-initiation/:appointmentId"
+        element={userRole === 'ROLE_PATIENT' ? <PaymentInitiation /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/payment-checkout/:appointmentId"
+        element={userRole === 'ROLE_PATIENT' ? <PaymentCheckout /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/payment-success/:appointmentId"
+        element={userRole === 'ROLE_PATIENT' ? <PaymentSuccess /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/payment-failed/:appointmentId"
+        element={userRole === 'ROLE_PATIENT' ? <PaymentFailed /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/payment-history"
+        element={userRole === 'ROLE_PATIENT' ? <PaymentHistory /> : <Navigate to="/" replace />}
+      />
+      
       <Route path="*" element={<Navigate to="/patientDashboard" replace />} />
     </Routes>
   )

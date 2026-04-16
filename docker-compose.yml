@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> main
 services:
   # PostgreSQL Database
   postgres-db:
@@ -20,7 +25,27 @@ services:
     networks:
       - healthcare-network
 
-  # RabbitMQ Message Broker
+  # PostgreSQL Database (for payment service)
+  postgres-payment-db:
+    image: postgres:15-alpine
+    container_name: syncclinic-postgres-payment
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rootpassword123
+      POSTGRES_DB: syncclinic_payment
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-payment-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - healthcare-network
+
   rabbitmq:
     image: rabbitmq:3.12-management-alpine
     container_name: syncclinic-rabbitmq
@@ -41,7 +66,6 @@ services:
     networks:
       - healthcare-network
 
-  # MongoDB Database
   mongodb:
     image: mongo:7.0
     container_name: syncclinic-mongodb
@@ -61,6 +85,8 @@ services:
     networks:
       - healthcare-network
 
+<<<<<<< HEAD
+=======
   # AI Symptoms Service
   ai-symptoms-service:
     build:
@@ -87,6 +113,7 @@ services:
       - healthcare-network
 
   # Kafka Message Broker (existing)
+>>>>>>> main
   kafka:
     image: confluentinc/confluent-local:7.6.0
     container_name: syncclinic_broker
@@ -103,6 +130,59 @@ services:
     networks:
       - healthcare-network
 
+<<<<<<< HEAD
+  telemedicine-service:
+    build:
+      context: ./telemedicine-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-telemedicine
+    ports:
+      - "8083:8083"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      JITSI_BASE_URL: https://meet.jit.si
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - healthcare-network
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-notification
+    ports:
+      - "8085:8085"
+    environment:
+      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/notification_db}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: ${MAIL_USERNAME:-your-email@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-your-app-password}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-your-account-sid}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-your-auth-token}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-+1234567890}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - healthcare-network
+=======
 #  # Telemedicine Service
 #  telemedicine-service:
 #    build:
@@ -156,14 +236,36 @@ services:
 #    restart: unless-stopped
 #    networks:
 #      - healthcare-network
+>>>>>>> main
+
+  #FIXED: Payment Service
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-payment
+    ports:
+      - "8084:8084"
+    
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payment-db:5432/syncclinic_payment
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: rootpassword123
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+    depends_on:
+      - postgres-payment-db
+      - kafka
+    restart: unless-stopped
+    networks:
+      - healthcare-network
+
+volumes:
+  postgres-data:
+  postgres-payment-data:
+  rabbitmq-data:
+  mongodb-data:
 
 networks:
   healthcare-network:
     driver: bridge
-
-
-
-volumes:
-  postgres-data:
-  rabbitmq-data:
-  mongodb-data:
