@@ -153,8 +153,7 @@ services:
     container_name: syncclinic-payment
     ports:
       - "8084:8084"
-    env_file:
-      - ./payment-service/.env
+    
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payment-db:5432/syncclinic_payment
       SPRING_DATASOURCE_USERNAME: postgres
