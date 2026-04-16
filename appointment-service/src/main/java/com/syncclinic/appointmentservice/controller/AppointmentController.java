@@ -2,6 +2,7 @@ package com.syncclinic.appointmentservice.controller;
 
 import com.syncclinic.appointmentservice.model.Appointment;
 import com.syncclinic.appointmentservice.model.AppointmentStatus;
+import com.syncclinic.appointmentservice.model.AppointmentStatusHistory;
 import com.syncclinic.appointmentservice.service.AppointmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -51,5 +52,44 @@ public class AppointmentController {
             @RequestParam AppointmentStatus status
     ) {
         return appointmentService.updateAppointmentStatus(appointmentId, status);
+    }
+
+    // Cancel an appointment
+    @PutMapping("/{appointmentId}/cancel")
+    public Appointment cancelAppointment(@PathVariable Long appointmentId) {
+        return appointmentService.cancelAppointment(appointmentId);
+    }
+
+    // Reschedule an appointment
+    @PutMapping("/{appointmentId}/reschedule")
+    public Appointment rescheduleAppointment(
+            @PathVariable Long appointmentId,
+            @RequestBody Appointment newAppointmentDetails
+    ) {
+        return appointmentService.rescheduleAppointment(appointmentId, newAppointmentDetails);
+    }
+
+    // Get all appointment status history
+    @GetMapping("/history")
+    public List<AppointmentStatusHistory> getAllStatusHistory() {
+        return appointmentService.getAllStatusHistory();
+    }
+
+    // Get doctor appointments filtered by status
+    @GetMapping("/doctor/{doctorId}/status")
+    public List<Appointment> getAppointmentsByDoctorAndStatus(
+            @PathVariable Long doctorId,
+            @RequestParam AppointmentStatus status
+    ) {
+        return appointmentService.getAppointmentsByDoctorAndStatus(doctorId, status);
+    }
+
+    // Get patient appointments filtered by status
+    @GetMapping("/patient/{patientId}/status")
+    public List<Appointment> getAppointmentsByPatientAndStatus(
+            @PathVariable Long patientId,
+            @RequestParam AppointmentStatus status
+    ) {
+        return appointmentService.getAppointmentsByPatientAndStatus(patientId, status);
     }
 }

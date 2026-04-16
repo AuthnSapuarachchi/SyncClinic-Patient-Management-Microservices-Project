@@ -2,8 +2,9 @@ import './App.css'
 import { jwtDecode } from 'jwt-decode'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthScreen from './pages/AuthScreen'
+import AppointmentBooking from './pages/AppointmentBooking'
+import DoctorDashboard from './pages/DoctorDashboard'
 import PatientDashboard from './pages/PatientDashboard'
-// import DoctorDashboard from './pages/DoctorDashboard'
 // import AdminDashboard from './pages/AdminDashboard'
 
 const normalizeRole = (role) => {
@@ -51,6 +52,13 @@ const clearSession = () => {
   localStorage.removeItem('user_role')
 }
 
+const getDefaultRouteForRole = (role) => {
+  if (role === 'ROLE_DOCTOR') {
+    return '/doctorDashboard'
+  }
+  return '/patientDashboard'
+}
+
 function App() {
   let token = localStorage.getItem('jwt_token')
   const savedRole = localStorage.getItem('user_role')
@@ -95,12 +103,26 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/patientDashboard" replace />} />
+      <Route path="/" element={<Navigate to={getDefaultRouteForRole(userRole)} replace />} />
       <Route
         path="/patientDashboard"
         element={userRole === 'ROLE_PATIENT' ? <PatientDashboard /> : <Navigate to="/" replace />}
       />
-      <Route path="*" element={<Navigate to="/patientDashboard" replace />} />
+      <Route
+        path="/doctorDashboard"
+        element={userRole === 'ROLE_DOCTOR' ? <DoctorDashboard /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/appointments"
+        element={
+          userRole === 'ROLE_PATIENT' || userRole === 'ROLE_DOCTOR' ? (
+            <AppointmentBooking />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+      <Route path="*" element={<Navigate to={getDefaultRouteForRole(userRole)} replace />} />
     </Routes>
   )
 }
