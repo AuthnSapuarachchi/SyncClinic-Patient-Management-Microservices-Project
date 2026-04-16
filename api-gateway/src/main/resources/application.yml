@@ -45,3 +45,8 @@ spring:
           uri: http://localhost:8085
           predicates:
             - Path=/api/notifications,/api/notifications/**
+
+        - id: medisphere-AIsymptomcheck-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/api/notifications,/api/notifications/**
