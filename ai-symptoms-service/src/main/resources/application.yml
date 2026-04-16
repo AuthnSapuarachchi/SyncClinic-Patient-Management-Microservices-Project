@@ -34,9 +34,12 @@ groq:
   api-url: ${GROQ_API_URL:https://api.groq.com/openai/v1/chat/completions}
   api-key: ${GROQ_API_KEY:}
 
+<<<<<<< HEAD
 jwt:
   secret: ${JWT_SECRET:your_very_secure_and_long_secret_key_for_medisphere_telemedicine_service_2026}
 
+=======
+>>>>>>> c0339660cb37e8c8da4c86061e22bb6f388bfe01
 logging:
   level:
     com:
