@@ -88,12 +88,14 @@ function App() {
   }
 
   if (!token) {
+    const publicRedirectPath = hasSeenLanding ? '/auth' : '/landing'
+
     return (
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/landing" element={<Navigate to="/" replace />} />
-        <Route path="/auth" element={hasSeenLanding ? <AuthScreen /> : <Navigate to="/" replace />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/" element={<Navigate to={publicRedirectPath} replace />} />
+        <Route path="/landing" element={<LandingPage />} />
+        <Route path="/auth" element={hasSeenLanding ? <AuthScreen /> : <Navigate to="/landing" replace />} />
+        <Route path="*" element={<Navigate to={publicRedirectPath} replace />} />
       </Routes>
     )
   }
