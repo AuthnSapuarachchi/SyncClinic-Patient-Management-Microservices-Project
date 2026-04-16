@@ -295,7 +295,7 @@ export default function PatientMainDashboard() {
                         <section className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
                             <h2 className="text-lg font-bold text-cyan-300">Appointments</h2>
                             <div className="mt-4 space-y-3 text-sm">
-                                {appointments.slice(0, 6).map((appointment) => (
+                                {appointments.map((appointment) => (
                                     <div key={appointment.id} className="rounded-xl border border-slate-700 bg-slate-900/70 p-3">
                                         <p className="font-semibold text-slate-100">{doctorNameById[appointment.doctorId] || `Doctor #${appointment.doctorId}`}</p>
                                         <p className="text-slate-300">Doctor ID: {appointment.doctorId}</p>
