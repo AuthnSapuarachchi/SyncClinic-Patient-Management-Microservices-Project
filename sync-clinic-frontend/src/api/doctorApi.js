@@ -5,6 +5,11 @@ export const getDoctors = async () => {
   return response.data
 }
 
+export const getDoctorById = async (doctorId) => {
+  const response = await api.get(`/api/doctors/${doctorId}`)
+  return response.data
+}
+
 export const createDoctor = async (doctorPayload) => {
   const response = await api.post('/api/doctors', doctorPayload)
   return response.data

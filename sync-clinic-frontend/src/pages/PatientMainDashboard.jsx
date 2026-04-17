@@ -414,6 +414,7 @@ export default function PatientMainDashboard() {
                                             </button>
                                             <button
                                                 type="button"
+                                                onClick={() => navigate(`/doctors/${doctor.id}/profile`)}
                                                 className="rounded-lg border border-slate-500 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:bg-slate-700"
                                             >
                                                 View Profile
