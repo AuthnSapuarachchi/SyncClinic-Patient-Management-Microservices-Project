@@ -1,10 +1,9 @@
 package com.SyncClinic.payment_service.dto.events;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
  
 /**
- * Published to Kafka topic "payment-success-events".
+ * Published to RabbitMQ route "payment.success".
  * The notification-service listens to this and sends
  * confirmation SMS/email to patient and doctor.
  */
@@ -16,7 +15,7 @@ public class PaymentSuccessEvent {
     private String patientEmail;
     private String doctorId;
     private String doctorName;
-    private BigDecimal amount;
+    private String amount;
     private String currency;
     private LocalDateTime paidAt;
      private String paymentMethod;
@@ -30,7 +29,7 @@ public class PaymentSuccessEvent {
                                String patientEmail,
                                String doctorId,
                                String doctorName,
-                               BigDecimal amount,
+                               String amount,
                                String currency,
                                LocalDateTime paidAt,
                                String paymentMethod) {
@@ -94,11 +93,11 @@ public class PaymentSuccessEvent {
         this.doctorName = doctorName;
     }
  
-    public BigDecimal getAmount() {
+    public String getAmount() {
         return amount;
     }
  
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
  

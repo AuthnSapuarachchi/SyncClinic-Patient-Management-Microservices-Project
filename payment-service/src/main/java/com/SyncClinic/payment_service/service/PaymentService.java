@@ -179,7 +179,7 @@ public class PaymentService {
             // Notify appointment-service to mark payment as PAID
             appointmentClient.updatePaymentStatus(payment.getAppointmentId(), "PAID");
 
-            // Publish Kafka event → notification-service sends confirmation
+                // Publish RabbitMQ event -> notification-service sends confirmation
             eventPublisher.publishPaymentSuccess(new PaymentSuccessEvent(
                     payment.getId(),
                     payment.getAppointmentId(),
@@ -187,7 +187,7 @@ public class PaymentService {
                     payment.getPatientEmail(),
                     payment.getDoctorId(),
                     payment.getDoctorName(),
-                    payment.getAmount(),
+                    payment.getAmount() != null ? payment.getAmount().toPlainString() : null,
                     payment.getCurrency(),
                     LocalDateTime.now(),
                     "Stripe Card"));
@@ -207,13 +207,15 @@ public class PaymentService {
             payment.setFailureReason(reason);
             paymentRepository.save(payment);
 
-            // Publish Kafka event → notification-service informs patient
+                // Publish RabbitMQ event -> notification-service informs patient
             eventPublisher.publishPaymentFailed(new PaymentFailedEvent(
                     payment.getId(),
                     payment.getAppointmentId(),
                     payment.getPatientId(),
                     payment.getPatientEmail(),
                     payment.getDoctorId(),
+                    payment.getAmount() != null ? payment.getAmount().toPlainString() : null,
+                    payment.getCurrency(),
                     reason,
                     LocalDateTime.now()));
 
