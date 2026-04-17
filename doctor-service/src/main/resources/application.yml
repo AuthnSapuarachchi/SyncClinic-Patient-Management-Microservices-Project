@@ -3,17 +3,17 @@ server:
 
 spring:
   application:
-    name: doctorservice
+    name: doctor-service
 
   config:
     import: "optional:file:.env[.properties]"
 
   datasource:
-    # Note: Using port 5433 as per your original configuration
-    url: ${DB_URL:jdbc:postgresql://localhost:5433/doctor_service_db}
-    # Added 'postgres' and 'password' as defaults to prevent authentication crashes
+    # Safely pointing to the internal Docker DB
+    url: ${DB_URL:jdbc:postgresql://postgres-db:5432/doctor_service_db}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:rootpassword123}
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     show-sql: true
@@ -23,3 +23,22 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# BUG FIX 1: Added Service Registry Connection
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://service-registry:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+# BUG FIX 2: Added JWT Secret for Security Validation
+jwt:
+  secret: ${JWT_SECRET:5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437}
+
+# BUG FIX 3: Added Kafka (In case your Doctor service listens for Appointment events)
+kafka:
+  bootstrap-servers: kafka:9092

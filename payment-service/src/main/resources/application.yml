@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 8086
 
 spring:
   application:
@@ -7,7 +7,7 @@ spring:
 
   datasource:
     # Use postgres-payment-db when running in Docker, localhost:5435 for local dev
-    url: jdbc:postgresql://localhost:5435/syncclinic_payment
+    url: jdbc:postgresql://postgres-db:5432/syncclinic_payment
     username: postgres
     password: rootpassword123
     driver-class-name: org.postgresql.Driver
@@ -51,11 +51,11 @@ stripe:
 # Internal service URLs (for appointment status verification)
 appointment:
   service:
-    url: ${APPOINTMENT_SERVICE_URL:http://localhost:8082}
+    url: ${APPOINTMENT_SERVICE_URL:http://syncclinic-appointment:8082}
 
 telemedicine:
   service:
-    url: ${TELEMEDICINE_SERVICE_URL:http://localhost:8083}
+    url: ${TELEMEDICINE_SERVICE_URL:http://syncclinic-telemedicine:8083}
 
 kafka:
   topic:
