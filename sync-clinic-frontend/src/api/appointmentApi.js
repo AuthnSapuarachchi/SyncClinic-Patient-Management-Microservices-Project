@@ -15,8 +15,23 @@ export const getAppointmentsByDoctor = async (doctorId) => {
   return response.data
 }
 
+export const getAppointmentsByDoctorAndStatus = async (doctorId, status) => {
+  const response = await api.get(`/api/appointments/doctor/${doctorId}/status`, { params: { status } })
+  return response.data
+}
+
+export const getAppointmentStatusHistory = async () => {
+  const response = await api.get('/api/appointments/history')
+  return response.data
+}
+
 export const getAppointmentsByPatientAndStatus = async (patientId, status) => {
   const response = await api.get(`/api/appointments/patient/${patientId}/status`, { params: { status } })
+  return response.data
+}
+
+export const updateAppointmentStatus = async (appointmentId, status) => {
+  const response = await api.put(`/api/appointments/${appointmentId}/status`, null, { params: { status } })
   return response.data
 }
 

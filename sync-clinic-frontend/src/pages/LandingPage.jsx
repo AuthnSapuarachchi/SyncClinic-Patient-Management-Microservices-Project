@@ -8,6 +8,11 @@ export default function LandingPage() {
         navigate('/auth');
     };
 
+    const handleDoctorPortal = () => {
+        localStorage.setItem('has_seen_landing', 'true');
+        navigate('/doctor-auth');
+    };
+
     return (
         <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-slate-950 via-slate-900 to-cyan-950 px-4 py-8 text-slate-100 sm:px-6 lg:px-8">
             <div aria-hidden="true" className="pointer-events-none absolute -left-24 top-8 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
@@ -31,13 +36,22 @@ export default function LandingPage() {
                         <div className="rounded-xl border border-white/15 bg-white/10 px-4 py-3">Built for patients, doctors, and admins with secure access.</div>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={handleGetStarted}
-                        className="mt-7 rounded-xl bg-linear-to-r from-cyan-600 to-teal-600 px-6 py-3 text-sm font-bold text-white transition hover:from-cyan-700 hover:to-teal-700"
-                    >
-                        Get Started
-                    </button>
+                    <div className="mt-7 flex flex-wrap gap-3">
+                        <button
+                            type="button"
+                            onClick={handleGetStarted}
+                            className="rounded-xl bg-linear-to-r from-cyan-600 to-teal-600 px-6 py-3 text-sm font-bold text-white transition hover:from-cyan-700 hover:to-teal-700"
+                        >
+                            Patient Login / Register
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleDoctorPortal}
+                            className="rounded-xl border border-cyan-300/40 bg-white/10 px-6 py-3 text-sm font-bold text-cyan-100 transition hover:bg-white/20"
+                        >
+                            Doctor Login / Register
+                        </button>
+                    </div>
                 </section>
 
                 <section className="rounded-3xl border border-cyan-300/20 bg-slate-900/70 p-7 shadow-2xl sm:p-10">
