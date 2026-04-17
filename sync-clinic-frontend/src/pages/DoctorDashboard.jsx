@@ -105,10 +105,18 @@ export default function DoctorDashboard() {
       return
     }
 
+    const patientId = Number(prescriptionForm.patientId)
+    const appointmentId = Number(prescriptionForm.appointmentId)
+
+    if (patientId <= 0 || appointmentId <= 0) {
+      setStatusMessage({ text: 'Enter valid patient and appointment IDs before saving', isError: true })
+      return
+    }
+
     try {
       await createPrescription(selectedDoctorId, {
-        patientId: Number(prescriptionForm.patientId),
-        appointmentId: Number(prescriptionForm.appointmentId),
+        patientId,
+        appointmentId,
         diagnosis: prescriptionForm.diagnosis,
         medicines: prescriptionForm.medicines,
         notes: prescriptionForm.notes,
