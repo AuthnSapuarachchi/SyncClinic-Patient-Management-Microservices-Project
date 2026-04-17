@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
+import StatusToast from '../components/StatusToast';
 
 export default function DoctorRegister() {
     const [email, setEmail] = useState('');
@@ -141,18 +142,9 @@ export default function DoctorRegister() {
                             Login from the main page
                         </Link>
                     </p>
-
-                    {message && (
-                        <div
-                            className={`mt-4 rounded-xl border px-4 py-3 text-sm ${isError ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}
-                            role="status"
-                            aria-live="polite"
-                        >
-                            {message}
-                        </div>
-                    )}
                 </section>
             </section>
+            <StatusToast message={message} isError={isError} onClose={() => setMessage('')} />
         </div>
     );
 }
