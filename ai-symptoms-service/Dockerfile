@@ -1,18 +1,26 @@
-# Build stage
-FROM eclipse-temurin:17-alpine AS build
-WORKDIR /workspace
-
-COPY .mvn .mvn
-COPY mvnw pom.xml ./
-COPY src ./src
-
-RUN chmod +x mvnw && ./mvnw -B package -DskipTests
-
-# Runtime stage
-FROM eclipse-temurin:17-jre-alpine
+# ==========================================
+# STAGE 1: The Builder (Compiles the code)
+# ==========================================
+# We use a heavy image that has Maven and the JDK installed
+FROM maven:3.9.5-eclipse-temurin-21 AS build
 WORKDIR /app
 
-COPY --from=build /workspace/target/medisphere-AIsymptomcheck-service-0.0.1-SNAPSHOT.jar /app/app.jar
+# Copy the project files INTO the container
+COPY pom.xml .
+COPY src ./src
 
-EXPOSE 8088
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Let Docker run Maven to compile the code (No laptop required!)
+RUN mvn clean package -DskipTests
+
+# ==========================================
+# STAGE 2: The Runner (Production Image)
+# ==========================================
+# We use a tiny, lightweight JRE (Java Runtime Environment) image
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+# The Magic: Copy ONLY the compiled .jar file from the "build" stage above
+COPY --from=build /app/target/*.jar app.jar
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]

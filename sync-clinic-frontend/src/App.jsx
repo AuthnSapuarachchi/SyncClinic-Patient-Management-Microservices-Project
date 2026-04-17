@@ -4,15 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthScreen from './pages/AuthScreen'
 import LandingPage from './pages/LandingPage'
 import PatientDashboard from './pages/PatientDashboard'
-<<<<<<< HEAD
-import PaymentInitiation from './pages/PaymentInitiation'
-import PaymentCheckout from './pages/PaymentCheckout'
-import PaymentSuccess from './pages/PaymentSuccess'
-import PaymentFailed from './pages/PaymentFailed'
-import PaymentHistory from './pages/PaymentHistory'
-=======
 import PatientMainDashboard from './pages/PatientMainDashboard'
->>>>>>> main
 // import DoctorDashboard from './pages/DoctorDashboard'
 // import AdminDashboard from './pages/AdminDashboard'
 
