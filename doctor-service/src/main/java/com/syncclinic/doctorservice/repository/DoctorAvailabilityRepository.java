@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DoctorAvailabilityRepository extends JpaRepository<DoctorAvailability, Long> {
 
+    void deleteByDoctorId(Long doctorId);
 }

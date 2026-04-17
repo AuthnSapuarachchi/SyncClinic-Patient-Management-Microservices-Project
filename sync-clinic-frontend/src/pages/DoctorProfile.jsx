@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createDoctor, getDoctors, updateDoctor } from '../api/doctorApi'
+import StatusToast from '../components/StatusToast'
 
 const emptyProfile = {
   fullName: '',
@@ -149,17 +150,11 @@ export default function DoctorProfile() {
           </div>
         </div>
 
-        {statusMessage.text && (
-          <div
-            className={`mb-5 rounded-xl border px-4 py-3 text-sm ${
-              statusMessage.isError
-                ? 'border-rose-400/40 bg-rose-500/10 text-rose-200'
-                : 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'
-            }`}
-          >
-            {statusMessage.text}
-          </div>
-        )}
+        <StatusToast
+          message={statusMessage.text}
+          isError={statusMessage.isError}
+          onClose={() => setStatusMessage({ text: '', isError: false })}
+        />
 
         <div className="grid gap-6 lg:grid-cols-3">
           <aside className="rounded-2xl border border-cyan-900/70 bg-slate-900/70 p-5">
@@ -180,74 +175,49 @@ export default function DoctorProfile() {
             <h2 className="text-xl font-bold text-cyan-300">{selectedDoctorId ? 'Update Profile' : 'Create Profile'}</h2>
             <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
               <div className="grid gap-4 sm:grid-cols-2">
-                <input
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                  name="fullName"
-                  placeholder="Full Name"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  required
-                />
-                <input
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                  name="email"
-                  placeholder="Email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-                <input
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                  name="phone"
-                  placeholder="Phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-                <input
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                  name="specialty"
-                  placeholder="Specialty"
-                  value={formData.specialty}
-                  onChange={handleChange}
-                />
-                <input
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                  name="hospital"
-                  placeholder="Hospital"
-                  value={formData.hospital}
-                  onChange={handleChange}
-                />
-                <input
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                  name="qualification"
-                  placeholder="Qualification"
-                  value={formData.qualification}
-                  onChange={handleChange}
-                />
-                <input
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                  name="experienceYears"
-                  placeholder="Experience Years"
-                  type="number"
-                  min="0"
-                  value={formData.experienceYears}
-                  onChange={handleChange}
-                />
-                <input
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5 text-slate-400"
-                  value={`Status: ${formData.status || 'PENDING'}`}
-                  readOnly
-                />
+                {[
+                  ['fullName', 'Full Name', 'text', 'Dr. Asha Perera'],
+                  ['email', 'Email', 'email', 'doctor@syncclinic.com'],
+                  ['phone', 'Phone', 'text', '+94...'],
+                  ['specialty', 'Specialty', 'text', 'Cardiologist'],
+                  ['hospital', 'Hospital', 'text', 'SyncClinic General'],
+                  ['qualification', 'Qualification', 'text', 'MBBS, MD'],
+                  ['experienceYears', 'Experience Years', 'number', '8'],
+                ].map(([name, label, type, placeholder]) => (
+                  <label key={name} className="text-sm font-semibold text-slate-200">
+                    {label}
+                    <input
+                      className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                      name={name}
+                      placeholder={placeholder}
+                      type={type}
+                      min={type === 'number' ? '0' : undefined}
+                      value={formData[name]}
+                      onChange={handleChange}
+                      required={name === 'fullName' || name === 'email'}
+                    />
+                  </label>
+                ))}
+                <label className="text-sm font-semibold text-slate-200">
+                  Status
+                  <input
+                    className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5 text-slate-400"
+                    value={formData.status || 'PENDING'}
+                    readOnly
+                  />
+                </label>
               </div>
-              <textarea
-                className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                name="bio"
-                rows="4"
-                placeholder="Doctor bio"
-                value={formData.bio}
-                onChange={handleChange}
-              />
+              <label className="block text-sm font-semibold text-slate-200">
+                Doctor Bio
+                <textarea
+                  className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                  name="bio"
+                  rows="4"
+                  placeholder="Short professional summary"
+                  value={formData.bio}
+                  onChange={handleChange}
+                />
+              </label>
               <button
                 type="submit"
                 disabled={loading}

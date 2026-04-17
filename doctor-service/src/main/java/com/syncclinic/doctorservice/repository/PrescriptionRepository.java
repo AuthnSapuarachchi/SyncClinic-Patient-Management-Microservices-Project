@@ -12,4 +12,6 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
 
     // Get all prescriptions for a specific patient
     List<Prescription> findByPatientId(Long patientId);
+
+    void deleteByDoctorId(Long doctorId);
 }

@@ -172,10 +172,10 @@ function App() {
       <Route
         path="/doctor-management"
         element={
-          userRole === 'ROLE_ADMIN' || userRole === 'ROLE_DOCTOR' ? <DoctorManagement /> :
+          userRole === 'ROLE_ADMIN' ? <DoctorManagement /> :
           <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
             <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
-            <p className="mt-2 text-slate-300">You must be an Admin or Doctor to view this page.</p>
+            <p className="mt-2 text-slate-300">You must be an Admin to view this page.</p>
             <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
           </div>
         }

@@ -11,6 +11,7 @@ import {
   updateAppointmentStatus,
 } from '../api/appointmentApi'
 import { getDoctors } from '../api/doctorApi'
+import StatusToast from '../components/StatusToast'
 
 const APPOINTMENT_STATUS = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', 'COMPLETED']
 
@@ -216,17 +217,11 @@ export default function AppointmentBooking() {
           </button>
         </div>
 
-        {statusMessage.text && (
-          <div
-            className={`mb-5 rounded-xl border px-4 py-3 text-sm ${
-              statusMessage.isError
-                ? 'border-rose-400/40 bg-rose-500/10 text-rose-200'
-                : 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'
-            }`}
-          >
-            {statusMessage.text}
-          </div>
-        )}
+        <StatusToast
+          message={statusMessage.text}
+          isError={statusMessage.isError}
+          onClose={() => setStatusMessage({ text: '', isError: false })}
+        />
 
         <div className="grid gap-6 lg:grid-cols-3">
           {isDoctor ? (
@@ -247,45 +242,62 @@ export default function AppointmentBooking() {
               <h2 className="text-xl font-bold text-cyan-300">Book New Appointment</h2>
               <form className="mt-4 space-y-4" onSubmit={handleBookAppointment}>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <input
-                    className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                    type="number"
-                    placeholder="Patient ID"
-                    value={patientId}
-                    onChange={(event) => setPatientId(event.target.value)}
-                    required
-                  />
-                  <input
-                    className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                    type="number"
-                    placeholder="Doctor ID"
-                    value={bookingForm.doctorId}
-                    onChange={(event) => setBookingForm({ ...bookingForm, doctorId: event.target.value })}
-                    required
-                  />
-                  <input
-                    className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                    type="date"
-                    value={bookingForm.appointmentDate}
-                    onChange={(event) => setBookingForm({ ...bookingForm, appointmentDate: event.target.value })}
-                    required
-                  />
-                  <input
-                    className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                    type="time"
-                    value={bookingForm.appointmentTime}
-                    onChange={(event) => setBookingForm({ ...bookingForm, appointmentTime: event.target.value })}
-                    required
-                  />
+                  <label className="text-sm font-semibold text-slate-200">
+                    Patient ID
+                    <input
+                      className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                      type="number"
+                      min="1"
+                      placeholder="1"
+                      value={patientId}
+                      onChange={(event) => setPatientId(event.target.value)}
+                      required
+                    />
+                  </label>
+                  <label className="text-sm font-semibold text-slate-200">
+                    Doctor ID
+                    <input
+                      className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                      type="number"
+                      min="1"
+                      placeholder="101"
+                      value={bookingForm.doctorId}
+                      onChange={(event) => setBookingForm({ ...bookingForm, doctorId: event.target.value })}
+                      required
+                    />
+                  </label>
+                  <label className="text-sm font-semibold text-slate-200">
+                    Appointment Date
+                    <input
+                      className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                      type="date"
+                      value={bookingForm.appointmentDate}
+                      onChange={(event) => setBookingForm({ ...bookingForm, appointmentDate: event.target.value })}
+                      required
+                    />
+                  </label>
+                  <label className="text-sm font-semibold text-slate-200">
+                    Appointment Time
+                    <input
+                      className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                      type="time"
+                      value={bookingForm.appointmentTime}
+                      onChange={(event) => setBookingForm({ ...bookingForm, appointmentTime: event.target.value })}
+                      required
+                    />
+                  </label>
                 </div>
-                <textarea
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                  rows="3"
-                  placeholder="Reason for appointment"
-                  value={bookingForm.reason}
-                  onChange={(event) => setBookingForm({ ...bookingForm, reason: event.target.value })}
-                  required
-                />
+                <label className="block text-sm font-semibold text-slate-200">
+                  Reason for Appointment
+                  <textarea
+                    className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                    rows="3"
+                    placeholder="Briefly describe the reason"
+                    value={bookingForm.reason}
+                    onChange={(event) => setBookingForm({ ...bookingForm, reason: event.target.value })}
+                    required
+                  />
+                </label>
                 <button
                   type="submit"
                   className="rounded-xl bg-linear-to-r from-cyan-600 to-teal-600 px-4 py-2.5 text-sm font-bold text-white"
@@ -336,27 +348,33 @@ export default function AppointmentBooking() {
               </button>
             </div>
             {searchMode === 'doctor' ? (
-              <input
-                className="mt-3 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                type="number"
-                placeholder="Doctor ID"
-                value={doctorSearchId}
-                onChange={(event) => setDoctorSearchId(event.target.value)}
-                readOnly={isDoctor}
-              />
+              <label className="mt-3 block text-sm font-semibold text-slate-200">
+                Doctor ID
+                <input
+                  className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                  type="number"
+                  placeholder="Doctor ID"
+                  value={doctorSearchId}
+                  onChange={(event) => setDoctorSearchId(event.target.value)}
+                  readOnly={isDoctor}
+                />
+              </label>
             ) : null}
-            <select
-              className="mt-3 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
-            >
-              <option value="">All statuses</option>
-              {APPOINTMENT_STATUS.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
+            <label className="mt-3 block text-sm font-semibold text-slate-200">
+              Status Filter
+              <select
+                className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+              >
+                <option value="">All statuses</option>
+                {APPOINTMENT_STATUS.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
               onClick={loadAppointments}
