@@ -169,13 +169,6 @@ export default function DoctorDashboard() {
               Appointment Booking
             </button>
             <button
-              onClick={() => navigate('/doctor-management')}
-              type="button"
-              className="rounded-lg border border-slate-500/60 bg-slate-800/70 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:bg-slate-700"
-            >
-              Doctor Management
-            </button>
-            <button
               onClick={handleLogout}
               type="button"
               className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
