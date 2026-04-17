@@ -2,6 +2,7 @@ import './App.css'
 import { jwtDecode } from 'jwt-decode'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthScreen from './pages/AuthScreen'
+import DoctorRegister from './pages/DoctorRegister'
 import LandingPage from './pages/LandingPage'
 import PatientDashboard from './pages/PatientDashboard'
 import PaymentInitiation from './pages/PaymentInitiation'
@@ -12,6 +13,9 @@ import PaymentHistory from './pages/PaymentHistory'
 import PatientMainDashboard from './pages/PatientMainDashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import DoctorDashboard from './pages/DoctorDashboard'
+import DoctorManagement from './pages/DoctorManagement'
+import DoctorProfile from './pages/DoctorProfile'
+import AppointmentBooking from './pages/AppointmentBooking'
 
 const normalizeRole = (role) => {
   if (typeof role !== 'string' || !role.trim()) {
@@ -98,6 +102,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/landing" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={hasSeenLanding ? <AuthScreen /> : <Navigate to="/" replace />} />
+        <Route path="/doctor-register" element={<DoctorRegister />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
@@ -148,6 +153,39 @@ function App() {
           <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
             <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
             <p className="mt-2 text-slate-300">You must be a Doctor to view this page.</p>
+            <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
+          </div>
+        }
+      />
+      <Route
+        path="/doctor/profile"
+        element={
+          userRole === 'ROLE_DOCTOR' ? <DoctorProfile /> :
+          <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
+            <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
+            <p className="mt-2 text-slate-300">You must be a Doctor to manage this profile.</p>
+            <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
+          </div>
+        }
+      />
+      <Route
+        path="/doctor-management"
+        element={
+          userRole === 'ROLE_ADMIN' || userRole === 'ROLE_DOCTOR' ? <DoctorManagement /> :
+          <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
+            <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
+            <p className="mt-2 text-slate-300">You must be an Admin or Doctor to view this page.</p>
+            <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
+          </div>
+        }
+      />
+      <Route
+        path="/appointments"
+        element={
+          userRole === 'ROLE_DOCTOR' || userRole === 'ROLE_PATIENT' ? <AppointmentBooking /> :
+          <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
+            <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
+            <p className="mt-2 text-slate-300">You must be a Doctor or Patient to view appointments.</p>
             <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
           </div>
         }
