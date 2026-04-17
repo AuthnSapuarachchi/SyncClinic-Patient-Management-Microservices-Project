@@ -40,3 +40,8 @@ export const createPrescription = async (doctorId, prescriptionPayload) => {
   const response = await api.post(`/api/prescriptions/doctor/${doctorId}`, prescriptionPayload)
   return response.data
 }
+
+export const getPrescriptionsByDoctor = async (doctorId) => {
+  const response = await api.get(`/api/prescriptions/doctor/${doctorId}`)
+  return response.data
+}

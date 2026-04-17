@@ -10,6 +10,7 @@ import com.syncclinic.appointmentservice.repository.AppointmentStatusHistoryRepo
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 // Service layer for appointment operations
@@ -149,7 +150,7 @@ public class AppointmentService {
                 .appointment(appointment)
                 .oldStatus(oldStatus)
                 .newStatus(newStatus)
-                .changedAt(LocalDateTime.now())
+                .changedAt(LocalDateTime.now(ZoneOffset.UTC))
                 .build();
         statusHistoryRepository.save(history);
     }

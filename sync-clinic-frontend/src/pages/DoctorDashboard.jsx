@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getAppointmentsByDoctor } from '../api/appointmentApi'
 import {
   addDoctorAvailability,
   createPrescription,
@@ -9,14 +10,48 @@ import {
 import StatusToast from '../components/StatusToast'
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
+const APPOINTMENT_STATUSES_TO_HIDE = ['CANCELLED', 'REJECTED', 'COMPLETED']
+
+const padTwoDigits = (value) => String(value).padStart(2, '0')
+
+const getAppointmentDateTime = (appointment) => {
+  const [hours = 0, minutes = 0] = String(appointment?.appointmentTime || '00:00')
+    .split(':')
+    .map((part) => Number(part))
+
+  const dateTime = appointment?.appointmentDate
+    ? new Date(`${appointment.appointmentDate}T${padTwoDigits(hours)}:${padTwoDigits(minutes)}:00`)
+    : null
+
+  return dateTime && !Number.isNaN(dateTime.getTime()) ? dateTime : null
+}
+
+const formatAppointmentDateTime = (appointment) => {
+  const dateTime = getAppointmentDateTime(appointment)
+
+  if (!dateTime) {
+    return 'Time not available'
+  }
+
+  return dateTime.toLocaleString(undefined, {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
 
 export default function DoctorDashboard() {
   const navigate = useNavigate()
   const userEmail = localStorage.getItem('user_email') || ''
   const [doctors, setDoctors] = useState([])
   const [selectedDoctorId, setSelectedDoctorId] = useState('')
+  const [appointments, setAppointments] = useState([])
   const [availabilityList, setAvailabilityList] = useState([])
   const [loadingDoctors, setLoadingDoctors] = useState(false)
+  const [loadingAppointments, setLoadingAppointments] = useState(false)
   const [statusMessage, setStatusMessage] = useState({ text: '', isError: false })
 
   const [availabilityForm, setAvailabilityForm] = useState({
@@ -37,6 +72,14 @@ export default function DoctorDashboard() {
     () => doctors.find((doctor) => String(doctor.id) === String(selectedDoctorId)) || null,
     [doctors, selectedDoctorId],
   )
+  const nextAppointment = useMemo(() => {
+    const now = new Date()
+    return appointments
+      .filter((appointment) => !APPOINTMENT_STATUSES_TO_HIDE.includes(appointment.status))
+      .map((appointment) => ({ appointment, dateTime: getAppointmentDateTime(appointment) }))
+      .filter(({ dateTime }) => dateTime && dateTime >= now)
+      .sort((first, second) => first.dateTime - second.dateTime)[0]?.appointment || null
+  }, [appointments])
 
   const loadDoctors = useCallback(async () => {
     setLoadingDoctors(true)
@@ -72,12 +115,36 @@ export default function DoctorDashboard() {
     }
   }
 
+  const loadAppointments = async (doctorId = selectedDoctorId, showSuccessMessage = false) => {
+    if (!doctorId) {
+      setAppointments([])
+      return
+    }
+
+    setLoadingAppointments(true)
+    try {
+      const data = await getAppointmentsByDoctor(doctorId)
+      setAppointments(Array.isArray(data) ? data : [])
+      if (showSuccessMessage) {
+        setStatusMessage({ text: 'Appointments refreshed', isError: false })
+      }
+    } catch (error) {
+      setStatusMessage({
+        text: error?.response?.data?.message || 'Failed to load appointments',
+        isError: true,
+      })
+    } finally {
+      setLoadingAppointments(false)
+    }
+  }
+
   useEffect(() => {
     loadDoctors()
   }, [loadDoctors])
 
   useEffect(() => {
     loadAvailability(selectedDoctorId)
+    loadAppointments(selectedDoctorId)
   }, [selectedDoctorId])
 
   const handleAvailabilitySubmit = async (event) => {
@@ -170,6 +237,13 @@ export default function DoctorDashboard() {
               Appointment Booking
             </button>
             <button
+              onClick={() => navigate('/doctor/prescriptions')}
+              type="button"
+              className="rounded-lg border border-emerald-400/60 bg-emerald-500/15 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-500/25"
+            >
+              My Prescriptions
+            </button>
+            <button
               onClick={handleLogout}
               type="button"
               className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
@@ -200,15 +274,58 @@ export default function DoctorDashboard() {
           </div>
           <div className="rounded-xl border border-sky-400/20 bg-sky-500/10 p-4">
             <p className="text-xs uppercase tracking-wide text-sky-200">Appointments</p>
-            <button
-              type="button"
-              onClick={() => navigate('/appointments')}
-              className="mt-2 rounded-lg bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:bg-slate-700"
-            >
-              Open Workspace
-            </button>
+            <p className="mt-1 text-2xl font-bold">{appointments.length}</p>
           </div>
         </div>
+
+        <section className="mb-6 overflow-hidden rounded-2xl border border-cyan-400/20 bg-linear-to-r from-cyan-500/15 via-slate-900/80 to-teal-500/15 p-5 shadow-xl backdrop-blur">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-cyan-200">Nearest Appointment</p>
+              {loadingAppointments ? (
+                <p className="mt-2 text-sm text-slate-300">Checking your upcoming schedule...</p>
+              ) : nextAppointment ? (
+                <>
+                  <h2 className="mt-1 text-2xl font-extrabold text-white">
+                    Appointment #{nextAppointment.id}
+                  </h2>
+                  <p className="mt-2 text-lg font-semibold text-cyan-100">
+                    {formatAppointmentDateTime(nextAppointment)}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-300">
+                    Patient #{nextAppointment.patientId} • {nextAppointment.status || 'PENDING'}
+                  </p>
+                  <p className="mt-2 max-w-2xl text-sm text-slate-400">
+                    {nextAppointment.reason || 'No appointment reason provided.'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2 className="mt-1 text-2xl font-extrabold text-white">No upcoming appointments</h2>
+                  <p className="mt-2 text-sm text-slate-300">
+                    You are clear from today onward. Refresh anytime to check for newly booked appointments.
+                  </p>
+                </>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => loadAppointments(selectedDoctorId, true)}
+                className="rounded-xl bg-cyan-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-cyan-600"
+              >
+                {loadingAppointments ? 'Refreshing...' : 'Refresh'}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/appointments')}
+                className="rounded-xl border border-cyan-500/50 bg-cyan-900/30 px-4 py-2.5 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-800/40"
+              >
+                Open Appointment Workspace
+              </button>
+            </div>
+          </div>
+        </section>
 
         <div className="grid gap-6 lg:grid-cols-3">
           <aside className="rounded-2xl border border-cyan-900/70 bg-slate-900/70 p-5">
