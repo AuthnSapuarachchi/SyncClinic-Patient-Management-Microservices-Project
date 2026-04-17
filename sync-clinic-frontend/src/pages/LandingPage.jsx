@@ -43,62 +43,49 @@ export default function LandingPage() {
                 </header>
 
                 {/* Hero Section */}
-                <main className="flex-1 flex flex-col items-center justify-center text-center py-16 lg:py-24">
-                    {/* Top Content */}
-                    <div className="z-10 flex flex-col items-center text-center w-full max-w-4xl mx-auto mb-16 px-4">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#0099FF]/30 bg-[#0099FF]/10 text-[#0099FF] text-[11px] font-bold uppercase tracking-widest mb-8 backdrop-blur-md">
-                            <span className="relative flex h-1.5 w-1.5">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0099FF] opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#0099FF]"></span>
-                            </span>
+                <main className="relative flex-1 flex flex-col items-center justify-center w-full min-h-[85vh] py-24 my-6">
+                    {/* Background Image (Full Bleed) */}
+                    <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[100vw] z-0 overflow-hidden">
+                        <img 
+                            src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=2000&auto=format&fit=crop&q=80" 
+                            alt="Healthcare Professional" 
+                            className="w-full h-full object-cover object-center"
+                        />
+                        {/* Modern Dark Gradient Overlay for readability & aesthetics */}
+                        <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-[3px] z-10"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/80 z-10"></div>
+                    </div>
+
+                    {/* Content Overlay */}
+                    <div className="relative z-20 flex flex-col items-center justify-center px-4 w-full max-w-5xl mx-auto text-center mt-10">
+                        {/* Modern Pill Badge */}
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 text-xs font-semibold uppercase tracking-widest mb-8 backdrop-blur-md">
+                            <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(34,211,238,0.8)]"></span>
                             Next-Gen Telehealth
                         </div>
                         
-                        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter mb-8 leading-[1.1]">
-                            <span className="text-white block">Healthcare that revolves</span>
-                            <span className="text-white block mt-1">around <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-[#0099FF]">you.</span></span>
+                        {/* Huge Modern Typography */}
+                        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold text-white leading-[1.15] tracking-tight mb-8 text-balance">
+                            Healthcare that revolves <br className="hidden md:block"/>
+                            around your entire well-being.
                         </h1>
                         
-                        <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-                            Book appointments, manage health records, attend secure video consultations, and receive digital prescriptions—all in one beautifully simple platform.
+                        <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-12 leading-relaxed font-light">
+                            Book appointments, manage health records, attend secure video consultations, and receive digital prescriptions—all in one seamlessly integrated platform.
                         </p>
                         
+                        {/* Glowing Modern Call-To-Action */}
                         <div className="flex justify-center w-full">
                             <button
                                 type="button"
                                 onClick={handleGetStarted}
-                                className="group relative px-8 py-3.5 rounded-full bg-white text-slate-950 font-bold text-[15px] hover:bg-slate-100 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_40px_rgba(0,153,255,0.25)] ring-4 ring-white/10"
+                                className="group relative px-8 py-4 rounded-full bg-white text-slate-950 font-bold text-lg hover:bg-slate-50 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_50px_rgba(0,153,255,0.4)] ring-4 ring-white/10"
                             >
                                 Get Started Now
-                                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                 </svg>
                             </button>
-                        </div>
-                    </div>
-
-                    {/* Landscape Hero Image */}
-                    <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6">
-                        <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-cyan-500/20 group backdrop-blur-sm bg-white/5 p-2">
-                            <div className="relative rounded-2xl overflow-hidden bg-slate-800">
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/10 to-transparent z-10 pointer-events-none"></div>
-                                <img 
-                                    src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=2070&auto=format&fit=crop" 
-                                    alt="SyncClinic Platform Preview" 
-                                    className="w-full h-auto aspect-video md:aspect-[21/9] object-cover transform group-hover:scale-[1.02] transition-transform duration-700"
-                                />
-                                <div className="absolute bottom-6 left-6 z-20 flex items-center gap-4 bg-slate-900/90 backdrop-blur-xl rounded-2xl p-4 border border-white/10 shadow-xl">
-                                    <div className="w-12 h-12 rounded-full bg-cyan-900/50 flex items-center justify-center shrink-0">
-                                        <svg className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                        </svg>
-                                    </div>
-                                    <div className="text-left hidden sm:block">
-                                        <h4 className="text-white font-semibold flex items-center gap-2">Comprehensive Dashboard</h4>
-                                        <p className="text-slate-300 text-sm">Everything at a glance</p>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </main>
