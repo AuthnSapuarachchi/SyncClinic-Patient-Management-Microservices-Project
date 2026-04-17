@@ -1,45 +1,26 @@
-<<<<<<< HEAD
+version: '3.8'
 
-
-=======
->>>>>>> main
 services:
-  # PostgreSQL Database
+  # ==========================================
+  # 1. DATABASES & BROKERS
+  # ==========================================
   postgres-db:
     image: postgres:15-alpine
     container_name: syncclinic-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: rootpassword123
+      # This creates the first DB automatically
       POSTGRES_DB: syncclinic_auth
     ports:
       - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      # Create an init.sql file next to this docker-compose.yml to create the other DBs!
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d syncclinic_auth"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - healthcare-network
-
-  # PostgreSQL Database (for payment service)
-  postgres-payment-db:
-    image: postgres:15-alpine
-    container_name: syncclinic-postgres-payment
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: rootpassword123
-      POSTGRES_DB: syncclinic_payment
-    ports:
-      - "5434:5432"
-    volumes:
-      - postgres-payment-data:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -85,35 +66,6 @@ services:
     networks:
       - healthcare-network
 
-<<<<<<< HEAD
-=======
-  # AI Symptoms Service
-  ai-symptoms-service:
-    build:
-      context: ./ai-symptoms-service
-      dockerfile: Dockerfile
-    container_name: syncclinic-ai-symptoms
-    ports:
-      - "8089:8088"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/syncclinic_auth
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword123
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - EUREKA_CLIENT_ENABLED=false
-      - JWT_SECRET=your_very_secure_and_long_secret_key_for_medisphere_telemedicine_service_2026
-      - GROQ_API_URL=https://api.groq.com/openai/v1/chat/completions
-      - GROQ_API_KEY=${GROQ_API_KEY:-test-key}
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info
-    depends_on:
-      postgres-db:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - healthcare-network
-
-  # Kafka Message Broker (existing)
->>>>>>> main
   kafka:
     image: confluentinc/confluent-local:7.6.0
     container_name: syncclinic_broker
@@ -124,32 +76,139 @@ services:
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      # FIXED FOR DOCKER: Use the container name so other services can find it
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     networks:
       - healthcare-network
 
-<<<<<<< HEAD
-  telemedicine-service:
+  # ==========================================
+  # 2. MICROSERVICES
+  # ==========================================
+  api-gateway:
     build:
-      context: ./telemedicine-service
+      context: ./api-gateway
       dockerfile: Dockerfile
-    container_name: syncclinic-telemedicine
+    container_name: syncclinic-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - healthcare-network
+
+  service-registry:
+    build:
+      context: ./service-registry
+      dockerfile: Dockerfile
+    container_name: syncclinic-service-registry
+    ports:
+      - "8761:8761"
+    restart: unless-stopped
+    networks:
+      - healthcare-network
+
+  identity-service:
+    build:
+      context: ./identity-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-identity
+    ports:
+      - "8081:8081"
+    environment:
+      # Pointing to the unified database container
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/syncclinic_auth
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: rootpassword123
+      # Pointing to the Kafka container
+      SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS: kafka:9092
+      # Injecting the JWT Secret
+      JWT_SECRET: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
+      # Pointing to the Service Registry container instead of localhost
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+      EUREKA_CLIENT_REGISTERWITHEUREKA: "true"
+      EUREKA_CLIENT_FETCHREGISTRY: "true"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      # Uncomment the next two lines ONLY IF you add the service-registry block above!
+      # service-registry:
+      #   condition: service_started
+    restart: unless-stopped
+    networks:
+      - healthcare-network
+
+  patient-service:
+    build:
+      context: ./patient-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-patient
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/patient_service_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: rootpassword123
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - healthcare-network
+
+  doctor-service:
+    build:
+      context: ./doctor-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-doctor
     ports:
       - "8083:8083"
     environment:
-      MONGODB_URI: ${MONGODB_URI}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: guest
-      JITSI_BASE_URL: https://meet.jit.si
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/doctor_service_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: rootpassword123
     depends_on:
-      rabbitmq:
+      postgres-db:
         condition: service_healthy
-      mongodb:
+    networks:
+      - healthcare-network
+
+  appointment-service:
+    build:
+      context: ./appointment-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-appointment
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/appointment_service_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: rootpassword123
+    depends_on:
+      postgres-db:
         condition: service_healthy
+    networks:
+      - healthcare-network
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-payment
+    ports:
+      - "8086:8086"
+    environment:
+      # Pointed to the unified postgres-db container!
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/syncclinic_payment
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: rootpassword123
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     restart: unless-stopped
     networks:
       - healthcare-network
@@ -162,7 +221,7 @@ services:
     ports:
       - "8085:8085"
     environment:
-      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/notification_db}
+      MONGO_URI: ${MONGO_URI:-mongodb://admin:admin123@mongodb:27017/notification_db?authSource=admin}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: guest
@@ -182,87 +241,57 @@ services:
     restart: unless-stopped
     networks:
       - healthcare-network
-=======
-#  # Telemedicine Service
-#  telemedicine-service:
-#    build:
-#      context: ./telemedicine-service
-#      dockerfile: Dockerfile
-#    container_name: syncclinic-telemedicine
-#    ports:
-#      - "8083:8083"
-#    environment:
-#      MONGODB_URI: ${MONGODB_URI}
-#      RABBITMQ_HOST: rabbitmq
-#      RABBITMQ_PORT: 5672
-#      RABBITMQ_USERNAME: guest
-#      RABBITMQ_PASSWORD: guest
-#      JITSI_BASE_URL: https://meet.jit.si
-#    depends_on:
-#      rabbitmq:
-#        condition: service_healthy
-#      mongodb:
-#        condition: service_healthy
-#    restart: unless-stopped
-#    networks:
-#      - healthcare-network
-#
-#  # Notification Service
-#  notification-service:
-#    build:
-#      context: ./notification-service
-#      dockerfile: Dockerfile
-#    container_name: syncclinic-notification
-#    ports:
-#      - "8085:8085"
-#    environment:
-#      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/notification_db}
-#      RABBITMQ_HOST: rabbitmq
-#      RABBITMQ_PORT: 5672
-#      RABBITMQ_USERNAME: guest
-#      RABBITMQ_PASSWORD: guest
-#      MAIL_HOST: smtp.gmail.com
-#      MAIL_PORT: 587
-#      MAIL_USERNAME: ${MAIL_USERNAME:-your-email@gmail.com}
-#      MAIL_PASSWORD: ${MAIL_PASSWORD:-your-app-password}
-#      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-your-account-sid}
-#      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-your-auth-token}
-#      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-+1234567890}
-#    depends_on:
-#      rabbitmq:
-#        condition: service_healthy
-#      mongodb:
-#        condition: service_healthy
-#    restart: unless-stopped
-#    networks:
-#      - healthcare-network
->>>>>>> main
 
-  #FIXED: Payment Service
-  payment-service:
+  telemedicine-service:
     build:
-      context: ./payment-service
+      context: ./telemedicine-service
       dockerfile: Dockerfile
-    container_name: syncclinic-payment
+    container_name: syncclinic-telemedicine
+    # Moved back to 8087 to avoid clashing with Appointment Service!
     ports:
-      - "8084:8084"
-    
+      - "8087:8087"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payment-db:5432/syncclinic_payment
+      MONGODB_URI: ${MONGODB_URI:-mongodb://admin:admin123@mongodb:27017/telemedicine_db?authSource=admin}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      JITSI_BASE_URL: https://meet.jit.si
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - healthcare-network
+
+  ai-symptoms-service:
+    build:
+      context: ./ai-symptoms-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-ai-symptoms
+    ports:
+      - "8088:8088"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/ai_symptoms_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: rootpassword123
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_CLIENT_ENABLED: "false"
+      JWT_SECRET: your_very_secure_and_long_secret_key_for_medisphere_telemedicine_service_2026
+      GROQ_API_URL: https://api.groq.com/openai/v1/chat/completions
+      GROQ_API_KEY: ${GROQ_API_KEY:-test-key}
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
     depends_on:
-      - postgres-payment-db
-      - kafka
+      postgres-db:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - healthcare-network
 
 volumes:
   postgres-data:
-  postgres-payment-data:
   rabbitmq-data:
   mongodb-data:
 
