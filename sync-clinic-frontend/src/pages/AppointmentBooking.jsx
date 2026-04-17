@@ -38,6 +38,17 @@ export default function AppointmentBooking() {
   })
 
   const [rescheduleById, setRescheduleById] = useState({})
+  const [doctorList, setDoctorList] = useState([])
+  // Load doctor list for patient booking dropdown
+  useEffect(() => {
+    if (!isDoctor) {
+      getDoctors()
+        .then((data) => {
+          setDoctorList(Array.isArray(data) ? data : [])
+        })
+        .catch(() => setDoctorList([]))
+    }
+  }, [isDoctor])
 
   const hasPatientId = useMemo(() => Number(patientId) > 0, [patientId])
   const hasDoctorSearchId = useMemo(() => Number(doctorSearchId) > 0, [doctorSearchId])
@@ -255,16 +266,20 @@ export default function AppointmentBooking() {
                     />
                   </label>
                   <label className="text-sm font-semibold text-slate-200">
-                    Doctor ID
-                    <input
+                    Doctor
+                    <select
                       className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                      type="number"
-                      min="1"
-                      placeholder="101"
                       value={bookingForm.doctorId}
                       onChange={(event) => setBookingForm({ ...bookingForm, doctorId: event.target.value })}
                       required
-                    />
+                    >
+                      <option value="">Select a doctor</option>
+                      {doctorList.map((doctor) => (
+                        <option key={doctor.id} value={doctor.id}>
+                          {doctor.fullName || `Doctor #${doctor.id}`} {doctor.specialty ? `- ${doctor.specialty}` : ''}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                   <label className="text-sm font-semibold text-slate-200">
                     Appointment Date
