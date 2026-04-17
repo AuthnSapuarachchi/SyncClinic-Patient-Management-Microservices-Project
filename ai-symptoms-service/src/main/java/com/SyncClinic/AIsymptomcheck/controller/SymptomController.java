@@ -7,12 +7,10 @@ import com.SyncClinic.AIsymptomcheck.service.SymptomService;
 import com.SyncClinic.AIsymptomcheck.service.SymptomHistoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/symptoms")
@@ -21,76 +19,74 @@ public class SymptomController {
     private final SymptomService geminiService;
     private final SymptomHistoryService historyService;
 
-    public SymptomController(SymptomService SymptomService,
+    public SymptomController(SymptomService symptomService,
                              SymptomHistoryService historyService) {
-        this.geminiService = SymptomService;
+        this.geminiService = symptomService;
         this.historyService = historyService;
     }
 
-    // Check symptoms — auto saves to history
     @PostMapping("/check")
-    @PreAuthorize("hasAnyRole('PATIENT', 'ADMIN')")
     public ResponseEntity<SymptomCheckResponse> checkSymptoms(
-            @Valid @RequestBody SymptomCheckRequest request) {
+            @Valid @RequestBody SymptomCheckRequest request,
+            @RequestHeader(value = "X-Patient-Id", required = false) String patientId) {
 
-        String patientId = getCurrentUserId();
-        SymptomCheckResponse response =
-                geminiService.checkSymptoms(request);
+        SymptomCheckResponse response = geminiService.checkSymptoms(request);
 
-        // Save to history — non-blocking
-        historyService.saveHistory(patientId, request, response);
+        // Use header-provided patientId, or fall back to a generated ID
+        String resolvedPatientId = (patientId != null && !patientId.isBlank())
+                ? patientId
+                : "guest-" + UUID.randomUUID();
+
+        historyService.saveHistory(resolvedPatientId, request, response);
 
         return ResponseEntity.ok(response);
     }
 
-    // Get logged-in patient's history
     @GetMapping("/history")
-    @PreAuthorize("hasRole('PATIENT')")
-    public ResponseEntity<List<SymptomHistoryResponse>> getMyHistory() {
-        String patientId = getCurrentUserId();
-        return ResponseEntity.ok(
-                historyService.getPatientHistory(patientId));
+    public ResponseEntity<List<SymptomHistoryResponse>> getMyHistory(
+            @RequestHeader(value = "X-Patient-Id", required = false) String patientId) {
+        if (patientId == null || patientId.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(historyService.getPatientHistory(patientId));
     }
 
-    // Get one specific history record
     @GetMapping("/history/{id}")
-    @PreAuthorize("hasAnyRole('PATIENT', 'ADMIN')")
     public ResponseEntity<SymptomHistoryResponse> getHistoryById(
-            @PathVariable Integer id) {
-        String patientId = getCurrentUserId();
-        return ResponseEntity.ok(
-                historyService.getHistoryById(id, patientId));
+            @PathVariable Integer id,
+            @RequestHeader(value = "X-Patient-Id", required = false) String patientId) {
+        if (patientId == null || patientId.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(historyService.getHistoryById(id, patientId));
     }
 
-    // Admin — get ALL patients' history
     @GetMapping("/history/all")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SymptomHistoryResponse>> getAllHistory() {
         return ResponseEntity.ok(historyService.getAllHistory());
     }
 
-    // Delete one specific record
     @DeleteMapping("/history/{id}")
-    @PreAuthorize("hasAnyRole('PATIENT', 'ADMIN')")
     public ResponseEntity<Map<String, String>> deleteHistoryById(
-            @PathVariable Integer id) {
-        String patientId = getCurrentUserId();
+            @PathVariable Integer id,
+            @RequestHeader(value = "X-Patient-Id", required = false) String patientId) {
+        if (patientId == null || patientId.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
         historyService.deleteHistoryById(id, patientId);
-        return ResponseEntity.ok(
-                Map.of("message", "History record deleted successfully"));
+        return ResponseEntity.ok(Map.of("message", "History record deleted successfully"));
     }
 
-    // Delete ALL history for logged-in patient
     @DeleteMapping("/history")
-    @PreAuthorize("hasRole('PATIENT')")
-    public ResponseEntity<Map<String, String>> deleteAllMyHistory() {
-        String patientId = getCurrentUserId();
+    public ResponseEntity<Map<String, String>> deleteAllMyHistory(
+            @RequestHeader(value = "X-Patient-Id", required = false) String patientId) {
+        if (patientId == null || patientId.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
         historyService.deleteAllPatientHistory(patientId);
-        return ResponseEntity.ok(
-                Map.of("message", "All history deleted successfully"));
+        return ResponseEntity.ok(Map.of("message", "All history deleted successfully"));
     }
 
-    // Health check
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
         return ResponseEntity.ok(Map.of(
@@ -98,12 +94,5 @@ public class SymptomController {
                 "status", "UP",
                 "aiProvider", "Groq - Llama 3.3 70B"
         ));
-    }
-
-    // Helper — get userId from JWT
-    private String getCurrentUserId() {
-        Authentication auth = SecurityContextHolder
-                .getContext().getAuthentication();
-        return auth.getPrincipal().toString();
     }
 }
