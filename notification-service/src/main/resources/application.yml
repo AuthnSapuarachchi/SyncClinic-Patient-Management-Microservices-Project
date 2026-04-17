@@ -1,34 +1,53 @@
 ﻿server:
-  port: 8084
+  port: 8085
   servlet:
     context-path: /notification-service
 
 spring:
   application:
     name: notification-service
+
   data:
     mongodb:
-      uri: 
+      uri: ${MONGO_URI:mongodb://admin:admin123@mongodb:27017/notification_db?authSource=admin}
+      auto-index-creation: true
+
   rabbitmq:
-    host: 
-    port: 
-    username: 
-    password: 
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: /
+    connection-timeout: 10000ms
+
   mail:
-    host: smtp.mailtrap.io
-    port: 2525
-    username: your_mailtrap_user
-    password: your_mailtrap_password
+    host: ${MAIL_HOST:smtp-relay.brevo.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:thilakarathnagayal@gmail.com}
+    password: ${MAIL_PASSWORD:your-brevo-smtp-key}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://service-registry:8761/eureka/
-    fetch-registry: true
-    register-with-eureka: true
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID:your-account-sid}
+  auth-token: ${TWILIO_AUTH_TOKEN:your-auth-token}
+  phone-number: ${TWILIO_PHONE_NUMBER:+1234567890}
+
+services:
+  patient-service-url: ${PATIENT_SERVICE_URL:http://syncclinic-patient:8082}
+  doctor-service-url: ${DOCTOR_SERVICE_URL:http://syncclinic-doctor:8083}
+
+logging:
+  level:
+    root: INFO
+    com.healthcare.notification: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
