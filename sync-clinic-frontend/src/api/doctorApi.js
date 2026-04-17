@@ -15,8 +15,9 @@ export const updateDoctor = async (doctorId, doctorPayload) => {
   return response.data
 }
 
-export const updateDoctorStatus = async (doctorId, status) => {
-  const response = await api.put(`/api/doctors/${doctorId}/status`, null, { params: { status } })
+export const updateDoctorStatus = async (doctorId, status, currentDoctor = null) => {
+  const doctor = currentDoctor || (await api.get(`/api/doctors/${doctorId}`)).data
+  const response = await api.put(`/api/doctors/${doctorId}`, { ...doctor, status })
   return response.data
 }
 
