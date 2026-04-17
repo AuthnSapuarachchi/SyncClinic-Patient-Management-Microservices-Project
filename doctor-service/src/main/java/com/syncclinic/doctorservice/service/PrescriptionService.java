@@ -41,4 +41,8 @@ public class PrescriptionService {
     public List<Prescription> getPrescriptionsByPatient(Long patientId) {
         return prescriptionRepository.findByPatientId(patientId);
     }
+
+    public List<Prescription> getPrescriptionsByDoctor(Long doctorId) {
+        return prescriptionRepository.findByDoctorId(doctorId);
+    }
 }
