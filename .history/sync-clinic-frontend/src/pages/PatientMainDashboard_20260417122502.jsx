@@ -480,10 +480,10 @@ export default function PatientMainDashboard() {
                                         <button
                                             type="button"
                                             onClick={() => createAndJoinSession(doctor)}
-                                            disabled={creatingSessionId !== null}
+                                            disabled={isCreatingSession}
                                             className="mt-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
                                         >
-                                            {creatingSessionId === doctor.id ? 'Starting...' : 'Start Video Call'}
+                                            {isCreatingSession ? 'Starting...' : 'Start Video Call'}
                                         </button>
                                     </div>
                                 ))}
