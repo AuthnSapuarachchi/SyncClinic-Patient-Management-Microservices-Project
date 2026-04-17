@@ -16,6 +16,7 @@ import DoctorDashboard from './pages/DoctorDashboard'
 import NotificationsPage from './pages/NotificationsPage'
 import DoctorManagement from './pages/DoctorManagement'
 import DoctorProfile from './pages/DoctorProfile'
+import DoctorProfileView from './pages/DoctorProfileView'
 import AppointmentBooking from './pages/AppointmentBooking'
 import DoctorPrescriptions from './pages/DoctorPrescriptions'
 
@@ -166,6 +167,17 @@ function App() {
           <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
             <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
             <p className="mt-2 text-slate-300">You must be a Doctor to manage this profile.</p>
+            <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
+          </div>
+        }
+      />
+      <Route
+        path="/doctors/:doctorId/profile"
+        element={
+          userRole === 'ROLE_PATIENT' ? <DoctorProfileView /> :
+          <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
+            <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
+            <p className="mt-2 text-slate-300">You must be a Patient to view doctor profiles.</p>
             <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
           </div>
         }
