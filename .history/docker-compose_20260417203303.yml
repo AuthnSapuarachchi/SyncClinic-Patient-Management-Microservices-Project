@@ -273,6 +273,30 @@ services:
     networks:
       - healthcare-network
 
+  telemedicine-service:
+    build:
+      context: ./telemedicine-service
+      dockerfile: Dockerfile
+    container_name: syncclinic-telemedicine
+    # Moved back to 8087 to avoid clashing with Appointment Service!
+    ports:
+      - "8087:8087"
+    environment:
+      MONGODB_URI: ${MONGODB_URI:-mongodb://admin:admin123@mongodb:27017/telemedicine_db?authSource=admin}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      JITSI_BASE_URL: https://meet.jit.si
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - healthcare-network
+
   ai-symptoms-service:
     build:
       context: ./ai-symptoms-service
