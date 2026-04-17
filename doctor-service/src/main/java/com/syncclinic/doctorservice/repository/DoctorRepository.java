@@ -1,6 +1,7 @@
 package com.syncclinic.doctorservice.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,8 @@ import com.syncclinic.doctorservice.model.Doctor;
 // Repository interface for Doctor entity
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
+
+   Optional<Doctor> findByEmailIgnoreCase(String email);
 
    @Query("SELECT d FROM Doctor d WHERE d.status = 'VERIFIED' " + // CRITICAL: Security check
            "AND (:specialty IS NULL OR :specialty = '' OR LOWER(d.specialty) = LOWER(:specialty)) " +

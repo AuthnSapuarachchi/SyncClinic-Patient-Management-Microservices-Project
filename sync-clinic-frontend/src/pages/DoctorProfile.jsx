@@ -17,7 +17,7 @@ const emptyProfile = {
 
 export default function DoctorProfile() {
   const navigate = useNavigate()
-  const userEmail = localStorage.getItem('user_email') || ''
+  const userEmail = (localStorage.getItem('user_email') || '').trim().toLowerCase()
   const [doctors, setDoctors] = useState([])
   const [selectedDoctorId, setSelectedDoctorId] = useState('')
   const [formData, setFormData] = useState({ ...emptyProfile, email: userEmail })
@@ -34,7 +34,7 @@ export default function DoctorProfile() {
     try {
       const data = await getDoctors()
       const doctorList = Array.isArray(data) ? data : []
-      const ownProfile = doctorList.find((doctor) => doctor.email === userEmail)
+      const ownProfile = doctorList.find((doctor) => doctor.email?.trim().toLowerCase() === userEmail)
       setDoctors(ownProfile ? [ownProfile] : [])
       if (ownProfile) {
         setSelectedDoctorId(String(ownProfile.id))
@@ -100,6 +100,7 @@ export default function DoctorProfile() {
 
     const payload = {
       ...formData,
+      email: userEmail,
       experienceYears: Number(formData.experienceYears) || 0,
       status: selectedDoctor?.status || formData.status || 'PENDING',
     }
@@ -194,6 +195,8 @@ export default function DoctorProfile() {
                       min={type === 'number' ? '0' : undefined}
                       value={formData[name]}
                       onChange={handleChange}
+                      readOnly={name === 'email'}
+                      title={name === 'email' ? 'Doctor profile email is linked to your login email.' : undefined}
                       required={name === 'fullName' || name === 'email'}
                     />
                   </label>
