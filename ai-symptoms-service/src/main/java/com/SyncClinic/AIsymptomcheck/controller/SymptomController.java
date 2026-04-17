@@ -8,6 +8,7 @@ import com.SyncClinic.AIsymptomcheck.service.SymptomHistoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -16,12 +17,12 @@ import java.util.UUID;
 @RequestMapping("/api/symptoms")
 public class SymptomController {
 
-    private final SymptomService geminiService;
+    private final SymptomService symptomService;
     private final SymptomHistoryService historyService;
 
     public SymptomController(SymptomService symptomService,
                              SymptomHistoryService historyService) {
-        this.geminiService = symptomService;
+        this.symptomService = symptomService;
         this.historyService = historyService;
     }
 
@@ -30,9 +31,8 @@ public class SymptomController {
             @Valid @RequestBody SymptomCheckRequest request,
             @RequestHeader(value = "X-Patient-Id", required = false) String patientId) {
 
-        SymptomCheckResponse response = geminiService.checkSymptoms(request);
+        SymptomCheckResponse response = symptomService.checkSymptoms(request);
 
-        // Use header-provided patientId, or fall back to a generated ID
         String resolvedPatientId = (patientId != null && !patientId.isBlank())
                 ? patientId
                 : "guest-" + UUID.randomUUID();
@@ -45,9 +45,11 @@ public class SymptomController {
     @GetMapping("/history")
     public ResponseEntity<List<SymptomHistoryResponse>> getMyHistory(
             @RequestHeader(value = "X-Patient-Id", required = false) String patientId) {
+
         if (patientId == null || patientId.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
+
         return ResponseEntity.ok(historyService.getPatientHistory(patientId));
     }
 
@@ -55,9 +57,11 @@ public class SymptomController {
     public ResponseEntity<SymptomHistoryResponse> getHistoryById(
             @PathVariable Integer id,
             @RequestHeader(value = "X-Patient-Id", required = false) String patientId) {
+
         if (patientId == null || patientId.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
+
         return ResponseEntity.ok(historyService.getHistoryById(id, patientId));
     }
 
@@ -70,19 +74,23 @@ public class SymptomController {
     public ResponseEntity<Map<String, String>> deleteHistoryById(
             @PathVariable Integer id,
             @RequestHeader(value = "X-Patient-Id", required = false) String patientId) {
+
         if (patientId == null || patientId.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
+
         historyService.deleteHistoryById(id, patientId);
-        return ResponseEntity.ok(Map.of("message", "History record deleted successfully"));
+        return ResponseEntity.ok(Map.of("message", "History deleted successfully"));
     }
 
     @DeleteMapping("/history")
     public ResponseEntity<Map<String, String>> deleteAllMyHistory(
             @RequestHeader(value = "X-Patient-Id", required = false) String patientId) {
+
         if (patientId == null || patientId.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
+
         historyService.deleteAllPatientHistory(patientId);
         return ResponseEntity.ok(Map.of("message", "All history deleted successfully"));
     }
@@ -92,7 +100,7 @@ public class SymptomController {
         return ResponseEntity.ok(Map.of(
                 "service", "symptom-checker-service",
                 "status", "UP",
-                "aiProvider", "Groq - Llama 3.3 70B"
+                "aiProvider", "OpenAI - gpt-4o-mini"
         ));
     }
 }
