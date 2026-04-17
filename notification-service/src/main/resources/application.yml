@@ -21,10 +21,10 @@ spring:
     connection-timeout: 10000ms
 
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
+    host: ${MAIL_HOST:smtp-relay.brevo.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:your-email@gmail.com}
-    password: ${MAIL_PASSWORD:your-app-password}
+    username: ${MAIL_USERNAME:thilakarathnagayal@gmail.com}
+    password: ${MAIL_PASSWORD:your-brevo-smtp-key}
     properties:
       mail:
         smtp:

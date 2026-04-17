@@ -12,9 +12,11 @@ import lombok.NoArgsConstructor;
 public class ConsultationCompletedEvent {
 
 	private String appointmentId;
+	private String patientId;
 	private String patientName;
 	private String patientEmail;
 	private String patientPhone;
+	private String doctorId;
 	private String doctorName;
 	private String doctorEmail;
 	private Long sessionDuration;

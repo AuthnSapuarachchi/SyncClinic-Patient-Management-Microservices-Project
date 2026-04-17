@@ -3,7 +3,7 @@ package com.SyncClinic.payment_service.dto.events;
 import java.time.LocalDateTime;
  
 /**
- * Published to Kafka topic "payment-failed-events".
+ * Published to RabbitMQ route "payment.failed".
  * Notification-service listens to this to inform
  * the patient that their payment was unsuccessful.
  */
@@ -14,6 +14,8 @@ public class PaymentFailedEvent {
     private String patientId;
     private String patientEmail;
     private String doctorId;
+    private String amount;
+    private String currency;
     private String failureReason;
     private LocalDateTime failedAt;
  
@@ -25,6 +27,8 @@ public class PaymentFailedEvent {
                               String patientId,
                               String patientEmail,
                               String doctorId,
+                              String amount,
+                              String currency,
                               String failureReason,
                               LocalDateTime failedAt) {
         this.paymentId = paymentId;
@@ -32,6 +36,8 @@ public class PaymentFailedEvent {
         this.patientId = patientId;
         this.patientEmail = patientEmail;
         this.doctorId = doctorId;
+        this.amount = amount;
+        this.currency = currency;
         this.failureReason = failureReason;
         this.failedAt = failedAt;
     }
@@ -74,6 +80,22 @@ public class PaymentFailedEvent {
 
     public void setDoctorId(String doctorId) {
         this.doctorId = doctorId;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
  
     public String getFailureReason() {

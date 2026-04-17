@@ -26,6 +26,9 @@ public class ConsultationNotificationHandler {
 
 	public void handleConsultationCompleted(ConsultationCompletedEvent event) {
 		log.info("Handling consultation completed notification for appointment: {}", event.getAppointmentId());
+		String userId = event.getPatientId() != null && !event.getPatientId().isBlank()
+				? event.getPatientId()
+				: event.getAppointmentId();
 
 		// Send email to patient
 		try {
@@ -33,12 +36,12 @@ public class ConsultationNotificationHandler {
 			String patientEmailBody = buildConsultationCompletedPatientEmail(event);
 			emailService.sendHtmlEmail(event.getPatientEmail(), patientEmailSubject, patientEmailBody);
 
-			saveNotificationLog(event.getPatientEmail(), event.getAppointmentId(), "EMAIL",
+			saveNotificationLog(userId, event.getPatientEmail(), event.getAppointmentId(), "EMAIL",
 					NotificationLog.EventType.CONSULTATION_COMPLETED, patientEmailSubject,
 					patientEmailBody, NotificationLog.NotificationStatus.SENT, null);
 		} catch (Exception e) {
 			log.error("Failed to send patient consultation completed email", e);
-			saveNotificationLog(event.getPatientEmail(), event.getAppointmentId(), "EMAIL",
+			saveNotificationLog(userId, event.getPatientEmail(), event.getAppointmentId(), "EMAIL",
 					NotificationLog.EventType.CONSULTATION_COMPLETED, "Email",
 					"Failed to send", NotificationLog.NotificationStatus.FAILED, e.getMessage());
 		}
@@ -49,12 +52,12 @@ public class ConsultationNotificationHandler {
 					+ " complete. Check email for prescription.";
 			smsService.sendSms(event.getPatientPhone(), patientSmsBody);
 
-			saveNotificationLog(event.getPatientPhone(), event.getAppointmentId(), "SMS",
+			saveNotificationLog(userId, event.getPatientPhone(), event.getAppointmentId(), "SMS",
 					NotificationLog.EventType.CONSULTATION_COMPLETED, "SMS",
 					patientSmsBody, NotificationLog.NotificationStatus.SENT, null);
 		} catch (Exception e) {
 			log.error("Failed to send patient consultation completed SMS", e);
-			saveNotificationLog(event.getPatientPhone(), event.getAppointmentId(), "SMS",
+			saveNotificationLog(userId, event.getPatientPhone(), event.getAppointmentId(), "SMS",
 					NotificationLog.EventType.CONSULTATION_COMPLETED, "SMS",
 					"Failed to send", NotificationLog.NotificationStatus.FAILED, e.getMessage());
 		}
@@ -81,12 +84,12 @@ public class ConsultationNotificationHandler {
 				"</body></html>";
 	}
 
-	private void saveNotificationLog(String recipient, String referenceId, String type,
+	private void saveNotificationLog(String userId, String recipient, String referenceId, String type,
 			NotificationLog.EventType eventType, String subject, String message,
 			NotificationLog.NotificationStatus status, String errorMessage) {
 		try {
 			NotificationLog log = NotificationLog.builder()
-					.userId(referenceId)
+					.userId(userId)
 					.recipientEmail(type.equals("EMAIL") ? recipient : null)
 					.recipientPhone(type.equals("SMS") ? recipient : null)
 					.type(NotificationLog.NotificationType.valueOf(type))

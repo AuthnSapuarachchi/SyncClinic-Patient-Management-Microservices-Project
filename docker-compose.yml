@@ -234,10 +234,10 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
-      MAIL_HOST: smtp.gmail.com
+      MAIL_HOST: smtp-relay.brevo.com
       MAIL_PORT: 587
-      MAIL_USERNAME: ${MAIL_USERNAME:-your-email@gmail.com}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-your-app-password}
+      MAIL_USERNAME: ${MAIL_USERNAME:-thilakarathnagayal@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-your-brevo-smtp-key}
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-your-account-sid}
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-your-auth-token}
       TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-+1234567890}
