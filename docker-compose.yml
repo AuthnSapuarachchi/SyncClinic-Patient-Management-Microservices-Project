@@ -184,6 +184,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/appointment_service_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: rootpassword123
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
     depends_on:
       postgres-db:
         condition: service_healthy
@@ -204,6 +208,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: rootpassword123
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
     depends_on:
       postgres-db:
         condition: service_healthy
@@ -233,6 +241,8 @@ services:
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-your-account-sid}
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-your-auth-token}
       TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-+1234567890}
+      PATIENT_SERVICE_URL: http://syncclinic-patient:8082
+      DOCTOR_SERVICE_URL: http://syncclinic-doctor:8083
     depends_on:
       rabbitmq:
         condition: service_healthy

@@ -19,6 +19,7 @@ public class PaymentSuccessEvent {
     private BigDecimal amount;
     private String currency;
     private LocalDateTime paidAt;
+     private String paymentMethod;
  
     public PaymentSuccessEvent() {
     }
@@ -31,7 +32,8 @@ public class PaymentSuccessEvent {
                                String doctorName,
                                BigDecimal amount,
                                String currency,
-                               LocalDateTime paidAt) {
+                               LocalDateTime paidAt,
+                               String paymentMethod) {
         this.paymentId = paymentId;
         this.appointmentId = appointmentId;
         this.patientId = patientId;
@@ -41,6 +43,7 @@ public class PaymentSuccessEvent {
         this.amount = amount;
         this.currency = currency;
         this.paidAt = paidAt;
+        this.paymentMethod = paymentMethod;
     }
  
     public String getPaymentId() {
@@ -113,6 +116,14 @@ public class PaymentSuccessEvent {
  
     public void setPaidAt(LocalDateTime paidAt) {
         this.paidAt = paidAt;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }
  

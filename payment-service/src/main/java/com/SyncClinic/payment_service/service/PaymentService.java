@@ -189,7 +189,8 @@ public class PaymentService {
                     payment.getDoctorName(),
                     payment.getAmount(),
                     payment.getCurrency(),
-                    LocalDateTime.now()));
+                    LocalDateTime.now(),
+                    "Stripe Card"));
 
             log.info("Payment PAID: {} for appointment {}", payment.getId(), payment.getAppointmentId());
         });
@@ -212,6 +213,7 @@ public class PaymentService {
                     payment.getAppointmentId(),
                     payment.getPatientId(),
                     payment.getPatientEmail(),
+                    payment.getDoctorId(),
                     reason,
                     LocalDateTime.now()));
 

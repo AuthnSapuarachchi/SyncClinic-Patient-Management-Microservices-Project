@@ -13,6 +13,7 @@ import PaymentHistory from './pages/PaymentHistory'
 import PatientMainDashboard from './pages/PatientMainDashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import DoctorDashboard from './pages/DoctorDashboard'
+import NotificationsPage from './pages/NotificationsPage'
 import DoctorManagement from './pages/DoctorManagement'
 import DoctorProfile from './pages/DoctorProfile'
 import AppointmentBooking from './pages/AppointmentBooking'
@@ -215,6 +216,10 @@ function App() {
       <Route
         path="/payment-history"
         element={userRole === 'ROLE_PATIENT' ? <PaymentHistory /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/notifications"
+        element={userRole === 'ROLE_PATIENT' ? <NotificationsPage /> : <Navigate to="/" replace />}
       />
       
       <Route path="*" element={<Navigate to="/patientDashboard" replace />} />

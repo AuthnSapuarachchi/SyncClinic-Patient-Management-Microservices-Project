@@ -66,7 +66,7 @@ public class NotificationConsumer {
 	@RabbitListener(queues = RabbitMQConfig.PAYMENT_SUCCESS_QUEUE)
 	public void handlePaymentSuccess(PaymentSuccessEvent event) {
 		try {
-			log.info("Received payment success event for transaction: {}", event.getTransactionId());
+			log.info("Received payment success event for payment: {}", event.getPaymentId());
 			paymentNotificationHandler.handlePaymentSuccess(event);
 			log.info("Successfully processed payment success event");
 		} catch (Exception e) {

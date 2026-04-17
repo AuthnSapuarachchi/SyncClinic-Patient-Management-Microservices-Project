@@ -41,6 +41,10 @@ twilio:
   auth-token: ${TWILIO_AUTH_TOKEN:your-auth-token}
   phone-number: ${TWILIO_PHONE_NUMBER:+1234567890}
 
+services:
+  patient-service-url: ${PATIENT_SERVICE_URL:http://syncclinic-patient:8082}
+  doctor-service-url: ${DOCTOR_SERVICE_URL:http://syncclinic-doctor:8083}
+
 logging:
   level:
     root: INFO

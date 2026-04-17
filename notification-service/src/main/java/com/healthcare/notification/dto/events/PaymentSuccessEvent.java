@@ -11,10 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PaymentSuccessEvent {
 
-	private String transactionId;
+	private String paymentId;
+	private String patientId;
 	private String patientName;
 	private String patientEmail;
 	private String patientPhone;
+	private String doctorId;
 	private String doctorName;
 	private String amount;
 	private String currency;

@@ -32,6 +32,12 @@ spring:
               type:
                 headers: false
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
 eureka:
   client:
     enabled: false # Enable when service-registry is running

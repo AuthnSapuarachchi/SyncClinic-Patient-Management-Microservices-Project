@@ -529,6 +529,14 @@ export default function PatientMainDashboard() {
                             <button
                                 type="button"
                                 className="rounded-lg border border-slate-500 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:bg-slate-700"
+                                onClick={() => navigate('/notifications')}
+                            >
+                                View Notification History
+                            </button>
+                            <button
+                                type="button"
+                                className="rounded-lg border border-slate-500 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:bg-slate-700"
+                                onClick={() => navigate('/payment-history')}
                             >
                                 View Billing History
                             </button>
