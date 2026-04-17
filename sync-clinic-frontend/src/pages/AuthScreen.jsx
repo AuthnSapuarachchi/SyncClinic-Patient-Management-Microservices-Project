@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axiosConfig'; // The interceptor we built earlier!
 
 export default function AuthScreen() {
@@ -209,6 +210,15 @@ export default function AuthScreen() {
                             {loading ? 'Connecting...' : mode === 'register' ? 'Register as Patient' : 'Login to Dashboard'}
                         </button>
                     </form>
+
+                    {mode === 'register' && (
+                        <p className="mt-4 text-center text-sm text-slate-600">
+                            Are you a doctor?{' '}
+                            <Link to="/doctor-register" className="font-bold text-teal-700 hover:text-teal-900">
+                                Register here
+                            </Link>
+                        </p>
+                    )}
 
                     {message && (
                         <div
