@@ -128,7 +128,7 @@ export default function PatientMainDashboard() {
         const appointmentId = `quick-${patientId}-${doctor.id}-${Date.now()}`;
 
         setError('');
-        setCreatingSessionId(doctor.id);
+        setIsCreatingSession(true);
 
         try {
             const response = await api.post('/telemedicine-service/api/sessions/create', {
@@ -153,7 +153,7 @@ export default function PatientMainDashboard() {
             console.error('Failed to create telemedicine session', sessionError);
             setError('Unable to start the video session right now. Please try again.');
         } finally {
-            setCreatingSessionId(null);
+            setIsCreatingSession(false);
         }
     };
 
@@ -480,10 +480,10 @@ export default function PatientMainDashboard() {
                                         <button
                                             type="button"
                                             onClick={() => createAndJoinSession(doctor)}
-                                            disabled={creatingSessionId !== null}
+                                            disabled={isCreatingSession}
                                             className="mt-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
                                         >
-                                            {creatingSessionId === doctor.id ? 'Starting...' : 'Start Video Call'}
+                                            {isCreatingSession ? 'Starting...' : 'Start Video Call'}
                                         </button>
                                     </div>
                                 ))}
