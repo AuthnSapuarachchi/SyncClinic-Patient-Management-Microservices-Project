@@ -11,7 +11,7 @@ import PaymentFailed from './pages/PaymentFailed'
 import PaymentHistory from './pages/PaymentHistory'
 import PatientMainDashboard from './pages/PatientMainDashboard'
 import AdminDashboard from './pages/AdminDashboard'
-import DoctorDashboard from './pages/DoctorDashboard'
+// import DoctorDashboard from './pages/DoctorDashboard'
 
 const normalizeRole = (role) => {
   if (typeof role !== 'string' || !role.trim()) {
@@ -105,52 +105,16 @@ function App() {
 
   return (
     <Routes>
-      <Route 
-        path="/" 
-        element={
-          <Navigate 
-            to={
-              userRole === 'ROLE_ADMIN' ? '/adminDashboard' : 
-              userRole === 'ROLE_DOCTOR' ? '/doctorDashboard' : 
-              '/patientDashboard'
-            } 
-            replace 
-          />
-        } 
-      />
+      <Route path="/" element={<Navigate to="/patientDashboard" replace />} />
       <Route
         path="/patientDashboard"
-        element={
-          userRole === 'ROLE_PATIENT' ? <PatientMainDashboard /> : 
-          <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
-            <h1 className="text-2xl font-bold text-rose-500">Role Mismatch</h1>
-            <p className="mt-2 text-slate-300">Your current role is: <code className="bg-slate-800 px-2 py-1 rounded">{userRole}</code></p>
-            <p className="mt-2 text-slate-400">You do not have access to the Patient Dashboard.</p>
-            <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
+        element={userRole === 'ROLE_PATIENT' ? <PatientMainDashboard /> : (
+          <div style={{ color: 'white', padding: '20px' }}>
+            <h1>Role Mismatch</h1>
+            <p>Your current role is: <code>{userRole}</code></p>
+            <button onClick={clearSession}>Log Out</button>
           </div>
-        }
-      />
-      <Route
-        path="/adminDashboard"
-        element={
-          userRole === 'ROLE_ADMIN' ? <AdminDashboard /> : 
-          <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
-            <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
-            <p className="mt-2 text-slate-300">You must be an Admin to view this page.</p>
-            <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
-          </div>
-        }
-      />
-      <Route
-        path="/doctorDashboard"
-        element={
-          userRole === 'ROLE_DOCTOR' ? <DoctorDashboard /> : 
-          <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
-            <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
-            <p className="mt-2 text-slate-300">You must be a Doctor to view this page.</p>
-            <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
-          </div>
-        }
+        )}
       />
       <Route
         path="/patient/profile"

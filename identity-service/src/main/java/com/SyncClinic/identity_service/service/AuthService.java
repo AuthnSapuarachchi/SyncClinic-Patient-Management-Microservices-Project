@@ -1,6 +1,7 @@
 package com.SyncClinic.identity_service.service;
 
 import com.SyncClinic.identity_service.dto.AuthRequest;
+import com.SyncClinic.identity_service.entity.Role;
 import com.SyncClinic.identity_service.entity.UserCredentials;
 import com.SyncClinic.identity_service.repository.UserCredentialsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,25 +33,46 @@ public class AuthService {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    public Map<String, String> saveUser(UserCredentials credential) {
-        // Hash the plain-text password before saving it
-        credential.setPassword(passwordEncoder.encode(credential.getPassword()));
+    public Map<String, Object> saveUser(UserCredentials credential) {
+        // 1. Default to PATIENT if no role is provided
+        if (credential.getRole() == null) {
+            credential.setRole(Role.ROLE_PATIENT);
+        }
 
-        // Save the user to the database
+        credential.setPassword(passwordEncoder.encode(credential.getPassword()));
         UserCredentials savedUser = repository.save(credential);
 
-        // 3. SHOUT INTO KAFKA!
-        // We send a JSON string containing the email to the Broker
+        // Kafka event
         String eventMessage = String.format("{\"email\": \"%s\"}", savedUser.getEmail());
         kafkaTemplate.send("user-registration-events", eventMessage);
 
-        // 4. Generate the JWT token
         String token = jwtService.generateToken(savedUser.getEmail());
 
-        // 5. Return the token and success message to the user
         return Map.of(
-                "message", "User successfully registered to SyncClinic!",
-                "token", token
+                "message", "User successfully registered!",
+                "token", token,
+                "role", savedUser.getRole().name() // Send the string name of the enum
+        );
+    }
+
+    public Map<String, Object> login(AuthRequest authRequest) {
+        // 1. Authenticate
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
+        );
+
+        // 2. Fetch User to get the Role
+        UserCredentials user = repository.findByEmail(authRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 3. Generate Token
+        String token = jwtService.generateToken(authRequest.getEmail());
+
+        // 4. Pack it all up for the Controller
+        return Map.of(
+                "token", token,
+                "role", user.getRole().name(), // .name() converts Enum to "ADMIN"
+                "email", user.getEmail()
         );
     }
 
