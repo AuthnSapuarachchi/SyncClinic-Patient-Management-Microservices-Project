@@ -2,7 +2,6 @@ import './App.css'
 import { jwtDecode } from 'jwt-decode'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthScreen from './pages/AuthScreen'
-import DoctorAuthScreen from './pages/DoctorAuthScreen'
 import LandingPage from './pages/LandingPage'
 import PatientDashboard from './pages/PatientDashboard'
 import PaymentInitiation from './pages/PaymentInitiation'
@@ -11,11 +10,8 @@ import PaymentSuccess from './pages/PaymentSuccess'
 import PaymentFailed from './pages/PaymentFailed'
 import PaymentHistory from './pages/PaymentHistory'
 import PatientMainDashboard from './pages/PatientMainDashboard'
-import DoctorDashboard from './pages/DoctorDashboard'
-import AppointmentBooking from './pages/AppointmentBooking'
-// import AdminDashboard from './pages/AdminDashboard'
 import AdminDashboard from './pages/AdminDashboard'
-
+// import DoctorDashboard from './pages/DoctorDashboard'
 
 const normalizeRole = (role) => {
   if (typeof role !== 'string' || !role.trim()) {
@@ -62,14 +58,6 @@ const clearSession = () => {
   localStorage.removeItem('user_role')
 }
 
-const getHomePathForRole = (role) => {
-  if (role === 'ROLE_DOCTOR') {
-    return '/doctor/dashboard'
-  }
-
-  return '/patientDashboard'
-}
-
 function App() {
   let token = localStorage.getItem('jwt_token')
   const savedRole = localStorage.getItem('user_role')
@@ -110,7 +98,6 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/landing" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={hasSeenLanding ? <AuthScreen /> : <Navigate to="/" replace />} />
-        <Route path="/doctor-auth" element={<DoctorAuthScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
@@ -118,52 +105,14 @@ function App() {
 
   return (
     <Routes>
-      <Route 
-        path="/" 
-        element={
-          <Navigate 
-            to={
-              userRole === 'ROLE_ADMIN' ? '/adminDashboard' : 
-              userRole === 'ROLE_DOCTOR' ? '/doctorDashboard' : 
-              '/patientDashboard'
-            } 
-            replace 
-          />
-        } 
-      />
+      <Route path="/" element={<Navigate to={userRole === 'ROLE_ADMIN' ? '/adminDashboard' : '/patientDashboard'} replace />} />
       <Route
         path="/patientDashboard"
-        element={
-          userRole === 'ROLE_PATIENT' ? <PatientMainDashboard /> : 
-          <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
-            <h1 className="text-2xl font-bold text-rose-500">Role Mismatch</h1>
-            <p className="mt-2 text-slate-300">Your current role is: <code className="bg-slate-800 px-2 py-1 rounded">{userRole}</code></p>
-            <p className="mt-2 text-slate-400">You do not have access to the Patient Dashboard.</p>
-            <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
-          </div>
-        }
+        element={userRole === 'ROLE_PATIENT' ? <PatientMainDashboard /> : <Navigate to="/" replace />}
       />
       <Route
         path="/adminDashboard"
-        element={
-          userRole === 'ROLE_ADMIN' ? <AdminDashboard /> : 
-          <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
-            <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
-            <p className="mt-2 text-slate-300">You must be an Admin to view this page.</p>
-            <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
-          </div>
-        }
-      />
-      <Route
-        path="/doctorDashboard"
-        element={
-          userRole === 'ROLE_DOCTOR' ? <DoctorDashboard /> : 
-          <div className="flex h-screen flex-col items-center justify-center bg-slate-900 text-white">
-            <h1 className="text-2xl font-bold text-rose-500">Access Denied</h1>
-            <p className="mt-2 text-slate-300">You must be a Doctor to view this page.</p>
-            <button onClick={() => { clearSession(); window.location.href = '/'; }} className="mt-4 rounded bg-cyan-600 px-4 py-2 font-bold text-white hover:bg-cyan-700">Log Out</button>
-          </div>
-        }
+        element={userRole === 'ROLE_ADMIN' ? <AdminDashboard /> : <Navigate to="/" replace />}
       />
       <Route
         path="/patient/profile"
@@ -191,20 +140,8 @@ function App() {
         path="/payment-history"
         element={userRole === 'ROLE_PATIENT' ? <PaymentHistory /> : <Navigate to="/" replace />}
       />
-      <Route
-        path="/doctor/dashboard"
-        element={userRole === 'ROLE_DOCTOR' ? <DoctorDashboard /> : <Navigate to="/" replace />}
-      />
-      <Route
-        path="/appointments"
-        element={
-          userRole === 'ROLE_PATIENT' || userRole === 'ROLE_DOCTOR'
-            ? <AppointmentBooking />
-            : <Navigate to="/" replace />
-        }
-      />
       
-      <Route path="*" element={<Navigate to={getHomePathForRole(userRole)} replace />} />
+      <Route path="*" element={<Navigate to="/patientDashboard" replace />} />
     </Routes>
   )
 }
