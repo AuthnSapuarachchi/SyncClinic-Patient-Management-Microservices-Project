@@ -2,19 +2,27 @@ import { useMemo, useState } from 'react'
 import {
   cancelAppointment,
   createAppointment,
+  getAppointmentStatusHistory,
+  getAppointmentsByDoctor,
+  getAppointmentsByDoctorAndStatus,
   getAppointmentsByPatient,
   getAppointmentsByPatientAndStatus,
   rescheduleAppointment,
+  updateAppointmentStatus,
 } from '../api/appointmentApi'
 
 const APPOINTMENT_STATUS = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', 'COMPLETED']
 
 export default function AppointmentBooking() {
+  const [searchMode, setSearchMode] = useState('patient')
   const [patientId, setPatientId] = useState('')
+  const [doctorSearchId, setDoctorSearchId] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [appointments, setAppointments] = useState([])
+  const [statusHistory, setStatusHistory] = useState([])
   const [statusMessage, setStatusMessage] = useState({ text: '', isError: false })
   const [loading, setLoading] = useState(false)
+  const [loadingHistory, setLoadingHistory] = useState(false)
 
   const [bookingForm, setBookingForm] = useState({
     doctorId: '',
@@ -26,19 +34,29 @@ export default function AppointmentBooking() {
   const [rescheduleById, setRescheduleById] = useState({})
 
   const hasPatientId = useMemo(() => Number(patientId) > 0, [patientId])
+  const hasDoctorSearchId = useMemo(() => Number(doctorSearchId) > 0, [doctorSearchId])
 
   const loadAppointments = async () => {
-    if (!hasPatientId) {
+    if (searchMode === 'patient' && !hasPatientId) {
       setStatusMessage({ text: 'Enter a valid Patient ID first', isError: true })
+      return
+    }
+
+    if (searchMode === 'doctor' && !hasDoctorSearchId) {
+      setStatusMessage({ text: 'Enter a valid Doctor ID first', isError: true })
       return
     }
 
     setLoading(true)
     setStatusMessage({ text: '', isError: false })
     try {
-      const data = statusFilter
-        ? await getAppointmentsByPatientAndStatus(patientId, statusFilter)
-        : await getAppointmentsByPatient(patientId)
+      const data = searchMode === 'doctor'
+        ? statusFilter
+          ? await getAppointmentsByDoctorAndStatus(doctorSearchId, statusFilter)
+          : await getAppointmentsByDoctor(doctorSearchId)
+        : statusFilter
+          ? await getAppointmentsByPatientAndStatus(patientId, statusFilter)
+          : await getAppointmentsByPatient(patientId)
       setAppointments(Array.isArray(data) ? data : [])
     } catch (error) {
       setStatusMessage({
@@ -91,6 +109,35 @@ export default function AppointmentBooking() {
         text: error?.response?.data?.message || 'Cancel action failed',
         isError: true,
       })
+    }
+  }
+
+  const handleStatusUpdate = async (appointmentId, newStatus) => {
+    try {
+      await updateAppointmentStatus(appointmentId, newStatus)
+      setStatusMessage({ text: `Appointment #${appointmentId} marked ${newStatus}`, isError: false })
+      await loadAppointments()
+    } catch (error) {
+      setStatusMessage({
+        text: error?.response?.data?.message || 'Status update failed',
+        isError: true,
+      })
+    }
+  }
+
+  const loadStatusHistory = async () => {
+    setLoadingHistory(true)
+    setStatusMessage({ text: '', isError: false })
+    try {
+      const data = await getAppointmentStatusHistory()
+      setStatusHistory(Array.isArray(data) ? data : [])
+    } catch (error) {
+      setStatusMessage({
+        text: error?.response?.data?.message || 'Failed to load appointment status history',
+        isError: true,
+      })
+    } finally {
+      setLoadingHistory(false)
     }
   }
 
@@ -205,7 +252,44 @@ export default function AppointmentBooking() {
 
           <aside className="rounded-2xl border border-cyan-900/70 bg-slate-900/70 p-5">
             <h2 className="text-lg font-bold text-cyan-300">Search Controls</h2>
-            <p className="mt-1 text-xs text-slate-300">Filter by status for selected patient.</p>
+            <p className="mt-1 text-xs text-slate-300">Load appointments by patient or doctor, then filter by status.</p>
+            <div className="mt-3 grid grid-cols-2 gap-1 rounded-xl bg-slate-800 p-1" role="tablist" aria-label="Appointment search mode">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={searchMode === 'patient'}
+                onClick={() => {
+                  setSearchMode('patient')
+                  setAppointments([])
+                  setStatusMessage({ text: '', isError: false })
+                }}
+                className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${searchMode === 'patient' ? 'bg-cyan-700 text-white' : 'text-slate-300 hover:bg-slate-700'}`}
+              >
+                Patient
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={searchMode === 'doctor'}
+                onClick={() => {
+                  setSearchMode('doctor')
+                  setAppointments([])
+                  setStatusMessage({ text: '', isError: false })
+                }}
+                className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${searchMode === 'doctor' ? 'bg-cyan-700 text-white' : 'text-slate-300 hover:bg-slate-700'}`}
+              >
+                Doctor
+              </button>
+            </div>
+            {searchMode === 'doctor' ? (
+              <input
+                className="mt-3 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                type="number"
+                placeholder="Doctor ID"
+                value={doctorSearchId}
+                onChange={(event) => setDoctorSearchId(event.target.value)}
+              />
+            ) : null}
             <select
               className="mt-3 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
               value={statusFilter}
@@ -224,6 +308,13 @@ export default function AppointmentBooking() {
               className="mt-3 w-full rounded-xl bg-slate-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-600"
             >
               {loading ? 'Loading...' : 'Load Appointments'}
+            </button>
+            <button
+              type="button"
+              onClick={loadStatusHistory}
+              className="mt-3 w-full rounded-xl border border-cyan-500/50 bg-cyan-900/30 px-4 py-2.5 text-sm font-semibold text-cyan-100 hover:bg-cyan-800/40"
+            >
+              {loadingHistory ? 'Loading History...' : 'Load Status History'}
             </button>
           </aside>
         </div>
@@ -252,6 +343,16 @@ export default function AppointmentBooking() {
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
+                      {['APPROVED', 'REJECTED', 'COMPLETED'].map((status) => (
+                        <button
+                          type="button"
+                          key={status}
+                          onClick={() => handleStatusUpdate(appointment.id, status)}
+                          className="rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-semibold hover:bg-slate-600"
+                        >
+                          Mark {status}
+                        </button>
+                      ))}
                       <button
                         type="button"
                         onClick={() => handleCancel(appointment.id)}
@@ -301,6 +402,27 @@ export default function AppointmentBooking() {
                       }
                     />
                   </div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+          <h2 className="text-xl font-bold text-cyan-300">Status Tracking</h2>
+          <div className="mt-4 space-y-3">
+            {statusHistory.length === 0 ? (
+              <p className="text-sm text-slate-400">No status history loaded.</p>
+            ) : (
+              statusHistory.map((history) => (
+                <div key={history.id} className="rounded-xl border border-slate-700 bg-slate-900/70 p-4 text-sm">
+                  <p className="font-semibold text-cyan-200">
+                    Appointment #{history.appointment?.id || '-'}
+                  </p>
+                  <p className="text-slate-300">
+                    {history.oldStatus || 'NEW'} to {history.newStatus || '-'}
+                  </p>
+                  <p className="text-slate-400">{history.changedAt || 'Time not available'}</p>
                 </div>
               ))
             )}

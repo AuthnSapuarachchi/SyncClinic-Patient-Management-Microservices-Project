@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   addDoctorAvailability,
   createDoctor,
   createPrescription,
   getDoctorAvailability,
   getDoctors,
-  updateDoctorStatus,
+  updateDoctor,
 } from '../api/doctorApi'
 
 const DOCTOR_STATUS = ['PENDING', 'VERIFIED', 'REJECTED']
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
 
 export default function DoctorDashboard() {
+  const navigate = useNavigate()
   const [doctors, setDoctors] = useState([])
   const [selectedDoctorId, setSelectedDoctorId] = useState('')
   const [availabilityList, setAvailabilityList] = useState([])
@@ -126,7 +128,7 @@ export default function DoctorDashboard() {
     }
 
     try {
-      await updateDoctorStatus(selectedDoctorId, newStatus)
+      await updateDoctor(selectedDoctorId, { ...selectedDoctor, status: newStatus })
       setStatusMessage({ text: `Doctor status updated to ${newStatus}`, isError: false })
       await loadDoctors()
     } catch (error) {
@@ -203,13 +205,22 @@ export default function DoctorDashboard() {
             <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">Doctor Dashboard</h1>
             <p className="mt-1 text-sm text-slate-300">Manage doctor profile, availability calendar, and prescriptions.</p>
           </div>
-          <button
-            onClick={handleLogout}
-            type="button"
-            className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
-          >
-            Logout
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => navigate('/appointments')}
+              type="button"
+              className="rounded-lg border border-cyan-500/50 bg-cyan-900/30 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-800/40"
+            >
+              Appointment Booking
+            </button>
+            <button
+              onClick={handleLogout}
+              type="button"
+              className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         {statusMessage.text && (

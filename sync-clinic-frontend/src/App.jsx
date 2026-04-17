@@ -2,6 +2,7 @@ import './App.css'
 import { jwtDecode } from 'jwt-decode'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AuthScreen from './pages/AuthScreen'
+import DoctorAuthScreen from './pages/DoctorAuthScreen'
 import LandingPage from './pages/LandingPage'
 import PatientDashboard from './pages/PatientDashboard'
 import PaymentInitiation from './pages/PaymentInitiation'
@@ -10,8 +11,11 @@ import PaymentSuccess from './pages/PaymentSuccess'
 import PaymentFailed from './pages/PaymentFailed'
 import PaymentHistory from './pages/PaymentHistory'
 import PatientMainDashboard from './pages/PatientMainDashboard'
-import AdminDashboard from './pages/AdminDashboard'
 import DoctorDashboard from './pages/DoctorDashboard'
+import AppointmentBooking from './pages/AppointmentBooking'
+// import AdminDashboard from './pages/AdminDashboard'
+import AdminDashboard from './pages/AdminDashboard'
+
 
 const normalizeRole = (role) => {
   if (typeof role !== 'string' || !role.trim()) {
@@ -58,6 +62,14 @@ const clearSession = () => {
   localStorage.removeItem('user_role')
 }
 
+const getHomePathForRole = (role) => {
+  if (role === 'ROLE_DOCTOR') {
+    return '/doctor/dashboard'
+  }
+
+  return '/patientDashboard'
+}
+
 function App() {
   let token = localStorage.getItem('jwt_token')
   const savedRole = localStorage.getItem('user_role')
@@ -98,6 +110,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/landing" element={<Navigate to="/" replace />} />
         <Route path="/auth" element={hasSeenLanding ? <AuthScreen /> : <Navigate to="/" replace />} />
+        <Route path="/doctor-auth" element={<DoctorAuthScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
@@ -178,8 +191,20 @@ function App() {
         path="/payment-history"
         element={userRole === 'ROLE_PATIENT' ? <PaymentHistory /> : <Navigate to="/" replace />}
       />
+      <Route
+        path="/doctor/dashboard"
+        element={userRole === 'ROLE_DOCTOR' ? <DoctorDashboard /> : <Navigate to="/" replace />}
+      />
+      <Route
+        path="/appointments"
+        element={
+          userRole === 'ROLE_PATIENT' || userRole === 'ROLE_DOCTOR'
+            ? <AppointmentBooking />
+            : <Navigate to="/" replace />
+        }
+      />
       
-      <Route path="*" element={<Navigate to="/patientDashboard" replace />} />
+      <Route path="*" element={<Navigate to={getHomePathForRole(userRole)} replace />} />
     </Routes>
   )
 }
