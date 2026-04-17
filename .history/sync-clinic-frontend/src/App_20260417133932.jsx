@@ -10,8 +10,8 @@ import PaymentSuccess from './pages/PaymentSuccess'
 import PaymentFailed from './pages/PaymentFailed'
 import PaymentHistory from './pages/PaymentHistory'
 import PatientMainDashboard from './pages/PatientMainDashboard'
-import AdminDashboard from './pages/AdminDashboard'
 // import DoctorDashboard from './pages/DoctorDashboard'
+// import AdminDashboard from './pages/AdminDashboard'
 
 const normalizeRole = (role) => {
   if (typeof role !== 'string' || !role.trim()) {
@@ -105,14 +105,16 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={userRole === 'ROLE_ADMIN' ? '/adminDashboard' : '/patientDashboard'} replace />} />
+      <Route path="/" element={<Navigate to="/patientDashboard" replace />} />
       <Route
         path="/patientDashboard"
-        element={userRole === 'ROLE_PATIENT' ? <PatientMainDashboard /> : <Navigate to="/" replace />}
-      />
-      <Route
-        path="/adminDashboard"
-        element={userRole === 'ROLE_ADMIN' ? <AdminDashboard /> : <Navigate to="/" replace />}
+        element={userRole === 'ROLE_PATIENT' ? <PatientMainDashboard /> : (
+          <div style={{ color: 'white', padding: '20px' }}>
+            <h1>Role Mismatch</h1>
+            <p>Your current role is: <code>{userRole}</code></p>
+            <button onClick={clearSession}>Log Out</button>
+          </div>
+        )}
       />
       <Route
         path="/patient/profile"
