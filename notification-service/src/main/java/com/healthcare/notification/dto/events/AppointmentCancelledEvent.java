@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 public class AppointmentCancelledEvent {
 
 	private String appointmentId;
+	private String patientId;
+	private String doctorId;
 	private String patientName;
 	private String patientEmail;
 	private String patientPhone;

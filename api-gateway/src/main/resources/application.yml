@@ -43,7 +43,15 @@ spring:
         - id: notification-service
           uri: http://syncclinic-notification:8085 # Changed from localhost
           predicates:
+            - Path=/notification-service/api/notifications,/notification-service/api/notifications/**
+
+        # Compatibility alias for Notification Service (old path)
+        - id: notification-service-alias
+          uri: http://syncclinic-notification:8085
+          predicates:
             - Path=/api/notifications,/api/notifications/**
+          filters:
+            - RewritePath=/api/notifications(?<remaining>/?.*), /notification-service/api/notifications${remaining}
 
         # Route for AI Symptom Service
         - id: medisphere-AIsymptomcheck-service

@@ -13,6 +13,7 @@ public class PaymentFailedEvent {
     private String appointmentId;
     private String patientId;
     private String patientEmail;
+    private String doctorId;
     private String failureReason;
     private LocalDateTime failedAt;
  
@@ -23,12 +24,14 @@ public class PaymentFailedEvent {
                               String appointmentId,
                               String patientId,
                               String patientEmail,
+                              String doctorId,
                               String failureReason,
                               LocalDateTime failedAt) {
         this.paymentId = paymentId;
         this.appointmentId = appointmentId;
         this.patientId = patientId;
         this.patientEmail = patientEmail;
+        this.doctorId = doctorId;
         this.failureReason = failureReason;
         this.failedAt = failedAt;
     }
@@ -63,6 +66,14 @@ public class PaymentFailedEvent {
  
     public void setPatientEmail(String patientEmail) {
         this.patientEmail = patientEmail;
+    }
+
+    public String getDoctorId() {
+        return doctorId;
+    }
+
+    public void setDoctorId(String doctorId) {
+        this.doctorId = doctorId;
     }
  
     public String getFailureReason() {

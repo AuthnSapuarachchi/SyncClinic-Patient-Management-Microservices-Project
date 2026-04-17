@@ -11,9 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PaymentFailedEvent {
 
+	private String paymentId;
+	private String patientId;
 	private String patientName;
 	private String patientEmail;
 	private String patientPhone;
+	private String doctorId;
 	private String amount;
 	private String currency;
 	private String failureReason;

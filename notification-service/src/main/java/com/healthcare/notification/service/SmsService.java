@@ -25,6 +25,7 @@ public class SmsService {
 			log.info("SMS sent successfully to: {} with SID: {}", toPhoneNumber, message.getSid());
 		} catch (Exception e) {
 			log.error("Failed to send SMS to: {}", toPhoneNumber, e);
+			throw new RuntimeException("Failed to send SMS", e);
 		}
 	}
 

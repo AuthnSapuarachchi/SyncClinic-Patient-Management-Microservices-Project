@@ -1,5 +1,7 @@
 package com.syncclinic.appointmentservice.service;
 
+import com.syncclinic.appointmentservice.dto.events.AppointmentBookedEvent;
+import com.syncclinic.appointmentservice.dto.events.AppointmentCancelledEvent;
 import com.syncclinic.appointmentservice.model.Appointment;
 import com.syncclinic.appointmentservice.model.AppointmentStatus;
 import com.syncclinic.appointmentservice.model.AppointmentStatusHistory;
@@ -16,13 +18,16 @@ public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final AppointmentStatusHistoryRepository statusHistoryRepository;
+    private final AppointmentEventPublisher eventPublisher;
 
     public AppointmentService(
             AppointmentRepository appointmentRepository,
-            AppointmentStatusHistoryRepository statusHistoryRepository
+            AppointmentStatusHistoryRepository statusHistoryRepository,
+            AppointmentEventPublisher eventPublisher
     ) {
         this.appointmentRepository = appointmentRepository;
         this.statusHistoryRepository = statusHistoryRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     // Create a new appointment
@@ -31,7 +36,16 @@ public class AppointmentService {
         // Default appointment status when booking
         appointment.setStatus(AppointmentStatus.PENDING);
 
-        return appointmentRepository.save(appointment);
+        Appointment saved = appointmentRepository.save(appointment);
+        eventPublisher.publishAppointmentBooked(new AppointmentBookedEvent(
+                String.valueOf(saved.getId()),
+                String.valueOf(saved.getPatientId()),
+                String.valueOf(saved.getDoctorId()),
+                saved.getAppointmentDate(),
+                saved.getAppointmentTime(),
+                saved.getReason()));
+
+        return saved;
     }
 
     // Get all appointments
@@ -61,6 +75,17 @@ public class AppointmentService {
         appointment.setStatus(status);
         appointment = appointmentRepository.save(appointment);
         saveHistory(appointment, oldStatus, status);
+
+        if (status == AppointmentStatus.CANCELLED) {
+            eventPublisher.publishAppointmentCancelled(new AppointmentCancelledEvent(
+                    String.valueOf(appointment.getId()),
+                    String.valueOf(appointment.getPatientId()),
+                    String.valueOf(appointment.getDoctorId()),
+                    appointment.getAppointmentDate(),
+                    appointment.getAppointmentTime(),
+                    appointment.getReason()));
+        }
+
         return appointment;
     }
 
@@ -75,6 +100,15 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointment = appointmentRepository.save(appointment);
         saveHistory(appointment, oldStatus, AppointmentStatus.CANCELLED);
+
+        eventPublisher.publishAppointmentCancelled(new AppointmentCancelledEvent(
+            String.valueOf(appointment.getId()),
+            String.valueOf(appointment.getPatientId()),
+            String.valueOf(appointment.getDoctorId()),
+            appointment.getAppointmentDate(),
+            appointment.getAppointmentTime(),
+            appointment.getReason()));
+
         return appointment;
     }
 
