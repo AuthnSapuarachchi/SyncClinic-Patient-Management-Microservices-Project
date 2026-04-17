@@ -1,13 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
-
-const normalizeListResponse = (responseData) => {
-    if (Array.isArray(responseData)) return responseData;
-    if (Array.isArray(responseData?.data)) return responseData.data;
-    if (Array.isArray(responseData?.content)) return responseData.content;
-    return [];
-};
 
 export default function AdminDashboard() {
     const navigate = useNavigate();
@@ -20,7 +13,7 @@ export default function AdminDashboard() {
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('overview');
 
-    const fetchAdminData = useCallback(async () => {
+    const fetchAdminData = async () => {
         setIsLoading(true);
         setError('');
         try {
@@ -48,11 +41,18 @@ export default function AdminDashboard() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    };
 
     useEffect(() => {
         fetchAdminData();
-    }, [fetchAdminData]);
+    }, []);
+
+    const normalizeListResponse = (responseData) => {
+        if (Array.isArray(responseData)) return responseData;
+        if (Array.isArray(responseData?.data)) return responseData.data;
+        if (Array.isArray(responseData?.content)) return responseData.content;
+        return [];
+    };
 
     const handleDoctorAction = async (doctor, action) => {
         try {
@@ -190,16 +190,7 @@ export default function AdminDashboard() {
 
                 {activeTab === 'doctors' && (
                     <section className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <h2 className="text-lg font-bold text-cyan-300">Doctor Directory</h2>
-                            <button
-                                type="button"
-                                onClick={() => navigate('/doctor-management')}
-                                className="rounded-lg border border-cyan-500/50 bg-cyan-900/30 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-800/40"
-                            >
-                                Manage Doctors
-                            </button>
-                        </div>
+                        <h2 className="text-lg font-bold text-cyan-300">Doctor Directory</h2>
                         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {doctors.map(doc => (
                                 <div key={doc.id} className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">

@@ -1,7 +1,10 @@
 package com.syncclinic.doctorservice.service;
 
 import com.syncclinic.doctorservice.model.Doctor;
+import com.syncclinic.doctorservice.repository.DoctorAvailabilityRepository;
 import com.syncclinic.doctorservice.repository.DoctorRepository;
+import com.syncclinic.doctorservice.repository.PrescriptionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,10 +14,18 @@ import java.util.List;
 public class DoctorService {
 
     private final DoctorRepository doctorRepository;
+    private final DoctorAvailabilityRepository doctorAvailabilityRepository;
+    private final PrescriptionRepository prescriptionRepository;
 
     // Constructor injection for repository dependency
-    public DoctorService(DoctorRepository doctorRepository) {
+    public DoctorService(
+            DoctorRepository doctorRepository,
+            DoctorAvailabilityRepository doctorAvailabilityRepository,
+            PrescriptionRepository prescriptionRepository
+    ) {
         this.doctorRepository = doctorRepository;
+        this.doctorAvailabilityRepository = doctorAvailabilityRepository;
+        this.prescriptionRepository = prescriptionRepository;
     }
 
     // Save a new doctor to the database
@@ -61,13 +72,18 @@ public class DoctorService {
     }
 
     // Delete a doctor by ID
+    @Transactional
     public void deleteDoctor(Long id) {
 
         // Check whether doctor exists
         Doctor existingDoctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + id));
 
-        // Delete doctor from database
+        // Delete doctor-owned records first so foreign keys do not block admin cleanup.
+        doctorAvailabilityRepository.deleteByDoctorId(id);
+        prescriptionRepository.deleteByDoctorId(id);
+
+        // Delete doctor from database.
         doctorRepository.delete(existingDoctor);
-}
+    }
 }

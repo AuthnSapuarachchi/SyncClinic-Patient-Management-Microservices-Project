@@ -15,6 +15,11 @@ export const updateDoctor = async (doctorId, doctorPayload) => {
   return response.data
 }
 
+export const deleteDoctor = async (doctorId) => {
+  const response = await api.delete(`/api/doctors/${doctorId}`)
+  return response.data
+}
+
 export const updateDoctorStatus = async (doctorId, status, currentDoctor = null) => {
   const doctor = currentDoctor || (await api.get(`/api/doctors/${doctorId}`)).data
   const response = await api.put(`/api/doctors/${doctorId}`, { ...doctor, status })

@@ -6,6 +6,7 @@ import {
   getDoctorAvailability,
   getDoctors,
 } from '../api/doctorApi'
+import StatusToast from '../components/StatusToast'
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
 
@@ -169,13 +170,6 @@ export default function DoctorDashboard() {
               Appointment Booking
             </button>
             <button
-              onClick={() => navigate('/doctor-management')}
-              type="button"
-              className="rounded-lg border border-slate-500/60 bg-slate-800/70 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:bg-slate-700"
-            >
-              Doctor Management
-            </button>
-            <button
               onClick={handleLogout}
               type="button"
               className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
@@ -185,17 +179,11 @@ export default function DoctorDashboard() {
           </div>
         </div>
 
-        {statusMessage.text && (
-          <div
-            className={`mb-5 rounded-xl border px-4 py-3 text-sm ${
-              statusMessage.isError
-                ? 'border-rose-400/40 bg-rose-500/10 text-rose-200'
-                : 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'
-            }`}
-          >
-            {statusMessage.text}
-          </div>
-        )}
+        <StatusToast
+          message={statusMessage.text}
+          isError={statusMessage.isError}
+          onClose={() => setStatusMessage({ text: '', isError: false })}
+        />
 
         <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-cyan-400/20 bg-cyan-500/10 p-4">
@@ -260,29 +248,38 @@ export default function DoctorDashboard() {
           <section className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur lg:col-span-2">
             <h2 className="text-xl font-bold text-cyan-300">Availability Calendar</h2>
             <form className="mt-4 grid gap-3 sm:grid-cols-3" onSubmit={handleAvailabilitySubmit}>
-              <select
-                className="rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                value={availabilityForm.dayOfWeek}
-                onChange={(event) => setAvailabilityForm({ ...availabilityForm, dayOfWeek: event.target.value })}
-              >
-                {DAYS.map((day) => (
-                  <option key={day} value={day}>
-                    {day}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="time"
-                className="rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                value={availabilityForm.startTime}
-                onChange={(event) => setAvailabilityForm({ ...availabilityForm, startTime: event.target.value })}
-              />
-              <input
-                type="time"
-                className="rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                value={availabilityForm.endTime}
-                onChange={(event) => setAvailabilityForm({ ...availabilityForm, endTime: event.target.value })}
-              />
+              <label className="text-sm font-semibold text-slate-200">
+                Day
+                <select
+                  className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                  value={availabilityForm.dayOfWeek}
+                  onChange={(event) => setAvailabilityForm({ ...availabilityForm, dayOfWeek: event.target.value })}
+                >
+                  {DAYS.map((day) => (
+                    <option key={day} value={day}>
+                      {day}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-sm font-semibold text-slate-200">
+                Start Time
+                <input
+                  type="time"
+                  className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                  value={availabilityForm.startTime}
+                  onChange={(event) => setAvailabilityForm({ ...availabilityForm, startTime: event.target.value })}
+                />
+              </label>
+              <label className="text-sm font-semibold text-slate-200">
+                End Time
+                <input
+                  type="time"
+                  className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                  value={availabilityForm.endTime}
+                  onChange={(event) => setAvailabilityForm({ ...availabilityForm, endTime: event.target.value })}
+                />
+              </label>
               <button
                 type="submit"
                 className="rounded-xl bg-linear-to-r from-cyan-600 to-teal-600 px-4 py-2.5 text-sm font-bold text-white sm:col-span-3"
@@ -310,46 +307,63 @@ export default function DoctorDashboard() {
             <h2 className="text-xl font-bold text-cyan-300">Create Prescription</h2>
             <form className="mt-4 space-y-3" onSubmit={handlePrescriptionSubmit}>
               <div className="grid gap-3 sm:grid-cols-2">
-                <input
-                  className="rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                  placeholder="Patient ID"
-                  type="number"
-                  value={prescriptionForm.patientId}
-                  onChange={(event) => setPrescriptionForm({ ...prescriptionForm, patientId: event.target.value })}
-                  required
-                />
-                <input
-                  className="rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                  placeholder="Appointment ID"
-                  type="number"
-                  value={prescriptionForm.appointmentId}
-                  onChange={(event) => setPrescriptionForm({ ...prescriptionForm, appointmentId: event.target.value })}
-                  required
-                />
+                <label className="text-sm font-semibold text-slate-200">
+                  Patient ID
+                  <input
+                    className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                    placeholder="1"
+                    type="number"
+                    min="1"
+                    value={prescriptionForm.patientId}
+                    onChange={(event) => setPrescriptionForm({ ...prescriptionForm, patientId: event.target.value })}
+                    required
+                  />
+                </label>
+                <label className="text-sm font-semibold text-slate-200">
+                  Appointment ID
+                  <input
+                    className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                    placeholder="1001"
+                    type="number"
+                    min="1"
+                    value={prescriptionForm.appointmentId}
+                    onChange={(event) => setPrescriptionForm({ ...prescriptionForm, appointmentId: event.target.value })}
+                    required
+                  />
+                </label>
               </div>
-              <textarea
-                className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                rows="2"
-                placeholder="Diagnosis"
-                value={prescriptionForm.diagnosis}
-                onChange={(event) => setPrescriptionForm({ ...prescriptionForm, diagnosis: event.target.value })}
-                required
-              />
-              <textarea
-                className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                rows="2"
-                placeholder="Medicines"
-                value={prescriptionForm.medicines}
-                onChange={(event) => setPrescriptionForm({ ...prescriptionForm, medicines: event.target.value })}
-                required
-              />
-              <textarea
-                className="w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
-                rows="2"
-                placeholder="Notes"
-                value={prescriptionForm.notes}
-                onChange={(event) => setPrescriptionForm({ ...prescriptionForm, notes: event.target.value })}
-              />
+              <label className="block text-sm font-semibold text-slate-200">
+                Diagnosis
+                <textarea
+                  className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                  rows="2"
+                  placeholder="Brief diagnosis"
+                  value={prescriptionForm.diagnosis}
+                  onChange={(event) => setPrescriptionForm({ ...prescriptionForm, diagnosis: event.target.value })}
+                  required
+                />
+              </label>
+              <label className="block text-sm font-semibold text-slate-200">
+                Medicines
+                <textarea
+                  className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                  rows="2"
+                  placeholder="Medicine name, dose, frequency"
+                  value={prescriptionForm.medicines}
+                  onChange={(event) => setPrescriptionForm({ ...prescriptionForm, medicines: event.target.value })}
+                  required
+                />
+              </label>
+              <label className="block text-sm font-semibold text-slate-200">
+                Notes
+                <textarea
+                  className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900 px-4 py-2.5"
+                  rows="2"
+                  placeholder="Optional follow-up notes"
+                  value={prescriptionForm.notes}
+                  onChange={(event) => setPrescriptionForm({ ...prescriptionForm, notes: event.target.value })}
+                />
+              </label>
               <button
                 type="submit"
                 className="rounded-xl bg-linear-to-r from-cyan-600 to-teal-600 px-4 py-2.5 text-sm font-bold text-white"
