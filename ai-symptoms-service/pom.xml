@@ -10,7 +10,7 @@
 		<relativePath/> </parent>
 
 	<groupId>com.medisphere</groupId>
-	<artifactId>medisphere-AIsymptomcheck-service</artifactId>
+	<artifactId>SyncClinic</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>medisphere-AIsymptomcheck-service</name>
 	<description>AI powered symptom check service module for Medisphere solution</description>
