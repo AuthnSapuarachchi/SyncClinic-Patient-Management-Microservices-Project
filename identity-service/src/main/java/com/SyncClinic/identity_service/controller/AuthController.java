@@ -21,30 +21,17 @@ public class AuthController {
     @Autowired
     private AuthService service;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
+    // 1. Updated to Map<String, Object> to handle the Enum/String Role
     @PostMapping("/register")
-    public Map<String, String> addNewUser(@RequestBody UserCredentials user) {
+    public Map<String, Object> addNewUser(@RequestBody UserCredentials user) {
         return service.saveUser(user);
     }
 
     @PostMapping("/login")
-    public Map<String, String> getToken(@RequestBody AuthRequest authRequest) {
-        // 1. THE BOUNCER: Check the email and password against the database
-        Authentication authenticate = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
-        );
-
-        // 2. THE ID PRINTER: Only generate the token IF the bouncer approves
-        if (authenticate.isAuthenticated()) {
-
-            String token = service.generateToken(authRequest);
-
-            return Map.of("token", token);
-        } else {
-            throw new RuntimeException("Invalid login credentials!");
-        }
+    public Map<String, Object> getToken(@RequestBody AuthRequest authRequest) {
+        // We moved the AuthenticationManager logic into the service
+        // to keep this controller lean and mean.
+        return service.login(authRequest);
     }
 
 }
