@@ -1,16 +1,16 @@
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\model\VideoSession.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\controller\SessionController.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\config\CorsConfig.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\dto\SessionResponse.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\exception\ApiErrorResponse.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\repository\VideoSessionRepository.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\dto\events\AppointmentConfirmedEvent.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\dto\ApiResponse.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\dto\CreateSessionRequest.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\consumer\TelemedicineConsumer.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\service\SessionService.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\TelemedicineServiceApplication.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\publisher\TelemedicinePublisher.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\config\RabbitMQConfig.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\exception\GlobalExceptionHandler.java
-C:\Users\ASUS TUF X506H\Desktop\3rd Y 1st\DS\Assignment\SyncClinic\telemedicine-service\src\main\java\com\healthcare\telemedicine\dto\events\ConsultationCompletedEvent.java
+/app/src/main/java/com/healthcare/telemedicine/consumer/TelemedicineConsumer.java
+/app/src/main/java/com/healthcare/telemedicine/dto/SessionResponse.java
+/app/src/main/java/com/healthcare/telemedicine/dto/ApiResponse.java
+/app/src/main/java/com/healthcare/telemedicine/publisher/TelemedicinePublisher.java
+/app/src/main/java/com/healthcare/telemedicine/dto/CreateSessionRequest.java
+/app/src/main/java/com/healthcare/telemedicine/dto/events/AppointmentConfirmedEvent.java
+/app/src/main/java/com/healthcare/telemedicine/config/CorsConfig.java
+/app/src/main/java/com/healthcare/telemedicine/dto/events/ConsultationCompletedEvent.java
+/app/src/main/java/com/healthcare/telemedicine/exception/ApiErrorResponse.java
+/app/src/main/java/com/healthcare/telemedicine/model/VideoSession.java
+/app/src/main/java/com/healthcare/telemedicine/repository/VideoSessionRepository.java
+/app/src/main/java/com/healthcare/telemedicine/TelemedicineServiceApplication.java
+/app/src/main/java/com/healthcare/telemedicine/config/RabbitMQConfig.java
+/app/src/main/java/com/healthcare/telemedicine/controller/SessionController.java
+/app/src/main/java/com/healthcare/telemedicine/exception/GlobalExceptionHandler.java
+/app/src/main/java/com/healthcare/telemedicine/service/SessionService.java

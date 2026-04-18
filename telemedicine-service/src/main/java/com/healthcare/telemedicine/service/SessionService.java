@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -76,6 +78,84 @@ public class SessionService {
 		log.info("Video session created with ID: {}", savedSession.getId());
 
 		return SessionResponse.fromEntity(savedSession);
+	}
+
+	public SessionResponse requestVideoCall(com.healthcare.telemedicine.dto.CreateSessionRequest request) {
+		log.info("Requesting video call for appointment: {}", request.getAppointmentId());
+
+		String roomName = generateRoomName(request.getAppointmentId());
+		String joinUrl = generateJoinUrl(roomName);
+
+		VideoSession session = VideoSession.builder()
+				.appointmentId(request.getAppointmentId())
+				.patientId(request.getPatientId())
+				.patientName(request.getPatientName())
+				.doctorId(request.getDoctorId())
+				.doctorName(request.getDoctorName())
+				.roomName(roomName)
+				.joinUrl(joinUrl)
+				.status(VideoSession.SessionStatus.REQUESTED)
+				.createdAt(LocalDateTime.now())
+				.build();
+
+		VideoSession savedSession = videoSessionRepository.save(session);
+		log.info("Video call requested with session ID: {}", savedSession.getId());
+
+		return SessionResponse.fromEntity(savedSession);
+	}
+
+	public List<SessionResponse> getPendingRequestsForDoctor(String doctorId) {
+		log.debug("Fetching pending video call requests for doctor: {}", doctorId);
+
+		List<VideoSession> sessions = videoSessionRepository.findByDoctorIdAndStatus(doctorId, VideoSession.SessionStatus.REQUESTED);
+
+		return sessions.stream()
+				.map(SessionResponse::fromEntity)
+				.collect(Collectors.toList());
+	}
+
+	public SessionResponse acceptVideoCallRequest(String sessionId) {
+		log.info("Accepting video call request with session ID: {}", sessionId);
+
+		VideoSession session = videoSessionRepository.findById(sessionId)
+				.orElseThrow(() -> new RuntimeException("Session not found with ID: " + sessionId));
+
+		session.setStatus(VideoSession.SessionStatus.ACCEPTED);
+		
+		String roomName = generateRoomName(session.getAppointmentId());
+		String joinUrl = generateJoinUrl(roomName);
+		
+		session.setRoomName(roomName);
+		session.setJoinUrl(joinUrl);
+		
+		VideoSession updatedSession = videoSessionRepository.save(session);
+		log.info("Video call request accepted. Room generated: {}", roomName);
+
+		return SessionResponse.fromEntity(updatedSession);
+	}
+
+	public SessionResponse rejectVideoCallRequest(String sessionId) {
+		log.info("Rejecting video call request for session ID: {}", sessionId);
+
+		VideoSession session = videoSessionRepository.findById(sessionId)
+				.orElseThrow(() -> new RuntimeException("Session not found with ID: " + sessionId));
+
+		session.setStatus(VideoSession.SessionStatus.CANCELLED);
+		session.setEndedAt(LocalDateTime.now());
+
+		VideoSession updatedSession = videoSessionRepository.save(session);
+		log.info("Session rejected: {}", sessionId);
+
+		return SessionResponse.fromEntity(updatedSession);
+	}
+
+	public String getSessionStatus(String appointmentId) {
+		log.debug("Fetching session status for appointment: {}", appointmentId);
+
+		VideoSession session = videoSessionRepository.findByAppointmentId(appointmentId)
+				.orElseThrow(() -> new RuntimeException("Session not found for appointment: " + appointmentId));
+
+		return session.getStatus().name();
 	}
 
 	public SessionResponse getSessionByAppointmentId(String appointmentId) {
@@ -173,6 +253,16 @@ public class SessionService {
 				.collect(Collectors.toList());
 	}
 
+	public List<SessionResponse> getPendingRequestsForPatient(String patientId) {
+		log.debug("Fetching pending video call requests for patient: {}", patientId);
+
+		List<VideoSession> sessions = videoSessionRepository.findByPatientIdAndStatus(patientId, VideoSession.SessionStatus.REQUESTED);
+
+		return sessions.stream()
+				.map(SessionResponse::fromEntity)
+				.collect(Collectors.toList());
+	}
+
 	public List<SessionResponse> getActiveSessions() {
 		log.debug("Fetching all active sessions");
 
@@ -185,12 +275,20 @@ public class SessionService {
 	}
 
 	private String generateRoomName(String appointmentId) {
+		String safeAppointmentId = appointmentId == null ? "session"
+				: appointmentId.toLowerCase().replaceAll("[^a-z0-9-]", "-").replaceAll("-+", "-");
+		if (safeAppointmentId.isBlank()) {
+			safeAppointmentId = "session";
+		}
+
 		String uuid = UUID.randomUUID().toString().substring(0, 8);
-		return "healthcare-" + appointmentId + "-" + uuid;
+		return "healthcare-" + safeAppointmentId + "-" + uuid;
 	}
 
 	private String generateJoinUrl(String roomName) {
-		return jitsiBaseUrl + "/" + roomName;
+		String encodedRoomName = URLEncoder.encode(roomName, StandardCharsets.UTF_8)
+				.replace("+", "%20");
+		return jitsiBaseUrl + "/" + encodedRoomName;
 	}
 
 }

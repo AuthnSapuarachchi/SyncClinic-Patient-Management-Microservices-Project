@@ -33,6 +33,8 @@ public class VideoSession {
 	private Long durationMinutes;
 
 	public enum SessionStatus {
+		REQUESTED,
+		ACCEPTED,
 		WAITING,
 		IN_PROGRESS,
 		COMPLETED,

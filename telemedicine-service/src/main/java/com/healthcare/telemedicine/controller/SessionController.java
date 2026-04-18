@@ -37,6 +37,66 @@ public class SessionController {
 				.body(ApiResponse.success("Session created successfully", response));
 	}
 
+	@PostMapping("/request")
+	public ResponseEntity<ApiResponse<SessionResponse>> requestVideoCall(
+			@RequestBody CreateSessionRequest request) {
+		log.info("Requesting video call for appointment: {}", request.getAppointmentId());
+
+		SessionResponse response = sessionService.requestVideoCall(request);
+
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body(ApiResponse.success("Video call requested successfully", response));
+	}
+
+	@GetMapping("/doctor/{doctorId}/requests")
+	public ResponseEntity<ApiResponse<List<SessionResponse>>> getPendingRequestsForDoctor(
+			@PathVariable String doctorId) {
+		log.info("Getting pending requests for doctor: {}", doctorId);
+
+		List<SessionResponse> responses = sessionService.getPendingRequestsForDoctor(doctorId);
+
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(ApiResponse.success("Pending requests retrieved successfully", responses));
+	}
+
+	@PutMapping("/{sessionId}/accept")
+	public ResponseEntity<ApiResponse<SessionResponse>> acceptVideoCallRequest(
+			@PathVariable String sessionId) {
+		log.info("Accepting video call request for session: {}", sessionId);
+
+		SessionResponse response = sessionService.acceptVideoCallRequest(sessionId);
+
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(ApiResponse.success("Video call request accepted successfully", response));
+	}
+
+	@PutMapping("/{sessionId}/reject")
+	public ResponseEntity<ApiResponse<SessionResponse>> rejectVideoCallRequest(
+			@PathVariable String sessionId) {
+		log.info("Rejecting video call request for session: {}", sessionId);
+
+		SessionResponse response = sessionService.rejectVideoCallRequest(sessionId);
+
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(ApiResponse.success("Video call request rejected successfully", response));
+	}
+
+	@GetMapping("/{appointmentId}/status")
+	public ResponseEntity<ApiResponse<String>> getSessionStatus(
+			@PathVariable String appointmentId) {
+		log.info("Getting status for session with appointment: {}", appointmentId);
+
+		String status = sessionService.getSessionStatus(appointmentId);
+
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(ApiResponse.success("Session status retrieved successfully", status));
+	}
+
 	@GetMapping("/{appointmentId}")
 	public ResponseEntity<ApiResponse<SessionResponse>> getSession(
 			@PathVariable String appointmentId) {
@@ -105,6 +165,18 @@ public class SessionController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(ApiResponse.success("Sessions retrieved successfully", responses));
+	}
+
+	@GetMapping("/patient/{patientId}/requests")
+	public ResponseEntity<ApiResponse<List<SessionResponse>>> getPendingRequestsForPatient(
+			@PathVariable String patientId) {
+		log.info("Getting pending requests for patient: {}", patientId);
+
+		List<SessionResponse> responses = sessionService.getPendingRequestsForPatient(patientId);
+
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(ApiResponse.success("Pending requests retrieved successfully", responses));
 	}
 
 	@GetMapping("/active")

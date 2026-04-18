@@ -21,6 +21,8 @@ export default function PatientMainDashboard() {
     const [creatingSessionId, setCreatingSessionId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [notice, setNotice] = useState('');
+    const [closedSessionIds, setClosedSessionIds] = useState([]);
 
     const [filters, setFilters] = useState({
         specialty: '',
@@ -119,7 +121,7 @@ export default function PatientMainDashboard() {
         }
     };
 
-    const createAndJoinSession = async (doctor) => {
+    const requestVideoCall = async (doctor) => {
         if (!patientId || !doctor?.id) {
             setError('Missing patient or doctor details for telemedicine session creation.');
             return;
@@ -128,10 +130,11 @@ export default function PatientMainDashboard() {
         const appointmentId = `quick-${patientId}-${doctor.id}-${Date.now()}`;
 
         setError('');
+        setNotice('');
         setCreatingSessionId(doctor.id);
 
         try {
-            const response = await api.post('/telemedicine-service/api/sessions/create', {
+            await api.post('/telemedicine-service/api/sessions/request', {
                 appointmentId,
                 patientId: String(patientId),
                 patientName,
@@ -139,31 +142,29 @@ export default function PatientMainDashboard() {
                 doctorName: doctor.fullName || `Doctor #${doctor.id}`
             });
 
-            const session = normalizeSingleResponse(response.data);
-            const joinUrl = session?.joinUrl;
-
             await fetchTelemedicineSessions(patientId);
-
-            if (joinUrl) {
-                window.open(joinUrl, '_blank', 'noopener,noreferrer');
-            } else {
-                setError('Session created, but no join URL was returned.');
-            }
+            setNotice('Video call requested. Please wait for the doctor to accept.');
         } catch (sessionError) {
-            console.error('Failed to create telemedicine session', sessionError);
-            setError('Unable to start the video session right now. Please try again.');
+            console.error('Failed to create telemedicine session request', sessionError);
+            setNotice('');
+            setError('Unable to start the video session request right now. Please try again.');
         } finally {
             setCreatingSessionId(null);
         }
     };
 
-    const handleJoinSession = (joinUrl) => {
+    const handleJoinSession = (session) => {
+        const joinUrl = session?.joinUrl;
         if (!joinUrl) {
             setError('No join link is available for this session.');
             return;
         }
 
         window.open(joinUrl, '_blank', 'noopener,noreferrer');
+        if (session?.sessionId) {
+            setClosedSessionIds((prev) => (prev.includes(session.sessionId) ? prev : [...prev, session.sessionId]));
+            setNotice('Meeting opened. Join button is hidden for this completed session.');
+        }
     };
 
     const doctorNameById = useMemo(() => {
@@ -183,7 +184,9 @@ export default function PatientMainDashboard() {
             try {
                 const doctorsResponse = await api.get('/api/doctors');
                 const doctorsData = normalizeListResponse(doctorsResponse.data);
-                setDoctors(doctorsData.filter((doctor) => doctor.status !== 'REJECTED'));
+                const validDoctors = doctorsData.filter((doctor) => doctor.status !== 'REJECTED');
+                setDoctors(validDoctors);
+                setTelemedicineDoctors(validDoctors.filter((doctor) => doctor.status === 'VERIFIED'));
 
                 try {
                     const patientResponse = await api.get(`/api/patients/profile/${encodeURIComponent(userEmail)}`);
@@ -246,6 +249,18 @@ export default function PatientMainDashboard() {
         fetchDashboardData();
     }, [userEmail]);
 
+    useEffect(() => {
+        if (!patientId) {
+            return undefined;
+        }
+
+        const intervalId = setInterval(() => {
+            fetchTelemedicineSessions(patientId);
+        }, 5000);
+
+        return () => clearInterval(intervalId);
+    }, [patientId]);
+
     const handleBookAppointment = async (doctorId, feeLkr) => {
         void feeLkr;
 
@@ -282,13 +297,20 @@ export default function PatientMainDashboard() {
     };
 
     const nextSession = useMemo(() => {
-        const activeSessions = telemedicineSessions.filter((session) => session.status !== 'COMPLETED' && session.status !== 'CANCELLED');
+        const activeSessions = telemedicineSessions.filter((session) => {
+            const sessionId = session.sessionId || session.id;
+            return (
+                session.status === 'ACCEPTED'
+                && !closedSessionIds.includes(sessionId)
+                && !session.endedAt
+            );
+        });
         if (activeSessions.length === 0) {
             return null;
         }
 
         return activeSessions.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
-    }, [telemedicineSessions]);
+    }, [telemedicineSessions, closedSessionIds]);
 
     const handleLogout = () => {
         localStorage.removeItem('jwt_token');
@@ -302,6 +324,7 @@ export default function PatientMainDashboard() {
             <div className="mx-auto max-w-6xl">
                 {isLoading && <p className="mb-4 text-sm text-cyan-200">Loading dashboard...</p>}
                 {error && <p className="mb-4 text-sm text-rose-300">{error}</p>}
+                {notice && <p className="mb-4 text-sm text-emerald-300">{notice}</p>}
                 <section className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-linear-to-r from-cyan-700/30 via-slate-800/70 to-teal-700/30 p-6 shadow-xl backdrop-blur">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
@@ -471,25 +494,35 @@ export default function PatientMainDashboard() {
                             {nextSession && (
                                 <button
                                     type="button"
-                                    onClick={() => handleJoinSession(nextSession.joinUrl)}
-                                    className="mt-3 w-full rounded-lg bg-slate-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-600"
+                                    onClick={() => handleJoinSession(nextSession)}
+                                    className="mt-3 w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
                                 >
-                                    Join Next Video Session
+                                    Join Meeting {nextSession.doctorName ? `(Dr. ${nextSession.doctorName})` : ''}
                                 </button>
                             )}
 
-                            <div className="mt-4 space-y-2 text-sm">
-                                {telemedicineDoctors.slice(0, 4).map((doctor) => (
+                            {nextSession && (
+                                <p className="mt-2 text-xs text-emerald-300">
+                                    Doctor accepted your video call. Click Join Meeting to enter the consultation.
+                                </p>
+                            )}
+
+                            {telemedicineSessions.filter(s => s.status === 'REQUESTED' || s.status === 'PENDING').length > 0 && (
+                                <p className="mt-2 text-xs text-amber-300">You have {telemedicineSessions.filter(s => s.status === 'REQUESTED' || s.status === 'PENDING').length} pending video call request(s).</p>
+                            )}
+
+                            <div className="mt-4 space-y-2 text-sm max-h-96 overflow-y-auto">
+                                {telemedicineDoctors.map((doctor) => (
                                     <div key={`tele-${doctor.id}`} className="rounded-xl border border-slate-700 bg-slate-900/70 p-3">
                                         <p className="font-semibold text-slate-100">{doctor.fullName}</p>
                                         <p className="text-slate-300">{doctor.specialty} • {doctor.hospital}</p>
                                         <button
                                             type="button"
-                                            onClick={() => createAndJoinSession(doctor)}
-                                            disabled={creatingSessionId !== null}
+                                            onClick={() => requestVideoCall(doctor)}
+                                            disabled={creatingSessionId === doctor.id}
                                             className="mt-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
                                         >
-                                            {creatingSessionId === doctor.id ? 'Starting...' : 'Start Video Call'}
+                                            {creatingSessionId === doctor.id ? 'Requesting...' : 'Request Video Call'}
                                         </button>
                                     </div>
                                 ))}
