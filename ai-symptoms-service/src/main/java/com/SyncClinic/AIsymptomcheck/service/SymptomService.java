@@ -1,33 +1,41 @@
 package com.SyncClinic.AIsymptomcheck.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckRequest;
-import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
+
+import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckRequest;
+import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckResponse;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class SymptomService {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(SymptomService.class);
+    private static final Logger log = LoggerFactory.getLogger(SymptomService.class);
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${groq.api-url}")
+    @Value("${openai.api-url}")
     private String apiUrl;
 
-    @Value("${groq.api-key}")
+    @Value("${openai.api-key}")
     private String apiKey;
+
+    @Value("${openai.model:gpt-4.1-mini}")
+    private String model;
 
     public SymptomService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -36,93 +44,105 @@ public class SymptomService {
 
     public SymptomCheckResponse checkSymptoms(SymptomCheckRequest request) {
         String prompt = buildPrompt(request);
-        String geminiResponse = callGroqApi(prompt);
-        return parseGeminiResponse(geminiResponse);
+        String rawAiResponse = callOpenAiApi(prompt);
+        return parseAiResponse(rawAiResponse);
     }
 
-    // --- Build a structured prompt that forces JSON output ---
     private String buildPrompt(SymptomCheckRequest request) {
         String symptomsList = String.join(", ", request.getSymptoms());
+        String additional = (request.getAdditionalInfo() == null || request.getAdditionalInfo().isBlank())
+                ? "None"
+                : request.getAdditionalInfo();
 
         return """
-                You are a medical AI assistant. A patient has reported the following symptoms.
-                Analyze them and respond ONLY with a valid JSON object — no extra text, 
-                no markdown, no explanation outside the JSON.
-                
+                You are a medical triage assistant.
+                Return ONLY valid JSON. No markdown. No extra text.
+
                 Patient details:
                 - Age: %s
                 - Gender: %s
                 - Symptoms: %s
                 - Additional info: %s
-                
-                Respond with this exact JSON structure:
+
+                Required JSON schema:
                 {
                   "possibleConditions": ["condition1", "condition2", "condition3"],
                   "recommendedSpecialties": ["specialty1", "specialty2"],
                   "urgencyLevel": "LOW" or "MEDIUM" or "HIGH",
                   "generalAdvice": ["advice1", "advice2", "advice3"]
                 }
-                
+
                 Rules:
-                - possibleConditions: list 2-4 possible conditions, most likely first
-                - recommendedSpecialties: list 1-3 doctor specialties the patient should see
-                - urgencyLevel: LOW (can wait a few days), MEDIUM (see doctor soon), 
-                  HIGH (seek immediate care)
-                - generalAdvice: list 3-4 practical self-care tips
-                - Never diagnose definitively — use words like "possible", "may indicate"
-                """.formatted(
-                request.getAge(),
-                request.getGender(),
-                symptomsList,
-                request.getAdditionalInfo() != null
-                        ? request.getAdditionalInfo() : "None"
-        );
+                - possibleConditions: 2 to 4 likely conditions
+                - recommendedSpecialties: 1 to 3 specialties
+                - urgencyLevel: LOW, MEDIUM, or HIGH only
+                - generalAdvice: 3 to 4 practical tips
+                - Never diagnose with certainty
+                """.formatted(request.getAge(), request.getGender(), symptomsList, additional);
     }
 
-    private String callGroqApi(String prompt) {
+    private String callOpenAiApi(String prompt) {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new RuntimeException("OPENAI_API_KEY is missing");
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
 
-        Map<String, Object> message = Map.of(
+        Map<String, Object> systemMessage = Map.of(
+                "role", "system",
+                "content", "You are a safe medical triage assistant. Return strict JSON only."
+        );
+
+        Map<String, Object> userMessage = Map.of(
                 "role", "user",
                 "content", prompt
         );
+
         Map<String, Object> body = Map.of(
-                "model", "llama-3.3-70b-versatile",
-                "messages", List.of(message),
-                "temperature", 0.3
+                "model", model,
+                "messages", List.of(systemMessage, userMessage),
+                "temperature", 0.2
         );
 
-        HttpEntity<Map<String, Object>> entity =
-                new HttpEntity<>(body, headers);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    apiUrl, entity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, entity, String.class);
 
-            if (response.getStatusCode() == HttpStatus.OK
-                    && response.getBody() != null) {
-                JsonNode root = objectMapper.readTree(response.getBody());
-                return root
-                        .path("choices")
-                        .get(0)
-                        .path("message")
-                        .path("content")
-                        .asText();
+            if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                throw new RuntimeException("OpenAI returned empty/non-success response");
             }
-            throw new RuntimeException("Empty response from Groq API");
 
-        } catch (Exception e) {
-            log.error("Groq API call failed: {}", e.getMessage());
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode contentNode = root.path("choices").get(0).path("message").path("content");
+            if (contentNode.isMissingNode() || contentNode.asText().isBlank()) {
+                throw new RuntimeException("OpenAI response content is empty");
+            }
+
+            return contentNode.asText();
+
+        } catch (HttpStatusCodeException ex) {
+            String responseBody = ex.getResponseBodyAsString();
+            log.error("OpenAI API HTTP error: status={}, body={}", ex.getStatusCode(), responseBody);
+
+            if (ex.getStatusCode().value() == 401) {
+                throw new RuntimeException("Invalid OpenAI API key");
+            }
+            if (ex.getStatusCode().value() == 429) {
+                throw new RuntimeException("OpenAI rate limit exceeded");
+            }
+
+            throw new RuntimeException("OpenAI API request failed");
+        } catch (Exception ex) {
+            log.error("OpenAI API call failed: {}", ex.getMessage(), ex);
             throw new RuntimeException("Failed to get response from AI service");
         }
     }
 
-    // --- Parse the JSON Gemini returns into our DTO ---
-    private SymptomCheckResponse parseGeminiResponse(String rawResponse) {
+    private SymptomCheckResponse parseAiResponse(String rawResponse) {
         try {
-            // Clean up in case Gemini adds markdown code fences
             String cleaned = rawResponse
                     .replace("```json", "")
                     .replace("```", "")
@@ -130,32 +150,30 @@ public class SymptomService {
 
             JsonNode node = objectMapper.readTree(cleaned);
 
-            List<String> conditions  = new ArrayList<>();
+            List<String> conditions = new ArrayList<>();
             List<String> specialties = new ArrayList<>();
-            List<String> advice      = new ArrayList<>();
+            List<String> advice = new ArrayList<>();
 
-            node.path("possibleConditions")
-                    .forEach(n -> conditions.add(n.asText()));
-            node.path("recommendedSpecialties")
-                    .forEach(n -> specialties.add(n.asText()));
-            node.path("generalAdvice")
-                    .forEach(n -> advice.add(n.asText()));
+            node.path("possibleConditions").forEach(n -> conditions.add(n.asText()));
+            node.path("recommendedSpecialties").forEach(n -> specialties.add(n.asText()));
+            node.path("generalAdvice").forEach(n -> advice.add(n.asText()));
 
-            String urgency = node.path("urgencyLevel")
-                    .asText("MEDIUM");
+            String urgency = node.path("urgencyLevel").asText("MEDIUM").toUpperCase();
+
+            if (!urgency.equals("LOW") && !urgency.equals("MEDIUM") && !urgency.equals("HIGH")) {
+                urgency = "MEDIUM";
+            }
 
             return SymptomCheckResponse.builder()
                     .possibleConditions(conditions)
                     .recommendedSpecialties(specialties)
                     .urgencyLevel(urgency)
                     .generalAdvice(advice)
-                    .disclaimer("This is an AI-generated preliminary assessment " +
-                            "and does not constitute medical advice. " +
-                            "Please consult a qualified healthcare professional.")
+                    .disclaimer("This is an AI-generated preliminary assessment and not medical advice. Please consult a qualified healthcare professional.")
                     .build();
 
-        } catch (Exception e) {
-            log.error("Failed to parse Gemini response: {}", e.getMessage());
+        } catch (Exception ex) {
+            log.error("Failed to parse AI response: {}", ex.getMessage(), ex);
             throw new RuntimeException("Failed to parse AI response");
         }
     }
