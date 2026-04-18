@@ -1,0 +1,43 @@
+﻿server:
+  port: 8084 # Changed to 8084 (Appointment Service usually takes 8085)
+
+spring:
+  application:
+    name: notification-service
+
+  # 1. MongoDB Setup (For saving logs)
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://admin:admin123@mongodb:27017/notification_db?authSource=admin}
+
+  # 2. RabbitMQ Setup (The Post Office)
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: 5672
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+  # 3. Email Setup (Using your Brevo config)
+  mail:
+    host: ${MAIL_HOST:smtp-relay.brevo.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:thilakarathnagayal@gmail.com}
+    password: ${MAIL_PASSWORD:your-brevo-smtp-key}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# 4. Service Registry (Crucial so it joins the hospital network!)
+eureka:
+  client:
+    service-url:
+      defaultZone: http://service-registry:8761/eureka/
+
+# 5. Twilio (Ignored for now, but ready for later)
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID:dummy-sid}
+  auth-token: ${TWILIO_AUTH_TOKEN:dummy-token}
+  phone-number: ${TWILIO_PHONE_NUMBER:+1234567890}

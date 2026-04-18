@@ -1,0 +1,81 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: payment-service
+
+  datasource:
+    # Use postgres-payment-db when running in Docker, localhost:5435 for local dev
+    url: jdbc:postgresql://postgres-db:5432/syncclinic_payment
+    username: postgres
+    password: rootpassword123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring:
+          json:
+            add:
+              type:
+                headers: false
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+eureka:
+  client:
+    enabled: false # Enable when service-registry is running
+    service-url:
+      defaultZone: http://service-registry:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+stripe:
+  api:
+    key: ${STRIPE_API_KEY:sk_test_51TMRVCRx3TiIWi21ORiqn4uExXI1WfMowDiuOBnNSWkoymXFSJP6m9kCHATnA70b3wand56OSQdqUDIQ7Efb1g9i00kO3v2T8x}
+  publishable:
+    key: ${STRIPE_PUBLISHABLE_KEY:pk_test_51TMRVCRx3TiIWi21sogS8kzWtI2BKfk1x1uTgsnV526Ud5Y5JPLvdvkV24O1g5BmVrjIfUELgdZefrn9pgEUqVTW001VxdRF2Q}
+  webhook:
+    secret: ${STRIPE_WEBHOOK_SECRET:whsec_331095c6936e568759b2a0556aa2e04d721e4adef4e38de827c9b4a7ebe259a3}
+
+# Internal service URLs (for appointment status verification)
+appointment:
+  service:
+    url: ${APPOINTMENT_SERVICE_URL:http://syncclinic-appointment:8082}
+
+telemedicine:
+  service:
+    url: ${TELEMEDICINE_SERVICE_URL:http://syncclinic-telemedicine:8083}
+
+kafka:
+  topic:
+    payment-success: payment-success-events
+    payment-failed: payment-failed-events
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com:
+      SyncClinic:
+        payment_service: DEBUG

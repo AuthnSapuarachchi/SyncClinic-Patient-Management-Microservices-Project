@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # Route for the Identity Service
+        - id: identity-service
+          uri: http://syncclinic-identity:8081
+          predicates:
+            - Path=/auth/**
+
+        # Route for the Patient Management Service
+        - id: patient-service
+          uri: http://syncclinic-patient:8082  # Changed from patient-service to match docker container
+          predicates:
+            - Path=/api/patients,/api/patients/**
+          filters:
+            - AuthenticationFilter
+
+        # Route for the Doctor Management Service
+        - id: doctor-service
+          uri: http://syncclinic-doctor:8083   # Changed from localhost
+          predicates:
+            - Path=/api/doctors,/api/doctors/**
+
+        # Route for prescription APIs (served by doctor-service)
+        - id: prescription-service
+          uri: http://syncclinic-doctor:8083   # Changed from localhost
+          predicates:
+            - Path=/api/prescriptions,/api/prescriptions/**
+
+        # Route for the Appointment Service
+        - id: appointment-service
+          uri: http://syncclinic-appointment:8084 # Changed from localhost
+          predicates:
+            - Path=/api/appointments,/api/appointments/**
+
+        # Route for Notification Service
+        - id: notification-service
+          uri: http://syncclinic-notification:8085 # Changed from localhost
+          predicates:
+            - Path=/notification-service/api/notifications,/notification-service/api/notifications/**
+
+        # Compatibility alias for Notification Service (old path)
+        - id: notification-service-alias
+          uri: http://syncclinic-notification:8085
+          predicates:
+            - Path=/api/notifications,/api/notifications/**
+          filters:
+            - RewritePath=/api/notifications(?<remaining>/?.*), /notification-service/api/notifications${remaining}
+
+        # Route for AI Symptom Service
+        - id: medisphere-AIsymptomcheck-service
+          uri: http://syncclinic-ai-symptoms:8088 # Changed from localhost. (Note: Using 8088 based on your earlier Dockerfile setup)
+          predicates:
+            - Path=/api/symptoms,/api/symptoms/**
+
+        # Route for Telemedicine Service
+        - id: telemedicine-service
+          uri: http://syncclinic-telemedicine:8087 # Changed from localhost
+          predicates:
+            - Path=/telemedicine-service/**
+
+        # Route for Payment Service
+        - id: payment-service
+          uri: http://syncclinic-payment:8086
+          predicates:
+            - Path=/api/payments,/api/payments/**
