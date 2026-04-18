@@ -12,7 +12,20 @@ const emptyProfile = {
   qualification: '',
   experienceYears: '',
   bio: '',
+  profileImageUrl: '',
   status: 'PENDING',
+}
+
+const getInitials = (nameOrEmail) => {
+  const parts = String(nameOrEmail || '')
+    .trim()
+    .split(/[\s@._-]+/)
+    .filter(Boolean)
+
+  return parts
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('') || 'DR'
 }
 
 export default function DoctorProfile() {
@@ -21,6 +34,7 @@ export default function DoctorProfile() {
   const [doctors, setDoctors] = useState([])
   const [selectedDoctorId, setSelectedDoctorId] = useState('')
   const [formData, setFormData] = useState({ ...emptyProfile, email: userEmail })
+  const [selectedImageFile, setSelectedImageFile] = useState(null)
   const [statusMessage, setStatusMessage] = useState({ text: '', isError: false })
   const [loading, setLoading] = useState(false)
 
@@ -73,12 +87,52 @@ export default function DoctorProfile() {
       qualification: selectedDoctor.qualification || '',
       experienceYears: selectedDoctor.experienceYears ?? '',
       bio: selectedDoctor.bio || '',
+      profileImageUrl: selectedDoctor.profileImageUrl || '',
       status: selectedDoctor.status || 'PENDING',
     })
   }, [selectedDoctor, userEmail])
 
   const handleChange = (event) => {
     setFormData({ ...formData, [event.target.name]: event.target.value })
+  }
+
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      setSelectedImageFile(null)
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setStatusMessage({ text: 'Please choose an image file.', isError: true })
+      return
+    }
+
+    if (file.size > 1024 * 1024) {
+      setStatusMessage({ text: 'Choose an image smaller than 1 MB.', isError: true })
+      return
+    }
+
+    setSelectedImageFile(file)
+    setStatusMessage({ text: `${file.name} selected. Click Upload Image to preview it.`, isError: false })
+  }
+
+  const handleImageUpload = () => {
+    if (!selectedImageFile) {
+      setStatusMessage({ text: 'Choose an image before uploading.', isError: true })
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      setFormData((current) => ({ ...current, profileImageUrl: reader.result || '' }))
+      setStatusMessage({ text: 'Profile image uploaded. Save the profile to keep it.', isError: false })
+    }
+    reader.onerror = () => {
+      setStatusMessage({ text: 'Could not read the selected image.', isError: true })
+    }
+    reader.readAsDataURL(selectedImageFile)
   }
 
   const handleNewProfile = () => {
@@ -169,12 +223,87 @@ export default function DoctorProfile() {
               <p className="font-semibold text-cyan-200">{doctors.length > 0 ? 'Found' : 'Not created yet'}</p>
               <p className="mt-3 text-slate-300">Profile status</p>
               <p className="font-semibold text-emerald-300">{formData.status || 'PENDING'}</p>
+              <div className="mt-4 flex items-center gap-3 border-t border-slate-700 pt-4">
+                {formData.profileImageUrl ? (
+                  <img
+                    src={formData.profileImageUrl}
+                    alt="Doctor profile"
+                    className="h-16 w-16 rounded-lg object-cover ring-1 ring-cyan-300/30"
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-cyan-500/15 text-lg font-black text-cyan-100 ring-1 ring-cyan-300/30">
+                    {getInitials(formData.fullName || userEmail)}
+                  </div>
+                )}
+                <div>
+                  <p className="text-slate-300">Profile image</p>
+                  <p className="text-xs text-slate-400">{formData.profileImageUrl ? 'Ready to save' : 'Not added yet'}</p>
+                </div>
+              </div>
             </div>
           </aside>
 
           <section className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur lg:col-span-2">
             <h2 className="text-xl font-bold text-cyan-300">{selectedDoctorId ? 'Update Profile' : 'Create Profile'}</h2>
             <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+              <div className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  {formData.profileImageUrl ? (
+                    <img
+                      src={formData.profileImageUrl}
+                      alt="Doctor profile preview"
+                      className="h-24 w-24 rounded-lg object-cover ring-1 ring-cyan-300/30"
+                    />
+                  ) : (
+                    <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-cyan-500/15 text-2xl font-black text-cyan-100 ring-1 ring-cyan-300/30">
+                      {getInitials(formData.fullName || userEmail)}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-slate-200">
+                      Profile Image
+                      <input
+                        id="doctor-profile-image"
+                        className="sr-only"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <label
+                          htmlFor="doctor-profile-image"
+                          className="cursor-pointer rounded-lg border border-cyan-400/60 bg-cyan-900/40 px-4 py-2 text-sm font-bold text-cyan-100 transition hover:bg-cyan-800/50"
+                        >
+                          Choose File
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleImageUpload}
+                          disabled={!selectedImageFile}
+                          className="rounded-lg bg-cyan-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Upload Image
+                        </button>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-xs text-slate-400">
+                      {selectedImageFile ? `Selected: ${selectedImageFile.name}` : 'Use a JPG or PNG under 1 MB.'}
+                    </p>
+                    {formData.profileImageUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedImageFile(null)
+                          setFormData((current) => ({ ...current, profileImageUrl: '' }))
+                        }}
+                        className="mt-3 rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/20"
+                      >
+                        Remove Image
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 {[
                   ['fullName', 'Full Name', 'text', 'Dr. Asha Perera'],

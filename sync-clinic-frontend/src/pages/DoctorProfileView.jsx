@@ -17,6 +17,18 @@ const DetailCard = ({ label, value }) => (
   </div>
 )
 
+const getInitials = (nameOrEmail) => {
+  const parts = String(nameOrEmail || '')
+    .trim()
+    .split(/[\s@._-]+/)
+    .filter(Boolean)
+
+  return parts
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('') || 'DR'
+}
+
 export default function DoctorProfileView() {
   const { doctorId } = useParams()
   const navigate = useNavigate()
@@ -80,13 +92,26 @@ export default function DoctorProfileView() {
             <section className="mt-6 overflow-hidden rounded-3xl border border-cyan-300/20 bg-slate-900/80 shadow-2xl shadow-cyan-950/40">
               <div className="bg-linear-to-r from-cyan-500/20 via-teal-500/10 to-slate-900 p-6 sm:p-8">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                    {doctor.profileImageUrl ? (
+                      <img
+                        src={doctor.profileImageUrl}
+                        alt={`${displayValue(doctor.fullName, 'Doctor')} profile`}
+                        className="h-28 w-28 rounded-lg object-cover ring-2 ring-cyan-200/30"
+                      />
+                    ) : (
+                      <div className="flex h-28 w-28 items-center justify-center rounded-lg bg-cyan-500/15 text-3xl font-black text-cyan-100 ring-2 ring-cyan-200/30">
+                        {getInitials(doctor.fullName || doctor.email)}
+                      </div>
+                    )}
+                    <div>
                     <p className="text-xs font-bold uppercase tracking-[0.3em] text-cyan-200">Doctor Profile</p>
                     <h1 className="mt-3 text-3xl font-black text-white sm:text-4xl">
                       {displayValue(doctor.fullName, 'Doctor')}
                     </h1>
                     <p className="mt-2 text-lg font-semibold text-cyan-200">{displayValue(doctor.specialty)}</p>
                     <p className="mt-1 text-sm text-slate-300">{displayValue(doctor.hospital)}</p>
+                    </div>
                   </div>
 
                   <span

@@ -48,6 +48,10 @@ public class Doctor {
     @Column(length = 1000)
     private String bio;
 
+    // Doctor profile picture stored as a data URL
+    @Column(columnDefinition = "TEXT")
+    private String profileImageUrl;
+
     // Verification status of the doctor
     @Enumerated(EnumType.STRING)
     private DoctorStatus status;
