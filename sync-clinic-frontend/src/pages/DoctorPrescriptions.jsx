@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDoctors, getPrescriptionsByDoctor } from '../api/doctorApi'
 import api from '../api/axiosConfig'
+import DoctorNavigation from '../components/DoctorNavigation'
 import StatusToast from '../components/StatusToast'
 
 const formatEmailName = (email) => {
@@ -179,6 +180,8 @@ export default function DoctorPrescriptions() {
             </button>
           </div>
         </div>
+
+        <DoctorNavigation />
 
         <StatusToast
           message={statusMessage.text}

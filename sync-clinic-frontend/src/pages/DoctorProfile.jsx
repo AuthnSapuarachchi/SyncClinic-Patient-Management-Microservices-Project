@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createDoctor, getDoctors, updateDoctor } from '../api/doctorApi'
+import DoctorNavigation from '../components/DoctorNavigation'
 import StatusToast from '../components/StatusToast'
 
 const emptyProfile = {
@@ -204,6 +205,8 @@ export default function DoctorProfile() {
             </button>
           </div>
         </div>
+
+        <DoctorNavigation />
 
         <StatusToast
           message={statusMessage.text}
