@@ -7,6 +7,7 @@ import {
   getDoctorAvailability,
   getDoctors,
 } from '../api/doctorApi'
+import api from '../api/axiosConfig'
 import StatusToast from '../components/StatusToast'
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
@@ -53,6 +54,7 @@ export default function DoctorDashboard() {
   const [loadingDoctors, setLoadingDoctors] = useState(false)
   const [loadingAppointments, setLoadingAppointments] = useState(false)
   const [statusMessage, setStatusMessage] = useState({ text: '', isError: false })
+  const [videoRequests, setVideoRequests] = useState([])
 
   const [availabilityForm, setAvailabilityForm] = useState({
     dayOfWeek: 'MONDAY',
@@ -138,6 +140,40 @@ export default function DoctorDashboard() {
     }
   }
 
+  const loadVideoRequests = async (doctorId) => {
+    if (!doctorId) return
+    try {
+      const { data } = await api.get(`/telemedicine-service/api/sessions/doctor/${doctorId}/requests`)
+      const requests = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
+      const normalizedRequests = requests.map((request) => ({
+        ...request,
+        id: request?.id || request?.sessionId,
+      }))
+      setVideoRequests(normalizedRequests)
+    } catch (error) {
+      console.error('Failed to load video requests:', error)
+      setVideoRequests([])
+    }
+  }
+
+  const handleVideoAction = async (sessionId, action) => {
+    try {
+      if (action === 'accept') {
+        const { data } = await api.put(`/telemedicine-service/api/sessions/${sessionId}/accept`)
+        const joinUrl = data?.data?.joinUrl || data?.joinUrl
+        if (joinUrl) {
+          window.open(joinUrl, '_blank', 'noopener,noreferrer')
+        }
+      } else {
+        await api.put(`/telemedicine-service/api/sessions/${sessionId}/reject`)
+      }
+      setStatusMessage({ text: `Session ${action}ed successfully`, isError: false })
+      loadVideoRequests(selectedDoctorId)
+    } catch (error) {
+      setStatusMessage({ text: `Failed to ${action} session`, isError: true })
+    }
+  }
+
   useEffect(() => {
     loadDoctors()
   }, [loadDoctors])
@@ -145,6 +181,19 @@ export default function DoctorDashboard() {
   useEffect(() => {
     loadAvailability(selectedDoctorId)
     loadAppointments(selectedDoctorId)
+    loadVideoRequests(selectedDoctorId)
+  }, [selectedDoctorId])
+
+  useEffect(() => {
+    if (!selectedDoctorId) {
+      return undefined
+    }
+
+    const intervalId = setInterval(() => {
+      loadVideoRequests(selectedDoctorId)
+    }, 5000)
+
+    return () => clearInterval(intervalId)
   }, [selectedDoctorId])
 
   const handleAvailabilitySubmit = async (event) => {
@@ -418,6 +467,49 @@ export default function DoctorDashboard() {
             </div>
           </section>
         </div>
+
+        <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-xl font-bold text-cyan-300">Pending Video Call Requests</h2>
+            <button
+              type="button"
+              onClick={() => loadVideoRequests(selectedDoctorId)}
+              className="rounded-lg border border-cyan-500/50 bg-cyan-900/30 px-3 py-1.5 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-800/40"
+            >
+              Refresh Requests
+            </button>
+          </div>
+          <div className="mt-4 space-y-3">
+            {videoRequests.filter((req) => req.status === 'REQUESTED' || req.status === 'PENDING').length === 0 ? (
+              <p className="text-sm text-slate-400">No pending video call requests.</p>
+            ) : (
+              videoRequests
+                .filter((req) => req.status === 'REQUESTED' || req.status === 'PENDING')
+                .map((req) => (
+                  <div key={req.sessionId || req.id} className="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-800/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-100">Patient: {req.patientName}</p>
+                      <p className="text-sm text-slate-300">Time Requested: {new Date(req.createdAt).toLocaleString()}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleVideoAction(req.sessionId || req.id, 'accept')}
+                        className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleVideoAction(req.sessionId || req.id, 'reject')}
+                        className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))
+            )}
+          </div>
+        </section>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <section className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">

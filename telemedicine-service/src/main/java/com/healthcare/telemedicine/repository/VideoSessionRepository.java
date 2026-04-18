@@ -18,6 +18,8 @@ public interface VideoSessionRepository extends MongoRepository<VideoSession, St
 
 	List<VideoSession> findByPatientId(String patientId);
 
+	List<VideoSession> findByPatientIdAndStatus(String patientId, VideoSession.SessionStatus status);
+
 	List<VideoSession> findByStatus(VideoSession.SessionStatus status);
 
 }
