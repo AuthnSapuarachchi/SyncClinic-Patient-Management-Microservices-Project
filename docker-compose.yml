@@ -285,11 +285,11 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: rootpassword123
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      EUREKA_CLIENT_ENABLED: "false"
+      EUREKA_CLIENT_ENABLED: "true"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
       OPENAI_API_URL: https://api.openai.com/v1/chat/completions
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_MODEL: gpt-4.1-mini
-      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      OPENAI_API_KEY: ${OPENAI_API_KEY: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}
+      OPENAI_MODEL: gpt-4o-mini
     depends_on:
       postgres-db:
         condition: service_healthy
