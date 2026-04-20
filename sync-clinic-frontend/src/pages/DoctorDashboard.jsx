@@ -44,12 +44,49 @@ const formatAppointmentDateTime = (appointment) => {
   })
 }
 
+const formatEmailName = (email) => {
+  const emailPrefix = email?.split('@')[0]?.trim()
+  if (!emailPrefix) {
+    return ''
+  }
+
+  return emailPrefix
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
+const formatPersonName = (person) => {
+  const profileName =
+    [person?.firstName, person?.lastName].filter(Boolean).join(' ').trim() || person?.fullName?.trim() || ''
+
+  if (profileName && profileName.toLowerCase() !== 'pending pending') {
+    return profileName
+  }
+
+  return formatEmailName(person?.email)
+}
+
+const getInitials = (nameOrEmail) => {
+  const parts = String(nameOrEmail || '')
+    .trim()
+    .split(/[\s@._-]+/)
+    .filter(Boolean)
+
+  return parts
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('') || 'DR'
+}
+
 export default function DoctorDashboard() {
   const navigate = useNavigate()
   const userEmail = localStorage.getItem('user_email') || ''
   const [doctors, setDoctors] = useState([])
   const [selectedDoctorId, setSelectedDoctorId] = useState('')
   const [appointments, setAppointments] = useState([])
+  const [patientsById, setPatientsById] = useState({})
   const [availabilityList, setAvailabilityList] = useState([])
   const [loadingDoctors, setLoadingDoctors] = useState(false)
   const [loadingAppointments, setLoadingAppointments] = useState(false)
@@ -82,6 +119,10 @@ export default function DoctorDashboard() {
       .filter(({ dateTime }) => dateTime && dateTime >= now)
       .sort((first, second) => first.dateTime - second.dateTime)[0]?.appointment || null
   }, [appointments])
+  const nextAppointmentPatientName = useMemo(
+    () => formatPersonName(patientsById[nextAppointment?.patientId]) || '',
+    [nextAppointment, patientsById],
+  )
 
   const loadDoctors = useCallback(async () => {
     setLoadingDoctors(true)
@@ -117,6 +158,41 @@ export default function DoctorDashboard() {
     }
   }
 
+  const hydratePatientNames = async (appointmentList) => {
+    const patientIds = [
+      ...new Set(
+        appointmentList
+          .map((appointment) => appointment.patientId)
+          .filter((id) => id && !patientsById[id]),
+      ),
+    ]
+
+    if (patientIds.length === 0) {
+      return
+    }
+
+    const patientEntries = await Promise.all(
+      patientIds.map(async (id) => {
+        try {
+          const response = await api.get(`/api/patients/${id}`)
+          return [id, response.data]
+        } catch {
+          return [id, null]
+        }
+      }),
+    )
+
+    setPatientsById((currentPatientsById) => {
+      const nextPatientsById = { ...currentPatientsById }
+      patientEntries.forEach(([id, patient]) => {
+        if (patient) {
+          nextPatientsById[id] = patient
+        }
+      })
+      return nextPatientsById
+    })
+  }
+
   const loadAppointments = async (doctorId = selectedDoctorId, showSuccessMessage = false) => {
     if (!doctorId) {
       setAppointments([])
@@ -126,7 +202,9 @@ export default function DoctorDashboard() {
     setLoadingAppointments(true)
     try {
       const data = await getAppointmentsByDoctor(doctorId)
-      setAppointments(Array.isArray(data) ? data : [])
+      const appointmentList = Array.isArray(data) ? data : []
+      setAppointments(appointmentList)
+      await hydratePatientNames(appointmentList)
       if (showSuccessMessage) {
         setStatusMessage({ text: 'Appointments refreshed', isError: false })
       }
@@ -342,7 +420,9 @@ export default function DoctorDashboard() {
                     {formatAppointmentDateTime(nextAppointment)}
                   </p>
                   <p className="mt-1 text-sm text-slate-300">
-                    Patient #{nextAppointment.patientId} • {nextAppointment.status || 'PENDING'}
+                    {nextAppointmentPatientName
+                      ? `${nextAppointmentPatientName} (Patient #${nextAppointment.patientId})`
+                      : `Patient #${nextAppointment.patientId}`} • {nextAppointment.status || 'PENDING'}
                   </p>
                   <p className="mt-2 max-w-2xl text-sm text-slate-400">
                     {nextAppointment.reason || 'No appointment reason provided.'}
@@ -384,10 +464,25 @@ export default function DoctorDashboard() {
             {loadingDoctors ? <p className="mt-3 text-sm text-slate-300">Loading doctors...</p> : null}
             {selectedDoctor ? (
               <div className="mt-4 rounded-xl border border-slate-700 bg-slate-800/70 p-3 text-sm">
-                <p>
-                  <span className="font-semibold text-cyan-200">{selectedDoctor.fullName}</span>
-                </p>
-                <p className="text-slate-300">{selectedDoctor.specialty || 'No specialty yet'}</p>
+                <div className="flex items-center gap-3">
+                  {selectedDoctor.profileImageUrl ? (
+                    <img
+                      src={selectedDoctor.profileImageUrl}
+                      alt="Doctor profile"
+                      className="h-14 w-14 rounded-lg object-cover ring-1 ring-cyan-300/30"
+                    />
+                  ) : (
+                    <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-cyan-500/15 text-base font-black text-cyan-100 ring-1 ring-cyan-300/30">
+                      {getInitials(selectedDoctor.fullName || selectedDoctor.email)}
+                    </div>
+                  )}
+                  <div>
+                    <p>
+                      <span className="font-semibold text-cyan-200">{selectedDoctor.fullName}</span>
+                    </p>
+                    <p className="text-slate-300">{selectedDoctor.specialty || 'No specialty yet'}</p>
+                  </div>
+                </div>
                 <p className="mt-1 text-xs text-slate-400">Profile status: {selectedDoctor.status}</p>
                 <button
                   type="button"

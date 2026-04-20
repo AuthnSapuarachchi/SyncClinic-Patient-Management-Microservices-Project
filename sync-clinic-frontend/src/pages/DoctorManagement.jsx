@@ -13,6 +13,7 @@ const emptyDoctorForm = {
   qualification: '',
   experienceYears: '',
   bio: '',
+  profileImageUrl: '',
   status: 'PENDING',
 }
 
@@ -85,6 +86,7 @@ export default function DoctorManagement() {
       qualification: doctor.qualification || '',
       experienceYears: doctor.experienceYears ?? '',
       bio: doctor.bio || '',
+      profileImageUrl: doctor.profileImageUrl || '',
       status: doctor.status || 'PENDING',
     })
     setIsFormOpen(true)

@@ -3,6 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import AIChatBot from './AIChatBot';
 
+const getInitials = (nameOrEmail) => {
+    const parts = String(nameOrEmail || '')
+        .trim()
+        .split(/[\s@._-]+/)
+        .filter(Boolean);
+
+    return parts
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join('') || 'DR';
+};
+
 export default function PatientMainDashboard() {
     const navigate = useNavigate();
     const userEmail = localStorage.getItem('user_email') || 'patient@syncclinic.com';
@@ -417,10 +429,23 @@ export default function PatientMainDashboard() {
                                 filteredDoctors.map((doctor) => (
                                     <article key={doctor.id} className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
                                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                            <div>
-                                                <h3 className="font-bold text-slate-100">{doctor.fullName}</h3>
-                                                <p className="text-sm text-cyan-300">{doctor.specialty}</p>
-                                                <p className="text-sm text-slate-300">{doctor.hospital}</p>
+                                            <div className="flex items-center gap-3">
+                                                {doctor.profileImageUrl ? (
+                                                    <img
+                                                        src={doctor.profileImageUrl}
+                                                        alt={`${doctor.fullName || 'Doctor'} profile`}
+                                                        className="h-14 w-14 rounded-lg object-cover ring-1 ring-cyan-300/30"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-cyan-500/15 text-base font-black text-cyan-100 ring-1 ring-cyan-300/30">
+                                                        {getInitials(doctor.fullName || doctor.email)}
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <h3 className="font-bold text-slate-100">{doctor.fullName}</h3>
+                                                    <p className="text-sm text-cyan-300">{doctor.specialty}</p>
+                                                    <p className="text-sm text-slate-300">{doctor.hospital}</p>
+                                                </div>
                                             </div>
                                             <div className="text-left sm:text-right">
                                                 <p className="text-sm text-slate-300">Available: {doctor.status}</p>
@@ -514,8 +539,23 @@ export default function PatientMainDashboard() {
                             <div className="mt-4 space-y-2 text-sm max-h-96 overflow-y-auto">
                                 {telemedicineDoctors.map((doctor) => (
                                     <div key={`tele-${doctor.id}`} className="rounded-xl border border-slate-700 bg-slate-900/70 p-3">
-                                        <p className="font-semibold text-slate-100">{doctor.fullName}</p>
-                                        <p className="text-slate-300">{doctor.specialty} • {doctor.hospital}</p>
+                                        <div className="flex items-center gap-3">
+                                            {doctor.profileImageUrl ? (
+                                                <img
+                                                    src={doctor.profileImageUrl}
+                                                    alt={`${doctor.fullName || 'Doctor'} profile`}
+                                                    className="h-12 w-12 rounded-lg object-cover ring-1 ring-cyan-300/30"
+                                                />
+                                            ) : (
+                                                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-cyan-500/15 text-sm font-black text-cyan-100 ring-1 ring-cyan-300/30">
+                                                    {getInitials(doctor.fullName || doctor.email)}
+                                                </div>
+                                            )}
+                                            <div>
+                                                <p className="font-semibold text-slate-100">{doctor.fullName}</p>
+                                                <p className="text-slate-300">{doctor.specialty} • {doctor.hospital}</p>
+                                            </div>
+                                        </div>
                                         <button
                                             type="button"
                                             onClick={() => requestVideoCall(doctor)}

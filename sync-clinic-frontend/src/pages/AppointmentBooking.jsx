@@ -12,6 +12,7 @@ import {
 } from '../api/appointmentApi'
 import api from '../api/axiosConfig'
 import { getDoctors } from '../api/doctorApi'
+import DoctorNavigation from '../components/DoctorNavigation'
 import StatusToast from '../components/StatusToast'
 
 const APPOINTMENT_STATUS = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', 'COMPLETED']
@@ -420,6 +421,8 @@ export default function AppointmentBooking() {
             Logout
           </button>
         </div>
+
+        {isDoctor ? <DoctorNavigation /> : null}
 
         <StatusToast
           message={statusMessage.text}

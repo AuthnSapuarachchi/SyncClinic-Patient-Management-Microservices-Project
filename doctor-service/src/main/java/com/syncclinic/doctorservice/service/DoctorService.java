@@ -106,6 +106,7 @@ public class DoctorService {
         existingDoctor.setQualification(updatedDoctor.getQualification());
         existingDoctor.setExperienceYears(updatedDoctor.getExperienceYears());
         existingDoctor.setBio(updatedDoctor.getBio());
+        existingDoctor.setProfileImageUrl(updatedDoctor.getProfileImageUrl());
 
         if (allowStatusUpdate || existingDoctor.getStatus() == null) {
             existingDoctor.setStatus(updatedDoctor.getStatus());

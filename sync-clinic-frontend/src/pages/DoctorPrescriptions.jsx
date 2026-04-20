@@ -1,19 +1,94 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDoctors, getPrescriptionsByDoctor } from '../api/doctorApi'
+import api from '../api/axiosConfig'
+import DoctorNavigation from '../components/DoctorNavigation'
 import StatusToast from '../components/StatusToast'
+
+const formatEmailName = (email) => {
+  const emailPrefix = email?.split('@')[0]?.trim()
+  if (!emailPrefix) {
+    return ''
+  }
+
+  return emailPrefix
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
+const formatPersonName = (person) => {
+  const profileName =
+    [person?.firstName, person?.lastName].filter(Boolean).join(' ').trim() || person?.fullName?.trim() || ''
+
+  if (profileName && profileName.toLowerCase() !== 'pending pending') {
+    return profileName
+  }
+
+  return formatEmailName(person?.email)
+}
 
 export default function DoctorPrescriptions() {
   const navigate = useNavigate()
   const userEmail = localStorage.getItem('user_email') || ''
   const [doctor, setDoctor] = useState(null)
   const [prescriptions, setPrescriptions] = useState([])
+  const [patientsById, setPatientsById] = useState({})
   const [loading, setLoading] = useState(false)
   const [statusMessage, setStatusMessage] = useState({ text: '', isError: false })
 
   const sortedPrescriptions = useMemo(
     () => [...prescriptions].sort((first, second) => Number(second.id || 0) - Number(first.id || 0)),
     [prescriptions],
+  )
+  const patientNamesById = useMemo(
+    () =>
+      Object.values(patientsById).reduce((namesById, patient) => {
+        if (patient?.id) {
+          namesById[patient.id] = formatPersonName(patient)
+        }
+        return namesById
+      }, {}),
+    [patientsById],
+  )
+
+  const hydratePatientNames = useCallback(
+    async (prescriptionList) => {
+      const patientIds = [
+        ...new Set(
+          prescriptionList
+            .map((prescription) => prescription.patientId)
+            .filter(Boolean),
+        ),
+      ]
+
+      if (patientIds.length === 0) {
+        return
+      }
+
+      const patientEntries = await Promise.all(
+        patientIds.map(async (id) => {
+          try {
+            const response = await api.get(`/api/patients/${id}`)
+            return [id, response.data]
+          } catch {
+            return [id, null]
+          }
+        }),
+      )
+
+      setPatientsById((currentPatientsById) => {
+        const nextPatientsById = { ...currentPatientsById }
+        patientEntries.forEach(([id, patient]) => {
+          if (patient) {
+            nextPatientsById[id] = patient
+          }
+        })
+        return nextPatientsById
+      })
+    },
+    [],
   )
 
   const loadPrescriptions = useCallback(async (doctorId, showSuccessMessage = false) => {
@@ -25,7 +100,9 @@ export default function DoctorPrescriptions() {
     setLoading(true)
     try {
       const data = await getPrescriptionsByDoctor(doctorId)
-      setPrescriptions(Array.isArray(data) ? data : [])
+      const prescriptionList = Array.isArray(data) ? data : []
+      setPrescriptions(prescriptionList)
+      await hydratePatientNames(prescriptionList)
       if (showSuccessMessage) {
         setStatusMessage({ text: 'Prescriptions refreshed', isError: false })
       }
@@ -37,7 +114,7 @@ export default function DoctorPrescriptions() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [hydratePatientNames])
 
   useEffect(() => {
     const loadDoctorProfile = async () => {
@@ -104,6 +181,8 @@ export default function DoctorPrescriptions() {
           </div>
         </div>
 
+        <DoctorNavigation />
+
         <StatusToast
           message={statusMessage.text}
           isError={statusMessage.isError}
@@ -151,7 +230,9 @@ export default function DoctorPrescriptions() {
                   <div>
                     <p className="font-bold text-cyan-200">Prescription #{prescription.id}</p>
                     <p className="mt-1 text-slate-300">
-                      Patient #{prescription.patientId || '-'} • Appointment #{prescription.appointmentId || '-'}
+                      {patientNamesById[prescription.patientId]
+                        ? `${patientNamesById[prescription.patientId]} (Patient #${prescription.patientId})`
+                        : `Patient #${prescription.patientId || '-'}`} • Appointment #{prescription.appointmentId || '-'}
                     </p>
                   </div>
                   <button
