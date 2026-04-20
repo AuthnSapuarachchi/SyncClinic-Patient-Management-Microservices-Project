@@ -1,24 +1,20 @@
 package com.SyncClinic.AIsymptomcheck.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
-
 import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckRequest;
 import com.SyncClinic.AIsymptomcheck.dto.SymptomCheckResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class SymptomService {
@@ -34,7 +30,7 @@ public class SymptomService {
     @Value("${openai.api-key}")
     private String apiKey;
 
-    @Value("${openai.model:gpt-4.1-mini}")
+    @Value("${openai.model:gpt-4o-mini}") // Defaulting to the fast/cheap model
     private String model;
 
     public SymptomService(RestTemplate restTemplate) {
@@ -44,8 +40,8 @@ public class SymptomService {
 
     public SymptomCheckResponse checkSymptoms(SymptomCheckRequest request) {
         String prompt = buildPrompt(request);
-        String rawAiResponse = callOpenAiApi(prompt);
-        return parseAiResponse(rawAiResponse);
+        String rawResponse = callOpenAiApi(prompt);
+        return parseResponse(rawResponse);
     }
 
     private String buildPrompt(SymptomCheckRequest request) {
@@ -83,7 +79,7 @@ public class SymptomService {
 
     private String callOpenAiApi(String prompt) {
         if (apiKey == null || apiKey.isBlank()) {
-            throw new RuntimeException("OPENAI_API_KEY is missing");
+            throw new RuntimeException("OPENAI_API_KEY is missing from environment variables");
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -117,6 +113,7 @@ public class SymptomService {
 
             JsonNode root = objectMapper.readTree(response.getBody());
             JsonNode contentNode = root.path("choices").get(0).path("message").path("content");
+
             if (contentNode.isMissingNode() || contentNode.asText().isBlank()) {
                 throw new RuntimeException("OpenAI response content is empty");
             }
@@ -124,16 +121,9 @@ public class SymptomService {
             return contentNode.asText();
 
         } catch (HttpStatusCodeException ex) {
-            String responseBody = ex.getResponseBodyAsString();
-            log.error("OpenAI API HTTP error: status={}, body={}", ex.getStatusCode(), responseBody);
-
-            if (ex.getStatusCode().value() == 401) {
-                throw new RuntimeException("Invalid OpenAI API key");
-            }
-            if (ex.getStatusCode().value() == 429) {
-                throw new RuntimeException("OpenAI rate limit exceeded");
-            }
-
+            log.error("OpenAI API HTTP error: status={}, body={}", ex.getStatusCode(), ex.getResponseBodyAsString());
+            if (ex.getStatusCode().value() == 401) throw new RuntimeException("Invalid OpenAI API key");
+            if (ex.getStatusCode().value() == 429) throw new RuntimeException("OpenAI rate limit or billing exceeded");
             throw new RuntimeException("OpenAI API request failed");
         } catch (Exception ex) {
             log.error("OpenAI API call failed: {}", ex.getMessage(), ex);
@@ -141,13 +131,9 @@ public class SymptomService {
         }
     }
 
-    private SymptomCheckResponse parseAiResponse(String rawResponse) {
+    private SymptomCheckResponse parseResponse(String rawResponse) {
         try {
-            String cleaned = rawResponse
-                    .replace("```json", "")
-                    .replace("```", "")
-                    .trim();
-
+            String cleaned = rawResponse.replace("```json", "").replace("```", "").trim();
             JsonNode node = objectMapper.readTree(cleaned);
 
             List<String> conditions = new ArrayList<>();
@@ -159,7 +145,6 @@ public class SymptomService {
             node.path("generalAdvice").forEach(n -> advice.add(n.asText()));
 
             String urgency = node.path("urgencyLevel").asText("MEDIUM").toUpperCase();
-
             if (!urgency.equals("LOW") && !urgency.equals("MEDIUM") && !urgency.equals("HIGH")) {
                 urgency = "MEDIUM";
             }
@@ -174,7 +159,7 @@ public class SymptomService {
 
         } catch (Exception ex) {
             log.error("Failed to parse AI response: {}", ex.getMessage(), ex);
-            throw new RuntimeException("Failed to parse AI response");
+            throw new RuntimeException("Failed to parse AI response into JSON");
         }
     }
 }
