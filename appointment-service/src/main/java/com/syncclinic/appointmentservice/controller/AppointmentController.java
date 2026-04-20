@@ -45,6 +45,12 @@ public class AppointmentController {
         return appointmentService.getAppointmentsByDoctor(doctorId);
     }
 
+    // Get a single appointment by ID
+    @GetMapping("/{appointmentId}")
+    public Appointment getAppointmentById(@PathVariable Long appointmentId) {
+        return appointmentService.getAppointmentById(appointmentId);
+    }
+
     // Update appointment status
     @PutMapping("/{appointmentId}/status")
     public Appointment updateAppointmentStatus(

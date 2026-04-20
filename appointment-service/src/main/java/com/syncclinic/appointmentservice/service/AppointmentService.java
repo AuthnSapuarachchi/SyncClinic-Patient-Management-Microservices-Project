@@ -64,6 +64,14 @@ public class AppointmentService {
         return appointmentRepository.findByDoctorId(doctorId);
     }
 
+    // Get single appointment by ID
+    public Appointment getAppointmentById(Long appointmentId) {
+        return appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Appointment not found with ID: " + appointmentId
+                ));
+    }
+
     // Update appointment status
     public Appointment updateAppointmentStatus(Long appointmentId, AppointmentStatus status) {
 

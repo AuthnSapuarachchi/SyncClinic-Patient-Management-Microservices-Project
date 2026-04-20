@@ -77,7 +77,8 @@ spring:
           predicates:
             - Path=/telemedicine-service/**
 
+        # Route for Payment Service
         - id: payment-service
-          uri: http://syncclinic-payment:8086 # Bypass Eureka, talk directly to Docker
+          uri: http://syncclinic-payment:8086
           predicates:
-            - Path=/api/payments/**
+            - Path=/api/payments,/api/payments/**    

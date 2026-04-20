@@ -2,6 +2,7 @@ package com.SyncClinic.payment_service.service;
 
 import com.SyncClinic.payment_service.config.RabbitMQConfig;
 import com.SyncClinic.payment_service.dto.events.PaymentFailedEvent;
+import com.SyncClinic.payment_service.dto.events.PaymentInitiatedEvent;
 import com.SyncClinic.payment_service.dto.events.PaymentSuccessEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,11 @@ public class PaymentEventPublisher {
     public void publishPaymentSuccess(PaymentSuccessEvent event) {
         log.info("Publishing PaymentSuccessEvent for appointmentId: {}", event.getAppointmentId());
         rabbitTemplate.convertAndSend(RabbitMQConfig.HEALTHCARE_EXCHANGE, "payment.success", event);
+    }
+
+    public void publishPaymentInitiated(PaymentInitiatedEvent event) {
+        log.info("Publishing PaymentInitiatedEvent for appointmentId: {}", event.getAppointmentId());
+        rabbitTemplate.convertAndSend(RabbitMQConfig.HEALTHCARE_EXCHANGE, "payment.initiated", event);
     }
 
     public void publishPaymentFailed(PaymentFailedEvent event) {

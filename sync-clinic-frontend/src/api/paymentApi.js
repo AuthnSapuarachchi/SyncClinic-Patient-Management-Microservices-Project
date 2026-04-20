@@ -18,7 +18,8 @@ export const createPaymentIntent = async (appointmentId) => {
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || 
+      error.response?.data?.error ||
+      error.response?.data?.message ||
       'Failed to create payment intent. Please try again.'
     );
   }
@@ -34,7 +35,8 @@ export const getMyPayments = async () => {
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || 
+      error.response?.data?.error ||
+      error.response?.data?.message ||
       'Failed to fetch payment history'
     );
   }
@@ -47,10 +49,11 @@ export const getMyPayments = async () => {
  */
 export const getPaymentByAppointment = async (appointmentId) => {
   try {
-    const response = await api.get(`/api/payments/appointment/${appointmentId}`);
+    const response = await api.get(`/api/payments/${appointmentId}`);
     return response.data;
   } catch (error) {
-    throw new Error(
+    throw new Error(error ||
+      error.response?.data?.message ||
       error.response?.data?.message || 
       'Failed to fetch payment details'
     );
@@ -64,7 +67,7 @@ export const getPaymentByAppointment = async (appointmentId) => {
  */
 export const checkPaymentStatus = async (appointmentId) => {
   try {
-    const response = await api.get(`/api/payments/status/${appointmentId}`);
+    const response = await api.get(`/api/payments/${appointmentId}`);
     return response.data;
   } catch (error) {
     // Payment might not exist yet, which is okay

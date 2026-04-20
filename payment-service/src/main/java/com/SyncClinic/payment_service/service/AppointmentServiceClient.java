@@ -31,7 +31,7 @@ public class AppointmentServiceClient {
 
     /**
      * Fetches appointment details from appointment-service.
-     * Throws PaymentException (403) if status is not COMPLETED.
+     * Throws PaymentException (403) only for disallowed terminal statuses.
      */
     public AppointmentDetails getAndVerifyAppointment(String appointmentId) {
         String url = appointmentServiceUrl + "/api/appointments/" + appointmentId;
@@ -45,12 +45,12 @@ public class AppointmentServiceClient {
 
             log.info("Appointment {} status: {}", appointmentId, appointment.getStatus());
 
-            // The key business rule from the prompt:
-            // Payment only allowed when appointment/session is COMPLETED
-            if (!"COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
+            String status = appointment.getStatus() == null ? "" : appointment.getStatus().trim().toUpperCase();
+
+            // Allow payment for active lifecycle states; block only terminal invalid states.
+            if ("REJECTED".equals(status) || "CANCELLED".equals(status)) {
                 throw new PaymentException(
-                    "Payment is not available until your appointment or session is completed. " +
-                    "Current status: " + appointment.getStatus()
+                    "Payment is not available for appointment status: " + appointment.getStatus()
                 );
             }
 
@@ -66,18 +66,7 @@ public class AppointmentServiceClient {
             throw e; // rethrow our own exceptions
         } catch (Exception e) {
             log.error("Failed to reach appointment-service at {}: {}", url, e.getMessage());
-            // If appointment-service is unreachable during dev/testing, log warning and continue
-            // Remove this fallback in production!
-            log.warn("Appointment-service unreachable — skipping status check for development");
-            AppointmentDetails fallback = new AppointmentDetails();
-            fallback.setId(appointmentId);
-            fallback.setPatientId("test-patient-id");
-            fallback.setPatientEmail("test-patient@syncclinic.local");
-            fallback.setStatus("COMPLETED");
-            fallback.setConsultationFee(new java.math.BigDecimal("1500.00"));
-            fallback.setDoctorName("Dr. Unknown");
-            fallback.setDoctorId("unknown");
-            return fallback;
+            throw new PaymentException("Could not verify appointment details. Please try again.");
         }
     }
 

@@ -57,7 +57,11 @@ stripe:
 # Internal service URLs (for appointment status verification)
 appointment:
   service:
-    url: ${APPOINTMENT_SERVICE_URL:http://syncclinic-appointment:8082}
+    url: ${APPOINTMENT_SERVICE_URL:http://syncclinic-appointment:8084}
+
+patient:
+  service:
+    url: ${PATIENT_SERVICE_URL:http://syncclinic-patient:8082}
 
 telemedicine:
   service:

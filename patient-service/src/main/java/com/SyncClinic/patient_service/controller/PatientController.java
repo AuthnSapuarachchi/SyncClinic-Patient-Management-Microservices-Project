@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/patients")
@@ -33,6 +34,15 @@ public class PatientController {
     @GetMapping("/{id}")
     public Patient getPatientById(@PathVariable Long id) {
         return service.getPatientById(id);
+    }
+
+    @GetMapping("/internal/{id}/email")
+    public Map<String, Object> getPatientEmailById(@PathVariable Long id) {
+        Patient patient = service.getPatientById(id);
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", patient.getId());
+        response.put("email", patient.getEmail());
+        return response;
     }
 
     @GetMapping("/profile/{email:.+}")
