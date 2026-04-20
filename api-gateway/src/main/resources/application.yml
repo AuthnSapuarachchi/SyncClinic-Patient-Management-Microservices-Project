@@ -64,3 +64,8 @@ spring:
           uri: http://syncclinic-telemedicine:8087 # Changed from localhost
           predicates:
             - Path=/telemedicine-service/**
+
+        - id: payment-service
+          uri: lb://syncclinic-payment-service # Must match Eureka name perfectly
+          predicates:
+            - Path=/api/payments/**
