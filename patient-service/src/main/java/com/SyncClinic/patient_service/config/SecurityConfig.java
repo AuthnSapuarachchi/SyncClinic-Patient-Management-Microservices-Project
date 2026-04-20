@@ -4,6 +4,7 @@ import com.SyncClinic.patient_service.filter.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,6 +26,8 @@ public class SecurityConfig {
 
                 // 2. Lock down the Patient endpoints
                 .authorizeHttpRequests(auth -> auth
+                    // Internal service-to-service email lookup used by payment-service
+                    .requestMatchers(HttpMethod.GET, "/api/patients/internal/*/email").permitAll()
                         // In the future, you can do things like:
                         // .requestMatchers("/api/patients/delete").hasRole("ADMIN")
 
