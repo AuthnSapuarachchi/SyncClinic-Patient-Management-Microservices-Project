@@ -2,6 +2,7 @@ package com.healthcare.notification.consumer;
 
 import com.healthcare.notification.config.RabbitMQConfig;
 import com.healthcare.notification.dto.events.AppointmentBookedEvent;
+import com.healthcare.notification.dto.events.PaymentInitiatedEvent;
 import com.healthcare.notification.dto.events.PaymentSuccessEvent;
 import com.healthcare.notification.handler.AppointmentNotificationHandler;
 import com.healthcare.notification.handler.PaymentNotificationHandler;
@@ -28,5 +29,11 @@ public class NotificationConsumer {
     public void handlePaymentSuccess(PaymentSuccessEvent event) {
         log.info("Received PaymentSuccessEvent for paymentId: {} and appointmentId: {}", event.getPaymentId(), event.getAppointmentId());
         paymentNotificationHandler.handlePaymentSuccess(event);
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_PAYMENT_INITIATED)
+    public void handlePaymentInitiated(PaymentInitiatedEvent event) {
+        log.info("Received PaymentInitiatedEvent for paymentId: {} and appointmentId: {}", event.getPaymentId(), event.getAppointmentId());
+        paymentNotificationHandler.handlePaymentInitiated(event);
     }
 }

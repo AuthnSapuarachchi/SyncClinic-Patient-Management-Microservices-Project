@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.SyncClinic.payment_service.dto.events.PaymentFailedEvent;
+import com.SyncClinic.payment_service.dto.events.PaymentInitiatedEvent;
 import com.SyncClinic.payment_service.dto.events.PaymentSuccessEvent;
 import com.SyncClinic.payment_service.dto.request.CreatePaymentRequest;
 import com.SyncClinic.payment_service.dto.response.AppointmentDetails;
@@ -34,6 +35,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentEventPublisher eventPublisher;
     private final AppointmentServiceClient appointmentClient;
+    private final PatientServiceClient patientServiceClient;
 
     @Value("${stripe.webhook.secret}")
     private String webhookSecret;
@@ -43,10 +45,12 @@ public class PaymentService {
 
     public PaymentService(PaymentRepository paymentRepository,
                           PaymentEventPublisher eventPublisher,
-                          AppointmentServiceClient appointmentClient) {
+                          AppointmentServiceClient appointmentClient,
+                          PatientServiceClient patientServiceClient) {
         this.paymentRepository = paymentRepository;
         this.eventPublisher = eventPublisher;
         this.appointmentClient = appointmentClient;
+        this.patientServiceClient = patientServiceClient;
     }
 
     /**
@@ -66,7 +70,7 @@ public class PaymentService {
         String patientId = appointment.getPatientId();
         String patientEmail = appointment.getPatientEmail() != null && !appointment.getPatientEmail().isBlank()
                 ? appointment.getPatientEmail()
-                : "unknown@syncclinic.local";
+            : patientServiceClient.getPatientEmail(patientId);
 
         if (patientId == null || patientId.isBlank()) {
             throw new PaymentException("Unable to identify patient for payment request");
@@ -113,6 +117,19 @@ public class PaymentService {
             Payment saved = paymentRepository.save(payment);
             log.info("Created PaymentIntent {} for patient {} - appointment {}",
                     paymentIntent.getId(), patientId, request.getAppointmentId());
+
+                // Notify notification-service immediately when patient proceeds to payment.
+                eventPublisher.publishPaymentInitiated(new PaymentInitiatedEvent(
+                    saved.getId(),
+                    saved.getAppointmentId(),
+                    saved.getPatientId(),
+                    saved.getPatientEmail(),
+                    saved.getDoctorId(),
+                    saved.getDoctorName(),
+                    saved.getAmount() != null ? saved.getAmount().toPlainString() : null,
+                    saved.getCurrency(),
+                    LocalDateTime.now().toString()
+                ));
 
             // Step 4 — Return clientSecret to frontend
             return mapToResponse(saved);

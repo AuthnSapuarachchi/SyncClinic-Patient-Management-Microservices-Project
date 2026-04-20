@@ -1,6 +1,10 @@
-package com.healthcare.notification.dto.events;
+package com.SyncClinic.payment_service.dto.events;
 
-public class PaymentSuccessEvent {
+/**
+ * Published to RabbitMQ route "payment.initiated" when a patient clicks
+ * Proceed to Payment and a payment intent is created.
+ */
+public class PaymentInitiatedEvent {
 
     private String paymentId;
     private String appointmentId;
@@ -10,10 +14,29 @@ public class PaymentSuccessEvent {
     private String doctorName;
     private String amount;
     private String currency;
-    private String paidAt;
-    private String paymentMethod;
+    private String initiatedAt;
 
-    public PaymentSuccessEvent() {
+    public PaymentInitiatedEvent() {
+    }
+
+    public PaymentInitiatedEvent(String paymentId,
+                                 String appointmentId,
+                                 String patientId,
+                                 String patientEmail,
+                                 String doctorId,
+                                 String doctorName,
+                                 String amount,
+                                 String currency,
+                                 String initiatedAt) {
+        this.paymentId = paymentId;
+        this.appointmentId = appointmentId;
+        this.patientId = patientId;
+        this.patientEmail = patientEmail;
+        this.doctorId = doctorId;
+        this.doctorName = doctorName;
+        this.amount = amount;
+        this.currency = currency;
+        this.initiatedAt = initiatedAt;
     }
 
     public String getPaymentId() {
@@ -80,19 +103,11 @@ public class PaymentSuccessEvent {
         this.currency = currency;
     }
 
-    public String getPaidAt() {
-        return paidAt;
+    public String getInitiatedAt() {
+        return initiatedAt;
     }
 
-    public void setPaidAt(String paidAt) {
-        this.paidAt = paidAt;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
+    public void setInitiatedAt(String initiatedAt) {
+        this.initiatedAt = initiatedAt;
     }
 }

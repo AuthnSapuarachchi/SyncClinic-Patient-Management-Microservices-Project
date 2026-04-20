@@ -1,6 +1,6 @@
 package com.healthcare.notification.dto.events;
 
-public class PaymentSuccessEvent {
+public class PaymentInitiatedEvent {
 
     private String paymentId;
     private String appointmentId;
@@ -10,10 +10,9 @@ public class PaymentSuccessEvent {
     private String doctorName;
     private String amount;
     private String currency;
-    private String paidAt;
-    private String paymentMethod;
+    private String initiatedAt;
 
-    public PaymentSuccessEvent() {
+    public PaymentInitiatedEvent() {
     }
 
     public String getPaymentId() {
@@ -80,19 +79,11 @@ public class PaymentSuccessEvent {
         this.currency = currency;
     }
 
-    public String getPaidAt() {
-        return paidAt;
+    public String getInitiatedAt() {
+        return initiatedAt;
     }
 
-    public void setPaidAt(String paidAt) {
-        this.paidAt = paidAt;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
+    public void setInitiatedAt(String initiatedAt) {
+        this.initiatedAt = initiatedAt;
     }
 }

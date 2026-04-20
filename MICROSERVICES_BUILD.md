@@ -177,7 +177,7 @@ All services are connected via `healthcare-network` bridge network.
 - Java 17
 - Maven 3.8+
 - Docker & Docker Compose
-- Gmail account with app password (for email)
+- Brevo account with SMTP relay credentials (for email)
 - Twilio account credentials (for SMS)
 
 ### Build & Run
@@ -187,15 +187,20 @@ All services are connected via `healthcare-network` bridge network.
 docker-compose up --build
 ```
 
-**2. Environment Variables for Notification Service:**
+**2. Environment Variables for Notification Service (Brevo SMTP):**
 Create a `.env` file in the project root:
 ```
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
+MAIL_HOST=smtp-relay.brevo.com
+MAIL_PORT=587
+MAIL_USERNAME=your-brevo-smtp-login
+MAIL_PASSWORD=your-brevo-smtp-key
+MAIL_FROM=your-verified-sender@example.com
 TWILIO_ACCOUNT_SID=AC...
 TWILIO_AUTH_TOKEN=...
 TWILIO_PHONE_NUMBER=+1234567890
 ```
+
+`MAIL_FROM` should be a sender identity verified in Brevo.
 
 **3. Verify Services:**
 ```bash
