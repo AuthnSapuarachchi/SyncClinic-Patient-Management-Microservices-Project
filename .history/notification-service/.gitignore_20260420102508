@@ -35,7 +35,3 @@ build/
 .vscode/
 
 .env
-
-**/.env
-
-.history/

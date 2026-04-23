@@ -88,16 +88,16 @@ services:
   # ==========================================
   syncclinic-frontend:
     build:
-      context: ./sync-clinic-frontend # Change this to your actual folder name
+      context: ./path-to-your-frontend-folder # Change this to your actual folder name
       dockerfile: Dockerfile
     container_name: syncclinic-react
     ports:
-      - "5173:80" # Maps your laptop's 3000 to Nginx's internal 80
+      - "3000:80" # Maps your laptop's 3000 to Nginx's internal 80
     networks:
       - healthcare-network
     depends_on:
       - api-gateway
-
+      
   api-gateway:
     build: 
       context: ./api-gateway
