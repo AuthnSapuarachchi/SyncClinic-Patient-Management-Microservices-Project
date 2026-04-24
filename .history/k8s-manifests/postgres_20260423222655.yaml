@@ -1,0 +1,50 @@
+# ==========================================
+# POSTGRES DEPLOYMENT
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:latest
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "rootpassword123"
+        volumeMounts: # <-- Indented to belong to the postgres container
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+      volumes: # <-- Aligned with containers!
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+
+---
+# ==========================================
+# POSTGRES SERVICE
+# ==========================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-db
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

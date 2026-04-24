@@ -1,0 +1,57 @@
+# ==========================================
+# 1. The Deployment
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-symptoms-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-symptoms
+  template:
+    metadata:
+      labels:
+        app: ai-symptoms
+    spec:
+      containers:
+        - name: ai-symptoms
+          # CHANGE THIS TO THE EXACT IMAGE NAME YOU FOUND IN STEP 2!
+          image: syncclinic-ai-symptoms-service:latest
+          imagePullPolicy: Never # CRITICAL for local development
+          ports:
+            - containerPort: 8088
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-db:5432/ai_symptoms_db"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: syncclinic-secrets
+                  key: POSTGRES_PASSWORD
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: syncclinic-secrets
+                  key: OPENAI_API_KEY
+            - name: EUREKA_CLIENT_ENABLED
+              value: "false" # Goodbye Eureka!
+
+---
+# ==========================================
+# 2. The Service
+# ==========================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-symptoms-service
+spec:
+  selector:
+    app: ai-symptoms
+  ports:
+    - protocol: TCP
+      port: 8088
+      targetPort: 8088

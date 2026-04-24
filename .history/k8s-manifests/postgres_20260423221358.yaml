@@ -1,0 +1,50 @@
+# ==========================================
+# 1. The Deployment (The Container Rules)
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1 # How many copies to run
+  selector:
+    matchLabels:
+      app: postgres # How the deployment finds its pods
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest # Pulls standard Postgres image
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "rootpassword123"
+          volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+
+---
+# ==========================================
+# 2. The Service (The Internal Network Bridge)
+# ==========================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-db # CRITICAL: Your Spring Boot apps will look for this exact name!
+spec:
+  selector:
+    app: postgres # Routes traffic to the pods with this label
+  ports:
+    - protocol: TCP
+      port: 5432 # Port exposed inside the K8s cluster
+      targetPort: 5432 # Port the container is actually listening on
