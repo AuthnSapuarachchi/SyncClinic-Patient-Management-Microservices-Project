@@ -8,7 +8,7 @@ spring:
     gateway:
       globalcors:
         corsConfigurations:
-          "[/**]":
+          '[/**]':
             allowedOrigins: "http://localhost:5173"
             allowedMethods:
               - GET
@@ -21,15 +21,13 @@ spring:
       routes:
         # Route for the Identity Service
         - id: identity-service
-          # uri: http://syncclinic-identity:8081
-          uri: http://identity-service:8081
+          uri: http://syncclinic-identity:8081
           predicates:
             - Path=/auth/**
 
         # Route for the Patient Management Service
         - id: patient-service
-          # uri: http://syncclinic-patient:8082 # Changed from patient-service to match docker container
-          uri: http://patient-service:8082
+          uri: http://syncclinic-patient:8082  # Changed from patient-service to match docker container
           predicates:
             - Path=/api/patients,/api/patients/**
           filters:
@@ -37,13 +35,13 @@ spring:
 
         # Route for the Doctor Management Service
         - id: doctor-service
-          uri: http://syncclinic-doctor:8083 # Changed from localhost
+          uri: http://syncclinic-doctor:8083   # Changed from localhost
           predicates:
             - Path=/api/doctors,/api/doctors/**
 
         # Route for prescription APIs (served by doctor-service)
         - id: prescription-service
-          uri: http://syncclinic-doctor:8083 # Changed from localhost
+          uri: http://syncclinic-doctor:8083   # Changed from localhost
           predicates:
             - Path=/api/prescriptions,/api/prescriptions/**
 
@@ -69,8 +67,7 @@ spring:
 
         # Route for AI Symptom Service
         - id: medisphere-AIsymptomcheck-service
-          # uri: http://syncclinic-ai-symptoms:8088 # Changed from localhost. (Note: Using 8088 based on your earlier Dockerfile setup)
-          uri: http://ai-symptoms-service:8088
+          uri: http://syncclinic-ai-symptoms:8088 # Changed from localhost. (Note: Using 8088 based on your earlier Dockerfile setup)
           predicates:
             - Path=/api/symptoms,/api/symptoms/**
 
@@ -84,4 +81,4 @@ spring:
         - id: payment-service
           uri: http://syncclinic-payment:8086
           predicates:
-            - Path=/api/payments,/api/payments/**
+            - Path=/api/payments,/api/payments/**    

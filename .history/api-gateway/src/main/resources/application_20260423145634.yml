@@ -28,8 +28,7 @@ spring:
 
         # Route for the Patient Management Service
         - id: patient-service
-          # uri: http://syncclinic-patient:8082 # Changed from patient-service to match docker container
-          uri: http://patient-service:8082
+          uri: http://syncclinic-patient:8082 # Changed from patient-service to match docker container
           predicates:
             - Path=/api/patients,/api/patients/**
           filters:
@@ -69,8 +68,7 @@ spring:
 
         # Route for AI Symptom Service
         - id: medisphere-AIsymptomcheck-service
-          # uri: http://syncclinic-ai-symptoms:8088 # Changed from localhost. (Note: Using 8088 based on your earlier Dockerfile setup)
-          uri: http://ai-symptoms-service:8088
+          uri: http://syncclinic-ai-symptoms:8088 # Changed from localhost. (Note: Using 8088 based on your earlier Dockerfile setup)
           predicates:
             - Path=/api/symptoms,/api/symptoms/**
 

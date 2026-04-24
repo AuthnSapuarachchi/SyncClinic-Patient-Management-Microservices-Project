@@ -1,0 +1,96 @@
+# ==========================================
+# IDENTITY SERVICE
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity-service
+  template:
+    metadata:
+      labels:
+        app: identity-service
+    spec:
+      containers:
+        - name: identity-service
+          image: syncclinic-identity-service:v1 # Using the new v1 tag!
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081 # Make sure this matches your Identity port
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-db:5432/identity_db" # Assuming shared DB container
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: syncclinic-secrets
+                  key: POSTGRES_PASSWORD
+            - name: EUREKA_CLIENT_ENABLED
+              value: "false"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: identity-service
+spec:
+  selector:
+    app: identity-service
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+
+---
+# ==========================================
+# PATIENT SERVICE
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patient-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: patient-service
+  template:
+    metadata:
+      labels:
+        app: patient-service
+    spec:
+      containers:
+        - name: patient-service
+          image: syncclinic-patient-service:v1 # Using the new v1 tag!
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082 # Make sure this matches your Patient port
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-db:5432/patient_db"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: syncclinic-secrets
+                  key: POSTGRES_PASSWORD
+            - name: EUREKA_CLIENT_ENABLED
+              value: "false"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: patient-service
+spec:
+  selector:
+    app: patient-service
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
