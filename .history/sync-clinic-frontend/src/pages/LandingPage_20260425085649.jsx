@@ -69,12 +69,12 @@ export default function LandingPage() {
                             </div>
 
                             <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[0.95]">
-                                Advanced healthcare technology,
-                                <span className="block text-cyan-300">dedicated to patient excellence.</span>
+                                Enterprise-grade healthcare,
+                                <span className="block text-cyan-300">designed for billion-dollar teams.</span>
                             </h1>
 
                             <p className="max-w-2xl text-lg sm:text-xl text-slate-300 leading-relaxed">
-                                Streamline patient appointments, enable secure telemedicine consultations, manage comprehensive health records, and deliver personalized care through an integrated platform designed for medical excellence and patient safety.
+                                Streamline appointments, secure telemedicine, frictionless patient workflows, and operational analytics in a single end-to-end suite built for scale, compliance, and reliability.
                             </p>
 
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4">
