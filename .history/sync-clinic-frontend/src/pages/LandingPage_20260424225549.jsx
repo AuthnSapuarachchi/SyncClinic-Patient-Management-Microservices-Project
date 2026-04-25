@@ -40,7 +40,7 @@ export default function LandingPage() {
                     <nav className="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-300">
                         <a href="#features" className="hover:text-white transition-colors duration-200">Platform</a>
                         <a href="#benefits" className="hover:text-white transition-colors duration-200">Enterprise</a>
-                        <a href="#benefits" className="hover:text-white transition-colors duration-200">Security</a>
+                        <a href="#trust" className="hover:text-white transition-colors duration-200">Trust</a>
                         <button onClick={handleGetStarted} className="px-6 py-3 rounded-full bg-white text-slate-950 font-semibold shadow-lg shadow-cyan-500/10 hover:bg-slate-100 transition-all duration-200">
                             Sign In
                         </button>
@@ -69,12 +69,12 @@ export default function LandingPage() {
                             </div>
 
                             <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[0.95]">
-                                Advanced healthcare technology,
-                                <span className="block text-cyan-300">dedicated to patient excellence.</span>
+                                Enterprise-grade healthcare,
+                                <span className="block text-cyan-300">designed for billion-dollar teams.</span>
                             </h1>
 
                             <p className="max-w-2xl text-lg sm:text-xl text-slate-300 leading-relaxed">
-                                Streamline patient appointments, enable secure telemedicine consultations, manage comprehensive health records, and deliver personalized care through an integrated platform designed for medical excellence and patient safety.
+                                Streamline appointments, secure telemedicine, frictionless patient workflows, and operational analytics in a single end-to-end suite built for scale, compliance, and reliability.
                             </p>
 
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4">
