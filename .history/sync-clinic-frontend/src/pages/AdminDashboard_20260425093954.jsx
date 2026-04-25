@@ -395,13 +395,7 @@ export default function AdminDashboard() {
                         {paymentError && (
                             <div className="mt-4 rounded-lg border border-rose-500/30 bg-rose-500/10 p-4">
                                 <p className="text-sm text-rose-300">{paymentError}</p>
-                                <p className="mt-2 text-xs text-rose-200">
-                                    Troubleshooting: 
-                                    <br />1. Ensure payment service is running on backend
-                                    <br />2. Try clicking "Retry Load" to fetch fresh data
-                                    <br />3. Use "Show Debug" button to see the actual API response structure
-                                    <br />4. Click "Load Test Data" to verify table works with sample data
-                                </p>
+                                <p className="mt-2 text-xs text-rose-200">Troubleshooting: Click <span className="font-semibold">Load Test Data</span> to view sample transactions, or ensure the backend payment service is running on <code className="bg-rose-900/30 px-2 py-1 rounded">/api/payments/admin/all</code></p>
                             </div>
                         )}
                         

@@ -21,29 +21,7 @@ export default function AdminDashboard() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [paymentError, setPaymentError] = useState('');
-    const [showDebugInfo, setShowDebugInfo] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
-
-    // Helper function to extract payment fields flexibly
-    const getPaymentField = (payment, field) => {
-        const fieldMappings = {
-            id: ['id', 'transactionId', 'transaction_id', 'paymentId', 'payment_id'],
-            patientEmail: ['patientEmail', 'patient_email', 'email', 'patient', 'patientId', 'patient_id'],
-            doctorName: ['doctorName', 'doctor_name', 'doctor', 'doctorFullName', 'doctor_full_name', 'doctorId'],
-            amount: ['amount', 'total', 'price'],
-            status: ['status', 'paymentStatus', 'payment_status'],
-            createdAt: ['createdAt', 'created_at', 'date', 'transactionDate', 'transaction_date'],
-            currency: ['currency', 'currencyCode', 'currency_code']
-        };
-
-        const possibleFields = fieldMappings[field] || [field];
-        for (const fieldName of possibleFields) {
-            if (payment && payment[fieldName] !== undefined && payment[fieldName] !== null && payment[fieldName] !== '') {
-                return payment[fieldName];
-            }
-        }
-        return null;
-    };
 
     // Mock data generator for testing
     const generateMockPayments = () => {
@@ -278,14 +256,14 @@ export default function AdminDashboard() {
                                 {payments.length === 0 ? (
                                     <p className="text-sm text-slate-400">No transactions recorded yet.</p>
                                 ) : payments.slice().reverse().slice(0, 5).map((pay, i) => (
-                                    <div key={getPaymentField(pay, 'id') || i} className="rounded-xl border border-slate-700 bg-slate-900/70 p-3 flex justify-between items-center">
+                                    <div key={pay.id || i} className="rounded-xl border border-slate-700 bg-slate-900/70 p-3 flex justify-between items-center">
                                         <div>
-                                            <p className="font-semibold text-slate-100">{getPaymentField(pay, 'patientEmail') || 'Unknown Patient'}</p>
-                                            <p className="text-xs text-slate-400">To: {getPaymentField(pay, 'doctorName') || 'Unknown Doctor'}</p>
+                                            <p className="font-semibold text-slate-100">{pay.patientEmail || pay.patientId}</p>
+                                            <p className="text-xs text-slate-400">To: {pay.doctorName}</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="font-bold text-emerald-300">{(getPaymentField(pay, 'currency') || 'LKR').toUpperCase()} {getPaymentField(pay, 'amount') || 0}</p>
-                                            <p className="text-xs text-slate-400">{getPaymentField(pay, 'status') || 'PENDING'}</p>
+                                            <p className="font-bold text-emerald-300">{pay.currency?.toUpperCase() || 'LKR'} {pay.amount}</p>
+                                            <p className="text-xs text-slate-400">{pay.status}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -363,12 +341,6 @@ export default function AdminDashboard() {
                             <h2 className="text-lg font-bold text-cyan-300">Detailed Financial Transactions</h2>
                             <div className="flex gap-2">
                                 <button 
-                                    onClick={() => setShowDebugInfo(!showDebugInfo)} 
-                                    className="rounded-lg bg-gray-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
-                                >
-                                    {showDebugInfo ? 'Hide Debug' : 'Show Debug'}
-                                </button>
-                                <button 
                                     onClick={handleLoadTestData} 
                                     className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
                                 >
@@ -382,26 +354,11 @@ export default function AdminDashboard() {
                                 </button>
                             </div>
                         </div>
-
-                        {showDebugInfo && payments.length > 0 && (
-                            <div className="mt-4 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4 max-h-48 overflow-y-auto">
-                                <p className="text-sm font-semibold text-blue-300 mb-2">Debug: First Payment Object</p>
-                                <pre className="text-xs text-blue-200 whitespace-pre-wrap break-words">
-                                    {JSON.stringify(payments[0], null, 2)}
-                                </pre>
-                            </div>
-                        )}
                         
                         {paymentError && (
                             <div className="mt-4 rounded-lg border border-rose-500/30 bg-rose-500/10 p-4">
                                 <p className="text-sm text-rose-300">{paymentError}</p>
-                                <p className="mt-2 text-xs text-rose-200">
-                                    Troubleshooting: 
-                                    <br />1. Ensure payment service is running on backend
-                                    <br />2. Try clicking "Retry Load" to fetch fresh data
-                                    <br />3. Use "Show Debug" button to see the actual API response structure
-                                    <br />4. Click "Load Test Data" to verify table works with sample data
-                                </p>
+                                <p className="mt-2 text-xs text-rose-200">Troubleshooting: Click <span className="font-semibold">Load Test Data</span> to view sample transactions, or ensure the backend payment service is running on <code className="bg-rose-900/30 px-2 py-1 rounded">/api/payments/admin/all</code></p>
                             </div>
                         )}
                         
@@ -419,15 +376,15 @@ export default function AdminDashboard() {
                                 </thead>
                                 <tbody>
                                     {payments.length > 0 ? payments.map(pay => (
-                                        <tr key={getPaymentField(pay, 'id') || Math.random()} className="border-b border-slate-700/50 hover:bg-slate-800/30">
-                                            <td className="px-4 py-3 font-mono text-xs text-slate-400">{getPaymentField(pay, 'id') || '-'}</td>
-                                            <td className="px-4 py-3">{getPaymentField(pay, 'patientEmail') || '-'}</td>
-                                            <td className="px-4 py-3">{getPaymentField(pay, 'doctorName') || '-'}</td>
-                                            <td className="px-4 py-3 font-semibold text-emerald-300">{(getPaymentField(pay, 'currency') || 'LKR').toUpperCase()} {getPaymentField(pay, 'amount') || 0}</td>
-                                            <td className="px-4 py-3">{getPaymentField(pay, 'createdAt') ? new Date(getPaymentField(pay, 'createdAt')).toLocaleDateString() : '-'}</td>
+                                        <tr key={pay.id} className="border-b border-slate-700/50 hover:bg-slate-800/30">
+                                            <td className="px-4 py-3 font-mono text-xs text-slate-400">{pay.id}</td>
+                                            <td className="px-4 py-3">{pay.patientEmail || pay.patientId || '-'}</td>
+                                            <td className="px-4 py-3">{pay.doctorName || '-'}</td>
+                                            <td className="px-4 py-3 font-semibold text-emerald-300">{pay.currency?.toUpperCase() || 'LKR'} {pay.amount || 0}</td>
+                                            <td className="px-4 py-3">{pay.createdAt ? new Date(pay.createdAt).toLocaleDateString() : '-'}</td>
                                             <td className="px-4 py-3">
-                                                <span className={`px-2 py-1 rounded text-[10px] font-bold ${(getPaymentField(pay, 'status') || '').toUpperCase() === 'SUCCESS' || (getPaymentField(pay, 'status') || '').toUpperCase() === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
-                                                    {getPaymentField(pay, 'status') || 'UNKNOWN'}
+                                                <span className={`px-2 py-1 rounded text-[10px] font-bold ${pay.status === 'SUCCESS' || pay.status === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
+                                                    {pay.status}
                                                 </span>
                                             </td>
                                         </tr>
