@@ -278,14 +278,14 @@ export default function AdminDashboard() {
                                 {payments.length === 0 ? (
                                     <p className="text-sm text-slate-400">No transactions recorded yet.</p>
                                 ) : payments.slice().reverse().slice(0, 5).map((pay, i) => (
-                                    <div key={getPaymentField(pay, 'id') || i} className="rounded-xl border border-slate-700 bg-slate-900/70 p-3 flex justify-between items-center">
+                                    <div key={pay.id || i} className="rounded-xl border border-slate-700 bg-slate-900/70 p-3 flex justify-between items-center">
                                         <div>
-                                            <p className="font-semibold text-slate-100">{getPaymentField(pay, 'patientEmail') || 'Unknown Patient'}</p>
-                                            <p className="text-xs text-slate-400">To: {getPaymentField(pay, 'doctorName') || 'Unknown Doctor'}</p>
+                                            <p className="font-semibold text-slate-100">{pay.patientEmail || pay.patientId}</p>
+                                            <p className="text-xs text-slate-400">To: {pay.doctorName}</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="font-bold text-emerald-300">{(getPaymentField(pay, 'currency') || 'LKR').toUpperCase()} {getPaymentField(pay, 'amount') || 0}</p>
-                                            <p className="text-xs text-slate-400">{getPaymentField(pay, 'status') || 'PENDING'}</p>
+                                            <p className="font-bold text-emerald-300">{pay.currency?.toUpperCase() || 'LKR'} {pay.amount}</p>
+                                            <p className="text-xs text-slate-400">{pay.status}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -395,13 +395,7 @@ export default function AdminDashboard() {
                         {paymentError && (
                             <div className="mt-4 rounded-lg border border-rose-500/30 bg-rose-500/10 p-4">
                                 <p className="text-sm text-rose-300">{paymentError}</p>
-                                <p className="mt-2 text-xs text-rose-200">
-                                    Troubleshooting: 
-                                    <br />1. Ensure payment service is running on backend
-                                    <br />2. Try clicking "Retry Load" to fetch fresh data
-                                    <br />3. Use "Show Debug" button to see the actual API response structure
-                                    <br />4. Click "Load Test Data" to verify table works with sample data
-                                </p>
+                                <p className="mt-2 text-xs text-rose-200">Troubleshooting: Click <span className="font-semibold">Load Test Data</span> to view sample transactions, or ensure the backend payment service is running on <code className="bg-rose-900/30 px-2 py-1 rounded">/api/payments/admin/all</code></p>
                             </div>
                         )}
                         
